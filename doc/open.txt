@@ -1,0 +1,237 @@
+*open.txt*  Open files, URLs, and paths from anywhere in Neovim   *open.nvim*
+
+Author:   Stefan Bartl
+License:  MIT
+Version:  0.1.0
+
+==============================================================================
+CONTENTS                                                        *open-contents*
+
+  1. Introduction ................. |open-intro|
+  2. Requirements ................. |open-requirements|
+  3. Installation ................. |open-installation|
+  4. Configuration ................ |open-config|
+  5. The :Open command ............ |:Open|
+     5.1 Target argument .......... |open-target|
+     5.2 Scope argument ........... |open-scope|
+     5.3 Handlers ................. |open-handlers|
+  6. Tab completion ............... |open-completion|
+  7. Lua API ...................... |open-api|
+  8. Health check ................. |open-health|
+  9. Architecture ................. |open-architecture|
+
+==============================================================================
+1. INTRODUCTION                                                    *open-intro*
+
+open.nvim provides a single `:Open [target] [scope]` command that routes the
+thing under your cursor — path, URL, or plain text — to the right destination:
+system file manager, browser (with named-browser support), GUI text editor, or
+a Neovim split/tab.
+
+Context-aware: knows when you are in a Neo-tree, nvim-tree, or netrw buffer
+and opens the node under the cursor automatically.
+
+Depends on lib.nvim (a deliberate shared dependency).
+
+==============================================================================
+2. REQUIREMENTS                                             *open-requirements*
+
+  - Neovim 0.9 or later
+  - lib.nvim
+  - Platform tools as needed per handler (see |open-health|)
+
+==============================================================================
+3. INSTALLATION                                             *open-installation*
+
+lazy.nvim: >lua
+  {
+    "StefanBartl/open.nvim",
+    cmd          = "Open",
+    dependencies = { "StefanBartl/lib.nvim" },
+    opts         = {},
+  }
+<
+
+Local checkout: >lua
+  {
+    dir          = vim.env.REPOS_DIR .. "/open.nvim",
+    cmd          = "Open",
+    dependencies = { "StefanBartl/lib.nvim" },
+    opts         = {},
+  }
+<
+
+==============================================================================
+4. CONFIGURATION                                               *open-config*
+
+>lua
+  require("open_nvim").setup({
+    command             = "Open",        -- user command name
+    default_filemanager = "filemanager", -- handler for paths (no explicit target)
+    default_browser     = "browser",     -- handler for URLs  (no explicit target)
+    handlers = {
+      "filemanager",
+      "browser",
+      "notepad",
+      "nvim_internal",
+    },
+    keymaps = {},  -- reserved
+  })
+<
+
+`command`
+  Name of the registered user command. Change to avoid conflicts.
+
+`default_filemanager`
+  Handler key used when the context is path-like and no target was given.
+
+`default_browser`
+  Handler key used when the context looks like a URL and no target was given.
+
+`handlers`
+  List of handler module keys to load during `setup()`. Removing a key
+  prevents those handlers from registering, hiding them from tab-completion.
+  Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal"
+
+==============================================================================
+5. THE :Open COMMAND                                                   *:Open*
+
+>
+  :Open [target] [scope]
+<
+
+With no arguments, `:Open` uses a context-aware heuristic:
+  - Current buffer is a tree (neo-tree / nvim-tree / netrw) → filemanager
+  - cfile / cword looks like a URL → browser
+  - Otherwise → filemanager
+
+------------------------------------------------------------------------------
+5.1 Target argument                                              *open-target*
+
+The first argument selects a handler. Any registered key is valid.
+
+  :Open filemanager
+  :Open browser
+  :Open firefox
+  :Open split
+
+Omitting the target triggers the heuristic described above.
+
+------------------------------------------------------------------------------
+5.2 Scope argument                                               *open-scope*
+
+The second argument controls what text is passed to the handler.
+
+  "%"           Current buffer's file path.
+  "cfile"       `<cfile>` text under the cursor.
+  "path=<path>" Literal path (supports file completion after `path=`).
+  <anything>    Used verbatim as the resolved text.
+  (omitted)     Target-aware heuristic:
+                  PATH_TARGETS (filemanager/split/vsplit/tab):
+                    cfile→disk, fallback → buffer path
+                  Other targets:
+                    visual selection → cWORD → buffer path
+
+------------------------------------------------------------------------------
+5.3 Handlers                                                  *open-handlers*
+
+browser ~
+  Open a URL in the system default browser.
+  Non-URL text is treated as a Google search query.
+  Local file paths are wrapped in a `file://` scheme.
+
+chrome | chromium | firefox | edge | safari ~
+  Same as `browser` but launch a specific named browser.
+  `safari` only works on macOS.
+
+filemanager ~
+  Open a path in the system file manager.
+  Windows: `explorer.exe /select,<path>` (reveals the file).
+  WSL:     `explorer.exe` via `wslpath` conversion.
+  macOS:   `open -R <file>` (Finder reveal) or `open <dir>`.
+  Linux:   `xdg-open` first, then nautilus/thunar/dolphin/nemo/pcmanfm/caja.
+
+notepad | editor ~
+  Write the context text to a temporary `.txt` file and open it in the
+  platform GUI text editor:
+    Windows/WSL: `notepad.exe`
+    macOS:       `open -e` (TextEdit)
+    Linux:       `xdg-open`, then gedit/kate/mousepad/leafpad/pluma/xed
+
+split | vsplit | tab ~
+  Open a file path inside the current Neovim session.
+  URL contexts are rejected (use `browser` instead).
+  `split`  → horizontal split   (`split`)
+  `vsplit` → vertical split     (`vsplit`)
+  `tab`    → new tab            (`tabedit`)
+
+==============================================================================
+6. TAB COMPLETION                                             *open-completion*
+
+`:Open` completes context-sensitively: >
+
+  :Open <Tab>                      all registered handler names
+  :Open browser <Tab>              %  cfile  path=
+  :Open filemanager path=<Tab>     file/directory completion
+<
+
+==============================================================================
+7. LUA API                                                        *open-api*
+
+After calling `setup()`, the following functions are available:
+
+                                                           *open_nvim.open()*
+`require("open_nvim").open([target [, scope]])`
+
+  Open programmatically with an optional explicit handler and scope.
+  Behaves identically to the `:Open` command.
+
+  `target`  String handler key, or nil for the context-aware default.
+  `scope`   Scope token: "%", "cfile", "path=<path>", or literal text.
+
+  Examples: >lua
+    require("open_nvim").open()
+    require("open_nvim").open("browser")
+    require("open_nvim").open("filemanager", "%")
+    require("open_nvim").open("split", "cfile")
+<
+
+==============================================================================
+8. HEALTH CHECK                                               *open-health*
+
+>
+  :checkhealth open_nvim
+<
+
+Reports:
+
+  core          Neovim version, vim.system availability.
+  lib.nvim      lib.nvim.notify presence.
+  platform      Detected OS (Windows / WSL / macOS / Linux).
+  executables   Per-platform tool availability.
+  handlers      All registered handlers with descriptions.
+
+==============================================================================
+9. ARCHITECTURE                                          *open-architecture*
+
+  plugin/open.lua           Load guard (vim.g.loaded_open_nvim)
+  lua/open_nvim/
+    init.lua                setup() — config, handler loading, :Open command
+    config.lua              defaults + merged active config
+    registry.lua            handler register / get / list
+    context.lua             gather() + resolve() — two-stage resolution
+    platform.lua            OS detection, cached per session
+    util.lua                run_detached(), url_encode(), find_exec()
+    health.lua              :checkhealth open_nvim
+    @types/init.lua         LuaLS type definitions
+    handlers/
+      filemanager.lua       Explorer / Finder / xdg-open
+      browser.lua           browser + chrome/chromium/firefox/edge/safari
+      notepad.lua           notepad/editor (temp-file → GUI editor)
+      nvim_internal.lua     split / vsplit / tab
+
+Each leaf module exposes only plain functions or a `register_all(fn)` entry
+point; `init.lua` is the only place that registers a user command.
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:
