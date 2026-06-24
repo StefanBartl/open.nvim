@@ -7,6 +7,7 @@
 -- ---------------------------------------------------------------------------
 
 ---@alias OpenNvim.HandlerKey
+---| '"default"'       # System default application (like a double-click)
 ---| '"browser"'       # System default browser
 ---| '"chrome"'        # Google Chrome / Chromium
 ---| '"chromium"'      # Chromium

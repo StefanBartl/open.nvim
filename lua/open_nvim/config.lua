@@ -9,8 +9,8 @@ local defaults = {
   default_filemanager = "filemanager",
   default_browser     = "browser",
   -- Handler module keys to load during setup().
-  -- Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal"
-  handlers = { "filemanager", "browser", "notepad", "nvim_internal" },
+  -- Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" | "default"
+  handlers = { "filemanager", "browser", "notepad", "nvim_internal", "default" },
   keymaps  = {},
 }
 

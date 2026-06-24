@@ -135,6 +135,16 @@ The second argument controls what text is passed to the handler.
 ------------------------------------------------------------------------------
 5.3 Handlers                                                  *open-handlers*
 
+default ~
+  Open in the system default application — equivalent to a double-click.
+  The OS picks the app based on the file extension or URL scheme:
+  `.pdf` → PDF viewer, `.docx` → Word, `https://` → default browser, etc.
+  Windows:   `cmd.exe /C start "" <path>`
+  WSL:       converts path via `wslpath`, then same as Windows;
+             falls back to `xdg-open` for Linux-only paths
+  macOS:     `open <path>`
+  Linux:     `xdg-open <path>` (requires xdg-utils)
+
 browser ~
   Open a URL in the system default browser.
   Non-URL text is treated as a Google search query.

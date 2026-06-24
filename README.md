@@ -35,12 +35,12 @@ shared dependency.
 - [Lua API](#lua-api)
 - [Health Check](#health-check)
 - [Architecture](#architecture)
-- [License](#license)
 
 ## Features
 
 | Handler | What it opens | Platform |
 |---|---|---|
+| `default` | Open in the system default app (like double-click) | all |
 | `browser` | URL or text → system default browser (text → Google search) | all |
 | `chrome` | Google Chrome | Linux / WSL / Windows / macOS |
 | `chromium` | Chromium | Linux / WSL / Windows / macOS |
@@ -106,6 +106,7 @@ require("open_nvim").setup({
 
 ```
 :Open                          context-aware default (tree → filemanager, URL → browser)
+:Open default                  open in the system default application (like double-click)
 :Open filemanager              open current path/node in the system file manager
 :Open browser                  open URL or text in the system default browser
 :Open chrome                   open in Google Chrome
@@ -175,26 +176,4 @@ Reports:
 - Per-platform tool availability (explorer.exe, xdg-open, wslview, …)
 - All registered handlers and their descriptions
 
-## Architecture
-
-```
-plugin/open.lua           Load guard (vim.g.loaded_open_nvim)
-lua/open_nvim/
-  init.lua                setup() — config merge, handler loading, :Open command
-  config.lua              defaults + merged active config
-  registry.lua            handler register/get/list
-  context.lua             gather() + resolve() — two-stage context resolution
-  platform.lua            OS detection (win/mac/wsl/linux), cached per session
-  util.lua                run_detached(), url_encode(), find_exec()
-  health.lua              :checkhealth open_nvim
-  @types/init.lua         LuaLS type definitions
-  handlers/
-    filemanager.lua       filemanager handler (Explorer/Finder/xdg-open)
-    browser.lua           browser + chrome/chromium/firefox/edge/safari
-    notepad.lua           notepad/editor handlers (temp-file → GUI editor)
-    nvim_internal.lua     split/vsplit/tab handlers
-```
-
-## License
-
-MIT
+---

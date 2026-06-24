@@ -22,10 +22,11 @@ local M = {}
 
 -- Map of handler-module keys (used in cfg.handlers) to require paths.
 local HANDLER_MODULES = {
-  filemanager  = "open_nvim.handlers.filemanager",
-  browser      = "open_nvim.handlers.browser",
-  notepad      = "open_nvim.handlers.notepad",
+  filemanager   = "open_nvim.handlers.filemanager",
+  browser       = "open_nvim.handlers.browser",
+  notepad       = "open_nvim.handlers.notepad",
   nvim_internal = "open_nvim.handlers.nvim_internal",
+  default       = "open_nvim.handlers.default",
 }
 
 -- ---------------------------------------------------------------------------

@@ -1,9 +1,20 @@
 # open.nvim — Cheatsheet
 
+## Table of content
+
+  - [All registered handlers](#all-registered-handlers)
+  - [Scope tokens (2nd argument)](#scope-tokens-2nd-argument)
+  - [Common command examples](#common-command-examples)
+  - [Platform dispatch summary](#platform-dispatch-summary)
+  - [Lua API](#lua-api)
+
+---
+
 ## All registered handlers
 
 | Handler | Key | Description | Platform |
 |---|---|---|---|
+| Default app | `default` | Open in system default app (like double-click); PDFs → PDF viewer, .docx → Word, etc. | all |
 | System browser | `browser` | URL or text → default browser; plain text → Google search | all |
 | Google Chrome | `chrome` | Named browser: Google Chrome / Chromium | Linux · WSL · Win · Mac |
 | Chromium | `chromium` | Named browser: Chromium | Linux · WSL · Win · Mac |

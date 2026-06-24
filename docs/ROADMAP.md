@@ -4,6 +4,24 @@ Possible future features, in rough priority order.
 
 ---
 
+## Table of content
+
+  - [Near-term](#near-term)
+    - [User-defined handlers via `setup()`](#user-defined-handlers-via-setup)
+    - [`terminal` handler](#terminal-handler)
+    - [Keymap bindings in config](#keymap-bindings-in-config)
+  - [Medium-term](#medium-term)
+    - [`brave` and `opera` browser handlers](#brave-and-opera-browser-handlers)
+    - [`scope = "git"` — open Git root](#scope-git-open-git-root)
+    - [Picker integration](#picker-integration)
+    - [`reveal` option for filemanager handler](#reveal-option-for-filemanager-handler)
+  - [Long-term / speculative](#long-term-speculative)
+    - [Debug / verbose mode](#debug-verbose-mode)
+    - [Context cache](#context-cache)
+    - [`open_nvim.sources` plugin integration](#open_nvimsources-plugin-integration)
+
+---
+
 ## Near-term
 
 ### User-defined handlers via `setup()`
