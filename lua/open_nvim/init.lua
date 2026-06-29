@@ -187,6 +187,22 @@ function M.setup(opts)
           out[#out + 1] = scopes[i]
         end
       end
+
+      -- Named scope keywords
+      local ok_cfg, kw_cfg = pcall(require, "open_nvim.config")
+      if ok_cfg then
+        local kw_names = {}
+        for name in pairs(kw_cfg.get().keywords or {}) do
+          if name:sub(1, #arg_lead) == arg_lead then
+            kw_names[#kw_names + 1] = name
+          end
+        end
+        table.sort(kw_names)
+        for _, n in ipairs(kw_names) do
+          out[#out + 1] = n
+        end
+      end
+
       for _, f in ipairs(vim.fn.getcompletion(arg_lead, "file")) do
         out[#out + 1] = f
       end

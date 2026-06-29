@@ -204,7 +204,14 @@ function M.resolve(arg, target, signals)
     elseif arg:sub(1, 5) == "path=" then
       text = arg:sub(6)
     else
-      text = arg
+      -- Check named scope keywords before falling back to verbatim text.
+      local ok_cfg, cfg = pcall(require, "open_nvim.config")
+      local kw = ok_cfg and cfg.get().keywords and cfg.get().keywords[arg]
+      if kw then
+        text = type(kw) == "function" and kw() or vim.fn.expand(tostring(kw))
+      else
+        text = arg
+      end
     end
   elseif signals.tree_path then
     text = signals.tree_path

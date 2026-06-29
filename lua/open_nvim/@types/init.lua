@@ -76,5 +76,7 @@
 ---@field default_browser     string    Handler key for URL-default (default "browser")
 ---@field handlers            string[]  Handler module keys to load
 ---@field keymaps             table     Optional keymaps (reserved for future use)
+---@field builtin_keywords    boolean   Load built-in scope keywords (default true)
+---@field keywords            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
 
 return {}
