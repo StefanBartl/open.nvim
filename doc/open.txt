@@ -15,10 +15,13 @@ CONTENTS                                                        *open-contents*
      5.1 Target argument .......... |open-target|
      5.2 Scope argument ........... |open-scope|
      5.3 Handlers ................. |open-handlers|
-  6. Tab completion ............... |open-completion|
-  7. Lua API ...................... |open-api|
-  8. Health check ................. |open-health|
-  9. Architecture ................. |open-architecture|
+  6. Keywords ..................... |open-keywords|
+     6.1 Built-in keywords ........ |open-keywords-builtin|
+     6.2 User-defined keywords .... |open-keywords-user|
+  7. Tab completion ............... |open-completion|
+  8. Lua API ...................... |open-api|
+  9. Health check ................. |open-health|
+ 10. Architecture ................. |open-architecture|
 
 ==============================================================================
 1. INTRODUCTION                                                    *open-intro*
@@ -75,7 +78,9 @@ Local checkout: >lua
       "notepad",
       "nvim_internal",
     },
-    keymaps = {},  -- reserved
+    keymaps          = {},   -- reserved
+    builtin_keywords = true, -- set false to disable all built-in keywords
+    keywords         = {},   -- user overrides / additions (keyword → path or fn)
   })
 <
 
@@ -92,6 +97,16 @@ Local checkout: >lua
   List of handler module keys to load during `setup()`. Removing a key
   prevents those handlers from registering, hiding them from tab-completion.
   Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal"
+
+`builtin_keywords`
+  Boolean (default true). When false, none of the built-in scope keywords
+  (shell profiles, git, SSH, …) are loaded. See |open-keywords-builtin|.
+
+`keywords`
+  Table mapping keyword strings to paths. Values are either a string
+  (expanded at resolution time) or a `fun(): string|nil` for dynamic paths.
+  User entries override built-in entries with the same key.
+  See |open-keywords-user|.
 
 ==============================================================================
 5. THE :Open COMMAND                                                   *:Open*
@@ -125,12 +140,22 @@ The second argument controls what text is passed to the handler.
   "%"           Current buffer's file path.
   "cfile"       `<cfile>` text under the cursor.
   "path=<path>" Literal path (supports file completion after `path=`).
-  <anything>    Used verbatim as the resolved text.
+  <keyword>     Named scope alias — see |open-keywords|.
+  <anything>    Any other text is used verbatim as the resolved path/URL.
   (omitted)     Target-aware heuristic:
                   PATH_TARGETS (filemanager/split/vsplit/tab):
                     cfile→disk, fallback → buffer path
                   Other targets:
                     visual selection → cWORD → buffer path
+
+Examples using keywords: >
+
+  :Open split nvim_init        open Neovim init.lua in a horizontal split
+  :Open tab   zshrc            open ~/.zshrc in a new tab
+  :Open split pwsh_profile     open PowerShell $PROFILE in a split
+  :Open split gitconfig        open ~/.gitconfig in a split
+  :Open split MY_ROADMAP       open a user-defined keyword
+<
 
 ------------------------------------------------------------------------------
 5.3 Handlers                                                  *open-handlers*
@@ -176,17 +201,109 @@ split | vsplit | tab ~
   `tab`    → new tab            (`tabedit`)
 
 ==============================================================================
-6. TAB COMPLETION                                             *open-completion*
+6. KEYWORDS                                                    *open-keywords*
+
+Named scope aliases let you refer to common config files by a short keyword
+instead of typing out a full path. Keywords are valid as the second argument
+to `:Open` and appear in tab-completion.
+
+  :Open split  nvim_init      → opens Neovim init.lua in a split
+  :Open tab    zshrc          → opens ~/.zshrc in a new tab
+  :Open split  gitconfig      → opens ~/.gitconfig in a split
+  :Open split  pwsh_profile   → opens PowerShell $PROFILE in a split
+
+------------------------------------------------------------------------------
+6.1 Built-in keywords                                  *open-keywords-builtin*
+
+Loaded automatically unless `builtin_keywords = false`.
+Dynamic keywords (marked ✦) are resolved at invocation time.
+
+Shell profiles ~
+  pwsh_profile      PowerShell $PROFILE (✦ requires pwsh/powershell on PATH)
+  zshrc             ~/.zshrc
+  zprofile          ~/.zprofile
+  bashrc            ~/.bashrc
+  bash_profile      ~/.bash_profile
+  profile           ~/.profile
+  fish_config       ~/.config/fish/config.fish
+  nushell_config    ~/.config/nushell/config.nu
+
+Editor / IDE ~
+  nvim_init         init.lua or init.vim inside the Neovim config dir (✦)
+  vimrc             ~/.vimrc
+
+Terminal emulators & multiplexers ~
+  tmux_conf         ~/.config/tmux/tmux.conf  or  ~/.tmux.conf        (✦)
+  wezterm_conf      ~/.config/wezterm/wezterm.lua  or  ~/.wezterm.lua  (✦)
+  kitty_conf        ~/.config/kitty/kitty.conf
+  alacritty_conf    .toml preferred, .yml fallback                     (✦)
+  starship_conf     ~/.config/starship.toml
+
+Git ~
+  gitconfig         ~/.gitconfig
+  gitignore_global  from `git config core.excludesFile`, then common paths (✦)
+  gitmessage        from `git config commit.template`, then ~/.gitmessage   (✦)
+
+SSH ~
+  ssh_config            ~/.ssh/config
+  ssh_known_hosts       ~/.ssh/known_hosts
+  ssh_authorized_keys   ~/.ssh/authorized_keys
+
+Package managers & runtimes ~
+  npmrc             ~/.npmrc
+  yarnrc            ~/.yarnrc.yml
+  cargo_config      ~/.cargo/config.toml
+  pip_conf          ~/.config/pip/pip.conf  (Unix)                    (✦)
+                    %APPDATA%\pip\pip.ini   (Windows)
+  gemrc             ~/.gemrc
+  curlrc            ~/.curlrc
+
+System / misc ~
+  inputrc           ~/.inputrc  (Readline config)
+  hosts             /etc/hosts (Unix) · C:\Windows\System32\drivers\etc\hosts (Win) (✦)
+  docker_config     ~/.docker/config.json
+  wsl_conf          /etc/wsl.conf                            (WSL only)
+  wslconfig         ~/.wslconfig                             (Windows only)
+
+------------------------------------------------------------------------------
+6.2 User-defined keywords                                 *open-keywords-user*
+
+Add entries in `setup()`. User entries override built-in entries with the
+same key. >lua
+
+  require("open_nvim").setup({
+    keywords = {
+      -- Static path (~ is expanded at resolution time):
+      MY_ROADMAP  = "E:\\projects\\ROADMAP.md",
+
+      -- Override a built-in:
+      zshrc = "~/dotfiles/.zshrc",
+
+      -- Dynamic resolver (function called when the keyword is used):
+      MY_LOG = function()
+        return vim.fn.expand("~/logs/") .. os.date("%Y-%m-%d") .. ".md"
+      end,
+    },
+  })
+<
+
+To disable all built-in keywords: >lua
+  require("open_nvim").setup({ builtin_keywords = false })
+<
+
+==============================================================================
+7. TAB COMPLETION                                             *open-completion*
 
 `:Open` completes context-sensitively: >
 
   :Open <Tab>                      all registered handler names
-  :Open browser <Tab>              %  cfile  path=
-  :Open filemanager path=<Tab>     file/directory completion
+  :Open browser <Tab>              %  cfile  path=  <keywords>  <files>
+  :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix match)
+  :Open filemanager path=<Tab>     file/directory completion after path=
 <
 
 ==============================================================================
-7. LUA API                                                        *open-api*
+8. LUA API                                                        *open-api*
 
 After calling `setup()`, the following functions are available:
 
@@ -194,20 +311,22 @@ After calling `setup()`, the following functions are available:
 `require("open_nvim").open([target [, scope]])`
 
   Open programmatically with an optional explicit handler and scope.
-  Behaves identically to the `:Open` command.
+  Behaves identically to the `:Open` command. Scope may be a keyword.
 
   `target`  String handler key, or nil for the context-aware default.
-  `scope`   Scope token: "%", "cfile", "path=<path>", or literal text.
+  `scope`   Scope token: "%", "cfile", "path=<path>", keyword, or literal.
 
   Examples: >lua
     require("open_nvim").open()
     require("open_nvim").open("browser")
     require("open_nvim").open("filemanager", "%")
     require("open_nvim").open("split", "cfile")
+    require("open_nvim").open("split", "nvim_init")
+    require("open_nvim").open("tab",   "pwsh_profile")
 <
 
 ==============================================================================
-8. HEALTH CHECK                                               *open-health*
+9. HEALTH CHECK                                               *open-health*
 
 >
   :checkhealth open_nvim
@@ -222,7 +341,7 @@ Reports:
   handlers      All registered handlers with descriptions.
 
 ==============================================================================
-9. ARCHITECTURE                                          *open-architecture*
+10. ARCHITECTURE                                         *open-architecture*
 
   plugin/open.lua           Load guard (vim.g.loaded_open_nvim)
   lua/open_nvim/
@@ -232,6 +351,7 @@ Reports:
     context.lua             gather() + resolve() — two-stage resolution
     platform.lua            OS detection, cached per session
     util.lua                run_detached(), url_encode(), find_exec()
+    keywords.lua            built-in named scope keyword table
     health.lua              :checkhealth open_nvim
     @types/init.lua         LuaLS type definitions
     handlers/
