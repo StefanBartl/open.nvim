@@ -41,16 +41,16 @@ local function run(ctx)
   local cmd
 
   if plat.is_win then
-    cmd = { "cmd.exe", "/C", "start", "", text }
+    cmd = { "cmd.exe", "/C", "start", '""', text }
 
   elseif plat.is_wsl then
     if looks_like_url(text) then
       -- URLs go straight to cmd.exe start (opens default Windows browser)
-      cmd = { "cmd.exe", "/C", "start", "", text }
+      cmd = { "cmd.exe", "/C", "start", '""', text }
     else
       local win_path = wsl_to_win_path(vim.fn.expand(text))
       if win_path then
-        cmd = { "cmd.exe", "/C", "start", "", win_path }
+        cmd = { "cmd.exe", "/C", "start", '""', win_path }
       elseif vim.fn.executable("xdg-open") == 1 then
         -- Fallback for Linux-side files with no Windows equivalent
         cmd = { "xdg-open", text }
