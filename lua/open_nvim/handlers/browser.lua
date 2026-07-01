@@ -35,10 +35,10 @@ end
 ---@return string[]
 local function default_browser_cmd(url, plat)
   if plat.is_win then
-    return { "cmd.exe", "/C", "start", "", url }
+    return { "cmd.exe", "/C", "start", '""', url }
   elseif plat.is_wsl then
     if vim.fn.executable("wslview") == 1 then return { "wslview", url } end
-    return { "cmd.exe", "/C", "start", "", url }
+    return { "cmd.exe", "/C", "start", '""', url }
   elseif plat.is_mac then
     return { "open", url }
   else
