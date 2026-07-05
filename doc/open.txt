@@ -1,7 +1,6 @@
 *open.txt*  Open files, URLs, and paths from anywhere in Neovim   *open.nvim*
 
 Author:   Stefan Bartl
-License:  MIT
 Version:  0.1.0
 
 ==============================================================================
@@ -46,6 +45,11 @@ Depends on lib.nvim (a deliberate shared dependency).
 ==============================================================================
 3. INSTALLATION                                             *open-installation*
 
+open.nvim only does anything once `:Open` is invoked, so it should be loaded
+lazily on that command rather than eagerly (`lazy = false`) or on a UI event
+(`event = "VeryLazy"`) — those would just load the plugin sooner for no
+benefit.
+
 lazy.nvim: >lua
   {
     "StefanBartl/open.nvim",
@@ -55,12 +59,12 @@ lazy.nvim: >lua
   }
 <
 
-Local checkout: >lua
-  {
-    dir          = vim.env.REPOS_DIR .. "/open.nvim",
-    cmd          = "Open",
-    dependencies = { "StefanBartl/lib.nvim" },
-    opts         = {},
+packer: >lua
+  use {
+    "StefanBartl/open.nvim",
+    requires = { "StefanBartl/lib.nvim" },
+    cmd      = "Open",
+    config   = function() require("open_nvim").setup() end,
   }
 <
 
@@ -78,7 +82,6 @@ Local checkout: >lua
       "notepad",
       "nvim_internal",
     },
-    keymaps          = {},   -- reserved
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
   })

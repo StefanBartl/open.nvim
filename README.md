@@ -9,11 +9,13 @@
 
 ![Neovim](https://img.shields.io/badge/Neovim-0.9%2B-57A143?logo=neovim&logoColor=white)
 ![Lua](https://img.shields.io/badge/Made%20with-Lua-2C2D72?logo=lua&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue)
 ![Depends](https://img.shields.io/badge/depends-lib.nvim-orange)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20WSL-lightgrey)
 
 ---
+
+> Looking to understand a project's structure before opening files in it?
+> Check out [project-insight.nvim](https://github.com/StefanBartl/project-insight.nvim).
 
 A single `:Open [target] [scope]` command that routes the thing under your
 cursor — path, URL, or plain text — to the right destination: system file
@@ -69,14 +71,30 @@ shared dependency.
 
 ## Installation
 
+open.nvim only does anything once `:Open` is actually invoked, so it should be
+loaded lazily on that command rather than eagerly at startup (`lazy = false`)
+or on a UI event (`event = "VeryLazy"`) — those would just load the plugin
+sooner for no benefit.
+
 ```lua
 -- lazy.nvim
 {
   "StefanBartl/open.nvim",
-  -- dir = vim.env.REPOS_DIR .. "/open.nvim",  -- local checkout
   cmd  = "Open",
   dependencies = { "StefanBartl/lib.nvim" },
   opts = {},
+}
+```
+
+```lua
+-- packer
+use {
+  "StefanBartl/open.nvim",
+  requires = { "StefanBartl/lib.nvim" },
+  cmd = "Open",
+  config = function()
+    require("open_nvim").setup()
+  end,
 }
 ```
 
@@ -98,8 +116,6 @@ require("open_nvim").setup({
     "notepad",
     "nvim_internal",
   },
-
-  keymaps = {},  -- reserved for future keymap bindings
 
   -- Built-in named scope keywords (shell profiles, git, SSH, …).
   -- Set to false to disable all built-ins.

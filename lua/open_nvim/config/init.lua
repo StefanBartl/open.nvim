@@ -4,17 +4,7 @@
 local M = {}
 
 ---@type OpenNvim.Config
-local defaults = {
-  command             = "Open",
-  default_filemanager = "filemanager",
-  default_browser     = "browser",
-  -- Handler module keys to load during setup().
-  -- Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" | "default"
-  handlers         = { "filemanager", "browser", "notepad", "nvim_internal", "default" },
-  keymaps          = {},
-  builtin_keywords = true,   -- set false to disable all built-in scope keywords
-  keywords         = {},     -- user-defined keyword → path overrides / additions
-}
+local defaults = require("open_nvim.config.DEFAULTS")
 
 ---@type OpenNvim.Config
 local current = vim.deepcopy(defaults)
