@@ -186,6 +186,24 @@ function M.gather()
   return signals
 end
 
+---Choose a handler key when the user gives no explicit target.
+---@param signals OpenNvim.Signals
+---@return string
+function M.default_target(signals)
+  local cfg = require("open_nvim.config").get()
+
+  if signals.tree_path then
+    return cfg.default_filemanager
+  end
+
+  local probe = signals.cfile or signals.cword or signals.buffer_path or ""
+  if probe:match("^https?://") or probe:match("^ftp://") or probe:match("^www%.") then
+    return cfg.default_browser
+  end
+
+  return cfg.default_filemanager
+end
+
 ---Resolve what should be opened for `target`.
 ---@param arg     string|nil             Explicit scope: "%", "cfile", "path=…", or literal.
 ---@param target  string|nil             Handler key the context is being built for.

@@ -72,4 +72,27 @@ function M.list()
   return result
 end
 
+-- ---------------------------------------------------------------------------
+-- Dispatch
+-- ---------------------------------------------------------------------------
+
+---Look up and invoke the handler registered for `target`.
+---@param target string
+---@param ctx    OpenNvim.Context
+function M.dispatch(target, ctx)
+  local handler = M.get(target)
+  if not handler then
+    notify.error(
+      string.format("Unknown target: '%s'  (available: %s)",
+        target, table.concat(M.list_keys(), ", "))
+    )
+    return
+  end
+
+  local ok, err = pcall(handler.run, ctx)
+  if not ok then
+    notify.error(string.format("Handler '%s' failed: %s", target, tostring(err)))
+  end
+end
+
 return M
