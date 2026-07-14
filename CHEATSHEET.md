@@ -7,6 +7,7 @@
   - [Common command examples](#common-command-examples)
   - [Platform dispatch summary](#platform-dispatch-summary)
   - [Lua API](#lua-api)
+  - [Integrations](#integrations)
 
 ---
 
@@ -81,4 +82,11 @@ open.open()                      -- context-aware default
 open.open("browser")             -- explicit handler, auto scope
 open.open("filemanager", "%")    -- explicit handler + scope
 open.open("split", "cfile")      -- split on <cfile>
+```
+
+## Integrations
+
+```lua
+-- urlview.nvim: route picked URLs through open.nvim's browser handler
+require("open_nvim.integrations.urlview").setup()
 ```
