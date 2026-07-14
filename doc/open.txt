@@ -19,8 +19,10 @@ CONTENTS                                                        *open-contents*
      6.2 User-defined keywords .... |open-keywords-user|
   7. Tab completion ............... |open-completion|
   8. Lua API ...................... |open-api|
-  9. Health check ................. |open-health|
- 10. Architecture ................. |open-architecture|
+  9. Integrations ................. |open-integrations|
+     9.1 urlview.nvim ............. |open-integrations-urlview|
+ 10. Health check ................. |open-health|
+ 11. Architecture ................. |open-architecture|
 
 ==============================================================================
 1. INTRODUCTION                                                    *open-intro*
@@ -329,7 +331,40 @@ After calling `setup()`, the following functions are available:
 <
 
 ==============================================================================
-9. HEALTH CHECK                                               *open-health*
+9. INTEGRATIONS                                             *open-integrations*
+
+------------------------------------------------------------------------------
+9.1 urlview.nvim                                     *open-integrations-urlview*
+
+https://github.com/axieax/urlview.nvim lists URLs found in the current
+buffer and lets you pick one. `open_nvim.integrations.urlview` registers a
+custom urlview action, "open_in_browser", that routes the picked URL through
+open.nvim's own registry/handler dispatch (the `default_browser` handler —
+see |open-config|) instead of duplicating cross-platform browser-launch
+logic in a second place.
+
+lazy.nvim: >lua
+  {
+    "axieax/urlview.nvim",
+    lazy         = true,
+    cmd          = { "UrlView" },
+    dependencies = { "StefanBartl/open.nvim" },
+    config       = function()
+      require("open_nvim.integrations.urlview").setup()
+    end,
+  }
+<
+                                             *open_nvim.integrations.urlview*
+`require("open_nvim.integrations.urlview").setup([opts])`
+
+  Registers the "open_in_browser" action with `urlview.actions`, then calls
+  `urlview.setup(opts)` with `default_action = "open_in_browser"` (and
+  `default_picker` set to telescope/fzf-lua if available) unless already
+  set in `opts`. Pass `false` instead of a table to only register the
+  action without calling `urlview.setup()` yourself.
+
+==============================================================================
+10. HEALTH CHECK                                               *open-health*
 
 >
   :checkhealth open_nvim
@@ -344,7 +379,7 @@ Reports:
   handlers      All registered handlers with descriptions.
 
 ==============================================================================
-10. ARCHITECTURE                                         *open-architecture*
+11. ARCHITECTURE                                         *open-architecture*
 
   plugin/open.lua           Load guard (vim.g.loaded_open_nvim)
   lua/open_nvim/
@@ -362,6 +397,8 @@ Reports:
       browser.lua           browser + chrome/chromium/firefox/edge/safari
       notepad.lua           notepad/editor (temp-file → GUI editor)
       nvim_internal.lua     split / vsplit / tab
+    integrations/
+      urlview.lua           urlview.nvim "open_in_browser" action (opt-in)
 
 Each leaf module exposes only plain functions or a `register_all(fn)` entry
 point; `init.lua` is the only place that registers a user command.
