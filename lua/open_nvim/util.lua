@@ -24,32 +24,12 @@ function M.run_detached(cmd, label)
     return false
   end
 
-  -- On Windows/WSL, use jobstart(detach) — vim.system detach is unreliable
-  -- for GUI processes (explorer.exe, notepad, …) because the handle may
-  -- keep the process tethered to Neovim's job infrastructure.
-  if vim.fn.has("win32") == 1 or vim.fn.has("wsl") == 1 then
-    local ok, job_id = pcall(vim.fn.jobstart, cmd, { detach = true, on_exit = nil })
-    if not ok or type(job_id) ~= "number" or job_id <= 0 then
-      notify.error("Failed to launch '" .. label .. "' via jobstart")
-      return false
-    end
-    return true
-  end
-
-  -- Non-Windows: vim.system with detach (Neovim ≥ 0.10)
-  if vim.system then
-    local ok, err = pcall(vim.system, cmd, { detach = true }, nil)
-    if not ok then
-      notify.error("Failed to launch '" .. label .. "': " .. tostring(err))
-      return false
-    end
-    return true
-  end
-
-  -- Fallback: vim.fn.jobstart (Neovim < 0.10)
-  local ok, job_id = pcall(vim.fn.jobstart, cmd, { detach = true })
-  if not ok or type(job_id) ~= "number" or job_id <= 0 then
-    notify.error("Failed to launch '" .. label .. "' via jobstart")
+  -- Delegates the Windows/WSL-jobstart vs vim.system(detach) vs
+  -- Neovim<0.10-jobstart fallback chain to lib.nvim.cross.run.run_detached
+  -- (this module's own version was upstreamed into it).
+  local ok, err = require("lib.nvim.cross.run").run_detached(cmd)
+  if not ok then
+    notify.error("Failed to launch '" .. label .. "': " .. tostring(err))
     return false
   end
   return true
