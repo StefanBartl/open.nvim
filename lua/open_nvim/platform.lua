@@ -3,41 +3,33 @@
 ---@description
 --- Determines the host OS once and caches the result for the session.
 --- All sub-modules consume this instead of calling vim.fn.has() repeatedly.
+---
+--- Detection itself is delegated to lib.nvim.cross.platform (uname + env-var
+--- + /proc fallback chain, more robust than this module's previous single
+--- /proc/version check for WSL) — lib.nvim caches each detector internally
+--- too, so this module's own _cache exists to keep returning the same
+--- OpenNvim.Platform table shape, not to avoid repeated syscalls.
+
+local is_windows = require("lib.nvim.cross.platform.is_windows")
+local is_macos   = require("lib.nvim.cross.platform.is_macos")
+local is_wsl     = require("lib.nvim.cross.platform.is_wsl")
+local is_linux   = require("lib.nvim.cross.platform.is_linux")
 
 local M = {}
 
 ---@type OpenNvim.Platform|nil
 local _cache = nil
 
----Read /proc/version to detect a Microsoft/WSL kernel.
----@return boolean
-local function detect_wsl()
-  local handle = io.open("/proc/version", "r")
-  if not handle then return false end
-  local content = handle:read("*l") or ""
-  handle:close()
-  return content:lower():find("microsoft") ~= nil
-end
-
 ---Detect and cache the current platform (called at most once per session).
 ---@return OpenNvim.Platform
 function M.get()
   if _cache then return _cache end
 
-  local is_win = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
-  local is_mac = vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1
-
-  local is_wsl = false
-  if not is_win then
-    local ok, result = pcall(detect_wsl)
-    is_wsl = ok and result or false
-  end
-
   _cache = {
-    is_win   = is_win,
-    is_mac   = is_mac,
-    is_wsl   = is_wsl,
-    is_linux = not is_win and not is_mac,
+    is_win   = is_windows(),
+    is_mac   = is_macos(),
+    is_wsl   = is_wsl(),
+    is_linux = is_linux(),
   }
 
   return _cache
