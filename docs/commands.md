@@ -1,5 +1,9 @@
 # open.nvim — Command Reference
 
+One command, `:Open [target] [scope]` (built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+`<Tab>` completion).
+
 ## Table of content
 
 - [Commands](#commands)

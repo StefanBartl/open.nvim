@@ -26,6 +26,13 @@ local function check_lib_nvim()
   else
     vim.health.error("lib.nvim.notify not found — install StefanBartl/lib.nvim")
   end
+
+  -- The :Open command itself is built on lib.nvim.usercmd.composer.
+  if pcall(require, "lib.nvim.usercmd.composer") then
+    vim.health.ok("lib.nvim.usercmd.composer available")
+  else
+    vim.health.error("lib.nvim.usercmd.composer not found — :Open will fail to register")
+  end
 end
 
 local function check_platform()

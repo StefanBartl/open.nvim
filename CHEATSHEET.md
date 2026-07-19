@@ -11,6 +11,10 @@
 
 ---
 
+`:Open [target] [scope]` is built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+`<Tab>` completion for both arguments.
+
 ## All registered handlers
 
 | Handler | Key | Description | Platform |

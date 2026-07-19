@@ -14,6 +14,11 @@ source.
 
 ## Usrcmds
 
+One command, `:Open [target] [scope]` (built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
+`<Tab>` completion), defined in
+[lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua).
+
 | Command | Registered in |
 |---|---|
 | `:Open [target] [scope]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |

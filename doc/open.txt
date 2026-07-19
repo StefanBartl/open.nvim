@@ -120,6 +120,9 @@ packer: >lua
   :Open [target] [scope]
 <
 
+Built via lib.nvim.usercmd.composer (single flat `path = {}` root route —
+no subcommand tree), which is also what drives |open-completion|.
+
 With no arguments, `:Open` uses a context-aware heuristic:
   - Current buffer is a tree (neo-tree / nvim-tree / netrw) → filemanager
   - cfile / cword looks like a URL → browser
@@ -373,7 +376,7 @@ lazy.nvim: >lua
 Reports:
 
   core          Neovim version, vim.system availability.
-  lib.nvim      lib.nvim.notify presence.
+  lib.nvim      lib.nvim.notify and lib.nvim.usercmd.composer presence.
   platform      Detected OS (Windows / WSL / macOS / Linux).
   executables   Per-platform tool availability.
   handlers      All registered handlers with descriptions.
@@ -392,6 +395,8 @@ Reports:
     keywords.lua            built-in named scope keyword table
     health.lua              :checkhealth open_nvim
     @types/init.lua         LuaLS type definitions
+    bindings/
+      usrcmds.lua           :Open — built on lib.nvim.usercmd.composer
     handlers/
       filemanager.lua       Explorer / Finder / xdg-open
       browser.lua           browser + chrome/chromium/firefox/edge/safari
