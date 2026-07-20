@@ -6,6 +6,7 @@
   - [Scope tokens (2nd argument)](#scope-tokens-2nd-argument)
   - [Common command examples](#common-command-examples)
   - [Platform dispatch summary](#platform-dispatch-summary)
+  - [Link listing (`:UrlView`)](#link-listing-urlview)
   - [Lua API](#lua-api)
   - [Integrations](#integrations)
 
@@ -77,6 +78,36 @@
 | GUI text editor | `notepad.exe` | `notepad.exe` | `open -e` (TextEdit) | `xdg-open` / gedit… |
 | Detached spawn | `jobstart(detach)` | `jobstart(detach)` | `vim.system(detach)` | `vim.system(detach)` |
 
+## Link listing (`:UrlView`)
+
+`:UrlView [scope] [options]` — alias for `:Open urlview [scope] [options]`.
+
+| Scope | Scans |
+|---|---|
+| *(omitted)* / `%` | Current buffer |
+| `cwd` | Every file under `getcwd()`, recursively |
+| `buffers` | Every listed, loaded buffer |
+| `<path>` | A file, or a directory tree |
+| *(a range)* | `:'<,'>UrlView` — only those lines |
+
+| Option | Values |
+|---|---|
+| `sort=` | `none` (default) · `file` · `kind` · `alpha` |
+| `out=` | `picker` (default) · `table` · `csv` · `mdlinks` · `clipboard` · `echo` · `file:<path>` |
+| `match=` | Lua pattern on the basename, e.g. `match=%.md$` |
+| `--paths` | Also report existing filesystem paths |
+| `--all` | Keep duplicate targets |
+| `--flat` | Do not recurse |
+
+```
+:UrlView                                 this buffer → picker
+:UrlView cwd sort=file out=table         project-wide table
+:UrlView cwd match=%.md$ out=mdlinks     docs links as markdown → clipboard
+:UrlView ~/notes --paths sort=kind       URLs + existing paths, grouped
+:UrlView % out=file:/tmp/links.md        write this buffer's links to a file
+:'<,'>UrlView                            just the selection
+```
+
 ## Lua API
 
 ```lua
@@ -91,6 +122,7 @@ open.open("split", "cfile")      -- split on <cfile>
 ## Integrations
 
 ```lua
--- urlview.nvim: route picked URLs through open.nvim's browser handler
+-- urlview.nvim (superseded by the built-in :UrlView — see docs/integrations.md):
+-- route picked URLs through open.nvim's browser handler
 require("open_nvim.integrations.urlview").setup()
 ```

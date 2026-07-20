@@ -1,12 +1,22 @@
 # open.nvim — Integrations
 
-## urlview.nvim
+## urlview.nvim (superseded)
 
-[urlview.nvim](https://github.com/axieax/urlview.nvim) lists URLs found in
-the current buffer and lets you pick one. open.nvim provides a custom
-`open_in_browser` action so picked URLs are routed through the `browser`
-handler above (or whichever handler `default_browser` is set to) instead of
-duplicating cross-platform browser-launch logic in a second place.
+> **open.nvim now has this built in.** Use
+> [`:Open urlview` / `:UrlView`](commands.md#open-urlview--urlview) instead —
+> it needs no third-party plugin, scans more scopes (files, directories, all
+> buffers, a visual range — not just the current buffer), and can export to a
+> table, markdown links, the clipboard, or a file in addition to opening a
+> pick.
+
+The `open_nvim.integrations.urlview` module remains for anyone still running
+[urlview.nvim](https://github.com/axieax/urlview.nvim). It is opt-in and is
+not loaded by `open_nvim.setup()`.
+
+It registers a custom `open_in_browser` action so picked URLs are routed
+through the `browser` handler (or whichever handler `default_browser` is set
+to) instead of duplicating cross-platform browser-launch logic in a second
+place.
 
 ```lua
 {
@@ -25,3 +35,13 @@ duplicating cross-platform browser-launch logic in a second place.
 `default_picker` set to telescope/fzf-lua if available) unless you already
 set those yourself. Pass `false` instead of a table to only register the
 action without calling `urlview.setup()`.
+
+### Migrating off it
+
+Drop the `axieax/urlview.nvim` spec entirely. `:UrlView` is then provided by
+open.nvim itself under the same command name, so existing keymaps and muscle
+memory keep working.
+
+Note that both cannot own `:UrlView` at once — whichever registers last wins.
+If you want a different name for open.nvim's wrapper, or none at all, set
+`urlview.command` (see [configuration.md](configuration.md)).
