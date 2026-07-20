@@ -15,7 +15,7 @@
 ---
 
 > Looking to understand a project's structure before opening files in it?
-> Check out [project-insight.nvim](https://github.com/StefanBartl/project-insight.nvim).
+> Check out [insights.nvim](https://github.com/StefanBartl/insights.nvim).
 
 open.nvim gives you a single `:Open [target] [scope]` command that routes the
 thing under your cursor — path, URL, or plain text — to the right
