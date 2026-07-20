@@ -85,8 +85,12 @@ function M.register_all(register_fn)
         cmd = { mgr, path }
       end
 
-      local ok = util.run_detached(cmd, "filemanager")
-      if ok then notify.info(path) end
+      local ok, err = util.run_detached(cmd, "filemanager")
+      if ok then
+        notify.info(path)
+      else
+        notify.error(err)
+      end
       return ok
     end,
   })
