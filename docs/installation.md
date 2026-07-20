@@ -23,7 +23,7 @@ sooner for no benefit.
 -- lazy.nvim
 {
   "StefanBartl/open.nvim",
-  cmd  = { "Open", "UrlView" },
+  cmd  = { "Open", "UrlView", "MDLinksView" },
   dependencies = { "StefanBartl/lib.nvim" },
   opts = {},
 }
@@ -34,7 +34,7 @@ sooner for no benefit.
 use {
   "StefanBartl/open.nvim",
   requires = { "StefanBartl/lib.nvim" },
-  cmd = { "Open", "UrlView" },
+  cmd = { "Open", "UrlView", "MDLinksView" },
   config = function()
     require("open_nvim").setup()
   end,

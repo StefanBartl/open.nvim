@@ -3,7 +3,7 @@
 ## urlview.nvim (superseded)
 
 > **open.nvim now has this built in.** Use
-> [`:Open urlview` / `:UrlView`](commands.md#open-urlview--urlview) instead —
+> [`:Open viewer` / `:UrlView`](commands.md#open-viewer--urlview--mdlinksview) instead —
 > it needs no third-party plugin, scans more scopes (files, directories, all
 > buffers, a visual range — not just the current buffer), and can export to a
 > table, markdown links, the clipboard, or a file in addition to opening a
@@ -44,4 +44,4 @@ memory keep working.
 
 Note that both cannot own `:UrlView` at once — whichever registers last wins.
 If you want a different name for open.nvim's wrapper, or none at all, set
-`urlview.command` (see [configuration.md](configuration.md)).
+`viewer.commands.urls` (see [configuration.md](configuration.md)).

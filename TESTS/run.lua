@@ -22,7 +22,7 @@ package.path = table.concat({
 }, ";")
 
 -- open.nvim depends on lib.nvim at runtime (notify, usercmd.composer, and the
--- harvest primitives :Open urlview is built on), so the suite needs it on the
+-- harvest primitives :Open viewer is built on), so the suite needs it on the
 -- runtimepath.
 --
 -- A sibling checkout wins over the plugin-manager copy on purpose: the
@@ -64,8 +64,8 @@ end
 local specs = {
   "harvest_scope_spec.lua",
   "harvest_render_spec.lua",
-  "urlview_scan_spec.lua",
-  "urlview_spec.lua",
+  "viewer_scan_spec.lua",
+  "viewer_spec.lua",
   "usrcmds_spec.lua",
 }
 

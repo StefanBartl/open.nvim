@@ -18,10 +18,12 @@ CONTENTS                                                        *open-contents*
      6.1 Built-in keywords ........ |open-keywords-builtin|
      6.2 User-defined keywords .... |open-keywords-user|
   7. Tab completion ............... |open-completion|
-  8. The :UrlView command ......... |:UrlView|
-     8.1 Scope .................... |open-urlview-scope|
-     8.2 Options .................. |open-urlview-options|
-     8.3 Outputs .................. |open-urlview-outputs|
+  8. The :Open viewer command ..... |:Open-viewer|
+     8.1 Kind ..................... |open-viewer-kind|
+     8.2 Scope .................... |open-viewer-scope|
+     8.3 Options .................. |open-viewer-options|
+     8.4 The picker ............... |open-viewer-picker|
+     8.5 Outputs .................. |open-viewer-outputs|
   9. Lua API ...................... |open-api|
  10. Integrations ................. |open-integrations|
      10.1 urlview.nvim ............ |open-integrations-urlview|
@@ -59,7 +61,7 @@ benefit.
 lazy.nvim: >lua
   {
     "StefanBartl/open.nvim",
-    cmd          = { "Open", "UrlView" },
+    cmd          = { "Open", "UrlView", "MDLinksView" },
     dependencies = { "StefanBartl/lib.nvim" },
     opts         = {},
   }
@@ -69,7 +71,7 @@ packer: >lua
   use {
     "StefanBartl/open.nvim",
     requires = { "StefanBartl/lib.nvim" },
-    cmd      = { "Open", "UrlView" },
+    cmd      = { "Open", "UrlView", "MDLinksView" },
     config   = function() require("open_nvim").setup() end,
   }
 <
@@ -119,19 +121,23 @@ packer: >lua
   User entries override built-in entries with the same key.
   See |open-keywords-user|.
 
-`urlview`
-  Settings for |:UrlView|. Keys:
+`viewer`
+  Settings for |:Open-viewer|. Keys:
 
-    command         Name of the standalone wrapper command (default
-                    "UrlView"). Set to false to register only
-                    `:Open urlview`.
+    commands        Standalone wrapper command names, one per kind filter.
+                    Set a value to false to skip registering it.
+                      urls     default "UrlView"
+                      mdlinks  default "MDLinksView"
+                      all      default false (use `:Open viewer`)
     sort            Default ordering: "none" (default), "file", "kind",
                     "alpha".
     output          Default sink: "picker" (default), "table", "clipboard",
                     "mdlinks", "csv".
     mdlinks_output  Sink for `out=mdlinks` (default "clipboard").
+    open_file       Handler used when a picked entry is a local file
+                    (default "split"). Any registered handler key works.
 
-  All of them are overridable per invocation — see |open-urlview-options|.
+  All of them are overridable per invocation — see |open-viewer-options|.
 
 ==============================================================================
 5. THE :Open COMMAND                                                   *:Open*
@@ -329,44 +335,72 @@ To disable all built-in keywords: >lua
   :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix match)
   :Open filemanager path=<Tab>     file/directory completion after path=
 <
-`:UrlView` completes its own grammar: >
+The viewer commands complete their own grammar: >
 
+  :Open viewer <Tab>               all urls mdlinks files paths % cwd buffers
+  :Open viewer urls <Tab>          %  cwd  buffers  <files>
   :UrlView <Tab>                   %  cwd  buffers  <files>
   :UrlView cwd sort=<Tab>          none  file  kind  alpha
   :UrlView cwd out=<Tab>           picker table clipboard mdlinks csv echo file:
 <
 
 ==============================================================================
-8. THE :UrlView COMMAND                                             *:UrlView*
+8. THE :Open viewer COMMAND                                     *:Open-viewer*
 
-`:UrlView [scope] [options]`
-`:Open urlview [scope] [options]`
+`:Open viewer [kind] [scope] [options]`
+`:UrlView [scope] [options]`                                        *:UrlView*
+`:MDLinksView [scope] [options]`                                *:MDLinksView*
 
-Collect every link in a scope, then pick one to open — or export the whole
-list. `:UrlView` is a shallow wrapper around `:Open urlview`; both take
-exactly the same arguments. Rename or disable the wrapper with the
-`urlview.command` setting (see |open-config|).
+Collect links in a scope, then pick one to open — or export the whole list.
+`:UrlView` and `:MDLinksView` are shallow wrappers that pin the kind, so
+their first argument is the SCOPE, not a kind. Rename or disable them with
+the `viewer.commands` setting (see |open-config|).
 
 This replaces the former urlview.nvim dependency
 (see |open-integrations-urlview|). >
 
-  :UrlView                         links in the current buffer → picker
-  :UrlView cwd                     links in every file under the cwd
-  :UrlView ~/notes                 links in a file or directory (recursive)
-  :'<,'>UrlView                    links in the visual selection only
+  :UrlView                         URLs in the current buffer -> picker
+  :MDLinksView cwd                 markdown links under the cwd
+  :Open viewer                     every link in the current buffer
+  :Open viewer urls cwd            same as `:UrlView cwd`
+  :'<,'>UrlView                    URLs in the visual selection only
 <
-Recognized links: bare URLs (`https://…`, `ftp://…`, `www.…`), markdown
+Recognized links: bare URLs (`https://...`, `ftp://...`, `www....`), markdown
 inline links (reported by target, with the label kept), and — with
-`--paths` — filesystem paths that actually exist on disk. Links inside
-fenced code blocks are skipped, and a URL already inside a markdown link is
-not reported twice.
+`--paths` — filesystem paths that exist on disk. Links inside fenced code
+blocks are skipped, a URL already inside a markdown link is not reported
+twice, and bare in-document anchors (`[Kontext](#kontext)`) are dropped
+unless `--anchors` is given.
 
-Note that "urlview" is a reserved handler key: `:Open urlview` matches the
+Relative markdown targets are resolved against the directory of the file
+they were found in, so `[x](../../lua/init.lua)` inside a nested document is
+openable from anywhere.
+
+Note that "viewer" is a reserved handler key: `:Open viewer` matches the
 literal subcommand before the flat `:Open [target]` grammar sees it, so a
 handler registered under that key would be unreachable.
 
 ------------------------------------------------------------------------------
-8.1 Scope                                                 *open-urlview-scope*
+8.1 Kind                                                   *open-viewer-kind*
+
+The first argument of `:Open viewer` selects which links to keep.
+
+  all       (default) everything
+  urls      links whose TARGET is a URL, including [text](https://...)
+  mdlinks   links written with markdown SYNTAX, whatever they point at
+  files     links whose target is a local file or directory
+  paths     bare filesystem paths (requires --paths)
+
+`urls` and `mdlinks` deliberately overlap: `urls` asks "can a browser open
+this?", `mdlinks` asks "was this written with brackets?". A
+`[docs](https://x.dev)` is in both. That split is what makes `:UrlView` mean
+"things a browser can open" rather than "things without brackets".
+
+The kind is optional: `:Open viewer cwd` is read as "all kinds, cwd scope",
+because `cwd` does not name a kind.
+
+------------------------------------------------------------------------------
+8.2 Scope                                                 *open-viewer-scope*
 
   (omitted) / %   Current buffer
   cwd             Every file under |getcwd()|, recursively
@@ -374,29 +408,53 @@ handler registered under that key would be unreachable.
   <path>          A file, or a directory (recursively)
   (a range)       `:'<,'>UrlView` or `:10,20UrlView` scans only those lines
 
-Directory scans skip the conventional junk (.git, node_modules, …) via
+Directory scans skip the conventional junk (.git, node_modules, ...) via
 lib.nvim's shared ignore list, and skip binary and oversized files.
 
 ------------------------------------------------------------------------------
-8.2 Options                                             *open-urlview-options*
+8.3 Options                                             *open-viewer-options*
 
   sort={how}      Ordering: none (default) | file | kind | alpha
-  out={where}     Output sink; see |open-urlview-outputs|
+  out={where}     Output sink; see |open-viewer-outputs|
   match={pat}     Only scan files whose basename matches this Lua pattern,
                   e.g. `match=%.md$`
   --paths         Also report filesystem paths, not just URLs. Only paths
                   that exist on disk are reported.
-  --all           Keep duplicate targets (the default de-duplicates)
+  --anchors       Include bare in-document anchors, dropped by default
+  --dupes         Keep duplicate targets (the default de-duplicates)
   --flat          Do not recurse into subdirectories
 
 Flags and key=value options may appear in any order, before or after the
-scope argument.
+positional arguments.
 
 ------------------------------------------------------------------------------
-8.3 Outputs                                             *open-urlview-outputs*
+8.4 The picker                                           *open-viewer-picker*
 
-  picker          Interactive list; the pick is opened through the
-                  configured handler, so it obeys `default_browser`
+The results list is lib.nvim's `ui.kit.chooser`, which means:
+
+  - the WHOLE current line is highlighted (CursorLine:KitSelection)
+  - the cursor moves only up and down — j/k and the arrow keys; h, l, 0,
+    $, w, b and other horizontal motions are mapped to <Nop>
+  - <CR> opens the entry, <Esc> or q closes
+
+<CR> is kind-aware:
+
+  a URL           opens in your browser, via the `default_browser` handler
+  a local file    opens in a Neovim split (see `viewer.open_file`)
+  a directory     opens in the system file manager
+
+Following a markdown link therefore lands you in an editable buffer, not in
+your file manager. A `file.md#heading` target jumps to that heading after
+opening.
+
+Columns are aligned across the whole result set and shortened to fit the
+window: local targets are shown relative to the cwd, and long paths are
+elided in the middle rather than pushing the target off the right edge.
+
+------------------------------------------------------------------------------
+8.5 Outputs                                             *open-viewer-outputs*
+
+  picker          Interactive list; see |open-viewer-picker|
   table           GFM table (Kind / Location / Text / Target) in a scratch
                   buffer
   csv             The same columns as CSV, in a scratch buffer
@@ -406,13 +464,14 @@ scope argument.
   file:{path}     The rendered table, written to {path}
 
 `mdlinks` reuses an existing markdown label when there is one, and otherwise
-labels a URL with its host and a path with its basename — `[](…)` would
+labels a URL with its host and a path with its basename — `[](...)` would
 render as an invisible link. >
 
-  :UrlView cwd sort=file out=table         a table of every link in the project
-  :UrlView cwd match=%.md$ out=mdlinks     docs links as markdown, to clipboard
-  :UrlView ~/notes --paths sort=kind       URLs and paths, grouped by kind
-  :UrlView % out=file:/tmp/links.md        write this buffer's links to a file
+  :UrlView cwd sort=file out=table         a table of every URL in the project
+  :MDLinksView cwd                         every markdown link, as a picker
+  :Open viewer files cwd --paths           local targets, incl. bare paths
+  :UrlView cwd match=%.md$ out=mdlinks     doc URLs as markdown, to clipboard
+  :UrlView % out=file:/tmp/links.md        write this buffer's URLs to a file
 <
 ==============================================================================
 9. LUA API                                                        *open-api*
@@ -506,6 +565,9 @@ Reports:
       browser.lua           browser + chrome/chromium/firefox/edge/safari
       notepad.lua           notepad/editor (temp-file → GUI editor)
       nvim_internal.lua     split / vsplit / tab
+    viewer/
+      init.lua              :Open viewer — filter/sort/format/open
+      scan.lua              link extraction (URLs, md links, paths)
     integrations/
       urlview.lua           urlview.nvim "open_in_browser" action (opt-in)
 

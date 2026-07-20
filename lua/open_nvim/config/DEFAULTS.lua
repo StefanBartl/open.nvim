@@ -12,11 +12,18 @@ return {
   builtin_keywords = true,   -- set false to disable all built-in scope keywords
   keywords         = {},     -- user-defined keyword → path overrides / additions
 
-  -- `:Open urlview` / `:UrlView` — list links in a scope.
-  urlview = {
-    command        = "UrlView",  -- standalone wrapper command; set false to skip it
-    sort           = "none",     -- "none" | "file" | "kind" | "alpha"
-    output         = "picker",   -- "picker" | "table" | "clipboard" | "mdlinks" | "csv"
-    mdlinks_output = "clipboard",
+  -- `:Open viewer [kind]` — list links in a scope.
+  viewer = {
+    -- Standalone wrapper commands, one per filter. Set a value to false to
+    -- skip registering that command.
+    commands = {
+      urls    = "UrlView",      -- only browser-openable targets
+      mdlinks = "MDLinksView",  -- only markdown-syntax links
+      all     = false,          -- everything; use `:Open viewer` instead
+    },
+    sort           = "none",      -- "none" | "file" | "kind" | "alpha"
+    output         = "picker",    -- "picker" | "table" | "clipboard" | "mdlinks" | "csv"
+    mdlinks_output = "clipboard", -- sink for `out=mdlinks`
+    open_file      = "split",     -- handler for a picked local file ("split"/"vsplit"/"tab")
   },
 }
