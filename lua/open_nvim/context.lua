@@ -220,13 +220,13 @@ function M.resolve(arg, target, signals)
     elseif arg == "cfile" then
       text = signals.cfile
     elseif arg:sub(1, 5) == "path=" then
-      text = arg:sub(6)
+      text = require("lib.nvim.cross.fs.expand_path")(arg:sub(6))
     else
       -- Check named scope keywords before falling back to verbatim text.
       local ok_cfg, cfg = pcall(require, "open_nvim.config")
       local kw = ok_cfg and cfg.get().keywords and cfg.get().keywords[arg]
       if kw then
-        text = type(kw) == "function" and kw() or vim.fn.expand(tostring(kw))
+        text = type(kw) == "function" and kw() or require("lib.nvim.cross.fs.expand_path")(tostring(kw))
       else
         text = arg
       end

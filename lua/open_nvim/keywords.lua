@@ -18,7 +18,7 @@ local M = {}
 -- ---------------------------------------------------------------------------
 
 local function expand(p)
-  return vim.fn.expand(p)
+  return require("lib.nvim.cross.fs.expand_path")(p)
 end
 
 ---Run a command synchronously and return trimmed stdout, or nil on failure.
