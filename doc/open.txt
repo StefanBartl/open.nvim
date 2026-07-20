@@ -18,11 +18,15 @@ CONTENTS                                                        *open-contents*
      6.1 Built-in keywords ........ |open-keywords-builtin|
      6.2 User-defined keywords .... |open-keywords-user|
   7. Tab completion ............... |open-completion|
-  8. Lua API ...................... |open-api|
-  9. Integrations ................. |open-integrations|
-     9.1 urlview.nvim ............. |open-integrations-urlview|
- 10. Health check ................. |open-health|
- 11. Architecture ................. |open-architecture|
+  8. The :UrlView command ......... |:UrlView|
+     8.1 Scope .................... |open-urlview-scope|
+     8.2 Options .................. |open-urlview-options|
+     8.3 Outputs .................. |open-urlview-outputs|
+  9. Lua API ...................... |open-api|
+ 10. Integrations ................. |open-integrations|
+     10.1 urlview.nvim ............ |open-integrations-urlview|
+ 11. Health check ................. |open-health|
+ 12. Architecture ................. |open-architecture|
 
 ==============================================================================
 1. INTRODUCTION                                                    *open-intro*
@@ -55,7 +59,7 @@ benefit.
 lazy.nvim: >lua
   {
     "StefanBartl/open.nvim",
-    cmd          = "Open",
+    cmd          = { "Open", "UrlView" },
     dependencies = { "StefanBartl/lib.nvim" },
     opts         = {},
   }
@@ -65,7 +69,7 @@ packer: >lua
   use {
     "StefanBartl/open.nvim",
     requires = { "StefanBartl/lib.nvim" },
-    cmd      = "Open",
+    cmd      = { "Open", "UrlView" },
     config   = function() require("open_nvim").setup() end,
   }
 <
@@ -114,6 +118,20 @@ packer: >lua
   (expanded at resolution time) or a `fun(): string|nil` for dynamic paths.
   User entries override built-in entries with the same key.
   See |open-keywords-user|.
+
+`urlview`
+  Settings for |:UrlView|. Keys:
+
+    command         Name of the standalone wrapper command (default
+                    "UrlView"). Set to false to register only
+                    `:Open urlview`.
+    sort            Default ordering: "none" (default), "file", "kind",
+                    "alpha".
+    output          Default sink: "picker" (default), "table", "clipboard",
+                    "mdlinks", "csv".
+    mdlinks_output  Sink for `out=mdlinks` (default "clipboard").
+
+  All of them are overridable per invocation — see |open-urlview-options|.
 
 ==============================================================================
 5. THE :Open COMMAND                                                   *:Open*
@@ -311,9 +329,93 @@ To disable all built-in keywords: >lua
   :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix match)
   :Open filemanager path=<Tab>     file/directory completion after path=
 <
+`:UrlView` completes its own grammar: >
+
+  :UrlView <Tab>                   %  cwd  buffers  <files>
+  :UrlView cwd sort=<Tab>          none  file  kind  alpha
+  :UrlView cwd out=<Tab>           picker table clipboard mdlinks csv echo file:
+<
 
 ==============================================================================
-8. LUA API                                                        *open-api*
+8. THE :UrlView COMMAND                                             *:UrlView*
+
+`:UrlView [scope] [options]`
+`:Open urlview [scope] [options]`
+
+Collect every link in a scope, then pick one to open — or export the whole
+list. `:UrlView` is a shallow wrapper around `:Open urlview`; both take
+exactly the same arguments. Rename or disable the wrapper with the
+`urlview.command` setting (see |open-config|).
+
+This replaces the former urlview.nvim dependency
+(see |open-integrations-urlview|). >
+
+  :UrlView                         links in the current buffer → picker
+  :UrlView cwd                     links in every file under the cwd
+  :UrlView ~/notes                 links in a file or directory (recursive)
+  :'<,'>UrlView                    links in the visual selection only
+<
+Recognized links: bare URLs (`https://…`, `ftp://…`, `www.…`), markdown
+inline links (reported by target, with the label kept), and — with
+`--paths` — filesystem paths that actually exist on disk. Links inside
+fenced code blocks are skipped, and a URL already inside a markdown link is
+not reported twice.
+
+Note that "urlview" is a reserved handler key: `:Open urlview` matches the
+literal subcommand before the flat `:Open [target]` grammar sees it, so a
+handler registered under that key would be unreachable.
+
+------------------------------------------------------------------------------
+8.1 Scope                                                 *open-urlview-scope*
+
+  (omitted) / %   Current buffer
+  cwd             Every file under |getcwd()|, recursively
+  buffers         Every listed, loaded buffer
+  <path>          A file, or a directory (recursively)
+  (a range)       `:'<,'>UrlView` or `:10,20UrlView` scans only those lines
+
+Directory scans skip the conventional junk (.git, node_modules, …) via
+lib.nvim's shared ignore list, and skip binary and oversized files.
+
+------------------------------------------------------------------------------
+8.2 Options                                             *open-urlview-options*
+
+  sort={how}      Ordering: none (default) | file | kind | alpha
+  out={where}     Output sink; see |open-urlview-outputs|
+  match={pat}     Only scan files whose basename matches this Lua pattern,
+                  e.g. `match=%.md$`
+  --paths         Also report filesystem paths, not just URLs. Only paths
+                  that exist on disk are reported.
+  --all           Keep duplicate targets (the default de-duplicates)
+  --flat          Do not recurse into subdirectories
+
+Flags and key=value options may appear in any order, before or after the
+scope argument.
+
+------------------------------------------------------------------------------
+8.3 Outputs                                             *open-urlview-outputs*
+
+  picker          Interactive list; the pick is opened through the
+                  configured handler, so it obeys `default_browser`
+  table           GFM table (Kind / Location / Text / Target) in a scratch
+                  buffer
+  csv             The same columns as CSV, in a scratch buffer
+  mdlinks         `[label](target)` per line, copied to the clipboard
+  clipboard       The rendered table, copied to the clipboard
+  echo            Printed to the message area
+  file:{path}     The rendered table, written to {path}
+
+`mdlinks` reuses an existing markdown label when there is one, and otherwise
+labels a URL with its host and a path with its basename — `[](…)` would
+render as an invisible link. >
+
+  :UrlView cwd sort=file out=table         a table of every link in the project
+  :UrlView cwd match=%.md$ out=mdlinks     docs links as markdown, to clipboard
+  :UrlView ~/notes --paths sort=kind       URLs and paths, grouped by kind
+  :UrlView % out=file:/tmp/links.md        write this buffer's links to a file
+<
+==============================================================================
+9. LUA API                                                        *open-api*
 
 After calling `setup()`, the following functions are available:
 
@@ -336,10 +438,10 @@ After calling `setup()`, the following functions are available:
 <
 
 ==============================================================================
-9. INTEGRATIONS                                             *open-integrations*
+10. INTEGRATIONS                                            *open-integrations*
 
 ------------------------------------------------------------------------------
-9.1 urlview.nvim                                     *open-integrations-urlview*
+10.1 urlview.nvim                                    *open-integrations-urlview*
 
 https://github.com/axieax/urlview.nvim lists URLs found in the current
 buffer and lets you pick one. `open_nvim.integrations.urlview` registers a
@@ -369,7 +471,7 @@ lazy.nvim: >lua
   action without calling `urlview.setup()` yourself.
 
 ==============================================================================
-10. HEALTH CHECK                                               *open-health*
+11. HEALTH CHECK                                               *open-health*
 
 >
   :checkhealth open_nvim
@@ -384,7 +486,7 @@ Reports:
   handlers      All registered handlers with descriptions.
 
 ==============================================================================
-11. ARCHITECTURE                                         *open-architecture*
+12. ARCHITECTURE                                        *open-architecture*
 
   plugin/open.lua           Load guard (vim.g.loaded_open_nvim)
   lua/open_nvim/

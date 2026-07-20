@@ -1,5 +1,5 @@
 ---@module 'open_nvim.bindings.usrcmds'
----@brief Registers the :Open user command via lib.nvim.usercmd.composer.
+---@brief Registers the :Open (and :UrlView) user commands via lib.nvim.usercmd.composer.
 ---@description
 --- `:Open [target] [scope]` is a flat, no-subcommand grammar, so it uses
 --- composer's `path = {}` root-route trick rather than a subcommand tree.
@@ -7,6 +7,15 @@
 --- than the built-in STRING/PATH types (dynamic handler-registry lookup,
 --- "path=" pseudo-flag file completion, named-keyword prefix matching), so
 --- both get their own registered composer types.
+---
+--- `:Open urlview …` coexists with that root route because `tree.walk`
+--- consumes literal children greedily: the token "urlview" matches the
+--- literal child and never reaches the root route's OPEN_TARGET arg. This is
+--- only safe as long as no handler is registered under the key "urlview" —
+--- such a handler would become unreachable via `:Open urlview`.
+---
+--- `:UrlView` is the shallow standalone wrapper over the same route body,
+--- following replacer.nvim's `:Replace` / `:Replacer` precedent.
 
 local composer = require("lib.nvim.usercmd.composer")
 
@@ -92,6 +101,82 @@ composer.register_type("OPEN_SCOPE", {
   end,
 })
 
+-- ---------------------------------------------------------------------------
+-- urlview
+-- ---------------------------------------------------------------------------
+
+-- Scope token for `:Open urlview` / `:UrlView`: the literal scope keywords
+-- plus ordinary file/directory completion.
+composer.register_type("URLVIEW_SCOPE", {
+  validate = function(raw) return true, raw, nil end,
+  complete = function(arg_lead)
+    local out = {}
+    for _, s in ipairs({ "%", "cwd", "buffers" }) do
+      if s:sub(1, #arg_lead) == arg_lead then
+        out[#out + 1] = s
+      end
+    end
+    for _, f in ipairs(vim.fn.getcompletion(arg_lead, "file")) do
+      out[#out + 1] = f
+    end
+    return out
+  end,
+})
+
+--- Translate a composer ctx into `urlview.run` options.
+---@param ctx Lib.UserCmd.Composer.Ctx
+local function run_urlview(ctx)
+  local flags = ctx.flags or {}
+  local kv = ctx.kv or {}
+
+  require("open_nvim.urlview").run({
+    scope = ctx.args.scope,
+    sort = kv.sort,
+    out = kv.out,
+    match = kv.match,
+    paths = flags.paths == true,
+    -- `--all` keeps duplicate targets; the default de-duplicates, since the
+    -- same URL repeated across a repo is noise in a list you are picking from.
+    unique = flags.all ~= true,
+    recursive = flags.flat ~= true,
+    -- A range only counts when one was actually typed (`ctx.range.range > 0`);
+    -- nvim reports line1/line2 as the cursor line otherwise, which would
+    -- silently shrink a plain `:UrlView` to a single line.
+    range = (ctx.range and ctx.range.range or 0) > 0,
+    line1 = ctx.range and ctx.range.line1,
+    line2 = ctx.range and ctx.range.line2,
+  })
+end
+
+--- The shared route body for `:Open urlview` and the standalone `:UrlView`.
+---@param path string[]
+---@return Lib.UserCmd.Composer.Route
+local function urlview_route(path)
+  return {
+    path = path,
+    desc = "List links in a scope, then open / export them",
+    range = true,
+    args = {
+      { name = "scope", type = "URLVIEW_SCOPE", optional = true },
+    },
+    kv = {
+      { key = "sort", enum = { "none", "file", "kind", "alpha" } },
+      { key = "out", values = { "picker", "table", "clipboard", "mdlinks", "csv", "echo", "file:" } },
+      { key = "match" },
+    },
+    flags = {
+      { name = "paths", bool = true },
+      { name = "all", bool = true },
+      { name = "flat", bool = true },
+    },
+    run = run_urlview,
+  }
+end
+
+-- ---------------------------------------------------------------------------
+-- Registration
+-- ---------------------------------------------------------------------------
+
 ---Register the :Open [target] [scope] user command for the given config.
 ---@param cfg OpenNvim.Config
 function M.register(cfg)
@@ -111,8 +196,21 @@ function M.register(cfg)
         },
         desc = "Open path/URL with the specified handler",
         run  = function(ctx) run_open(ctx.args.target, ctx.args.scope) end },
+
+      urlview_route({ "urlview" }),
     },
   })
+
+  -- Standalone wrapper. Same route body, registered as its own verb so it
+  -- keeps its own completion and usage listing.
+  local uv_cmd = cfg.urlview and cfg.urlview.command
+  if uv_cmd and uv_cmd ~= "" then
+    composer.verb(uv_cmd, {
+      desc = ":UrlView — list links in a scope, then open / export them",
+      range = true,
+      routes = { urlview_route({}) },
+    })
+  end
 end
 
 return M

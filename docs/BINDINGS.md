@@ -14,23 +14,34 @@ source.
 
 ## Usrcmds
 
-One command, `:Open [target] [scope]` (built via
-[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
-`<Tab>` completion), defined in
+Built via [`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim)
+with `<Tab>` completion, defined in
 [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua).
 
 | Command | Registered in |
 |---|---|
 | `:Open [target] [scope]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
+| `:Open urlview [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
+| `:UrlView [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) — shallow wrapper over `:Open urlview`; name configurable via `urlview.command`, `false` disables it |
 
-Tab-completion:
+`:Open` tab-completion:
 - 1st arg (`target`) → all registered handler keys (see `:Open` in the
   [README](../README.md#command-reference)).
 - 2nd arg (`scope`) → `%`, `cfile`, `path=<file completion>`, all named scope
   keywords, then general file completion.
 
-See [README.md](../README.md#command-reference) for the full command
-reference and scope tokens.
+`:Open urlview` / `:UrlView` tab-completion:
+- 1st arg (`scope`) → `%`, `cwd`, `buffers`, then general file completion.
+- `sort=` → `none`, `file`, `kind`, `alpha`.
+- `out=` → `picker`, `table`, `clipboard`, `mdlinks`, `csv`, `echo`, `file:`.
+- Flags → `--paths`, `--all`, `--flat`. Both commands accept a range.
+
+`urlview` is a reserved handler key: `:Open urlview` matches the literal
+subcommand route before the flat `:Open [target]` grammar sees it, so a
+handler registered under that key would be unreachable.
+
+See [docs/commands.md](commands.md) for the full command reference and scope
+tokens.
 
 ## Keymaps
 

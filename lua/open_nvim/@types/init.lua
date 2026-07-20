@@ -67,6 +67,32 @@
 ---@field run  fun(ctx: OpenNvim.Context): boolean     Returns true when dispatch succeeded
 
 -- ---------------------------------------------------------------------------
+-- UrlView
+-- ---------------------------------------------------------------------------
+
+---@alias OpenNvim.UrlView.Kind
+---| '"url"'     # bare URL (scheme://… or www.…)
+---| '"mdlink"'  # markdown inline link [text](target)
+---| '"path"'    # filesystem path that exists on disk
+
+---One link found by `:Open urlview`, with enough provenance to jump back to it.
+---@class OpenNvim.UrlView.Link
+---@field target  string                  The thing to open (URL or absolute path)
+---@field kind    OpenNvim.UrlView.Kind   How it was recognized
+---@field display string                  Text as it appeared in the source
+---@field text    string|nil              Label, for markdown links only
+---@field lnum    integer                 1-based line number in its file/buffer
+---@field col     integer                 0-based byte column
+---@field file    string|nil              Absolute source path, when known
+---@field bufnr   integer|nil             Source buffer, when it came from one
+
+---@class OpenNvim.UrlView.Config
+---@field command string|nil  Standalone wrapper command name; false/nil disables it (default "UrlView")
+---@field sort    string|nil  Default sort: "none"|"file"|"kind"|"alpha" (default "none")
+---@field output  string|nil  Default output: "picker"|"table"|"clipboard"|"mdlinks"|"csv" (default "picker")
+---@field mdlinks_output string|nil  Sink for `out=mdlinks` (default "clipboard")
+
+-- ---------------------------------------------------------------------------
 -- Config
 -- ---------------------------------------------------------------------------
 
@@ -77,5 +103,6 @@
 ---@field handlers            string[]  Handler module keys to load
 ---@field builtin_keywords    boolean   Load built-in scope keywords (default true)
 ---@field keywords            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
+---@field urlview             OpenNvim.UrlView.Config  `:Open urlview` / `:UrlView` settings
 
 return {}

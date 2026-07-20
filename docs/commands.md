@@ -1,14 +1,19 @@
 # open.nvim — Command Reference
 
-One command, `:Open [target] [scope]` (built via
-[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim), with
-`<Tab>` completion).
+Two commands, both built via
+[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim) with
+`<Tab>` completion:
+
+- `:Open [target] [scope]` — route one thing to a handler
+- `:Open urlview [scope] [options]` (alias `:UrlView`) — list every link in a
+  scope, then open or export them
 
 ## Table of content
 
 - [Commands](#commands)
 - [Scope (2nd argument)](#scope-2nd-argument)
 - [Tab completion](#tab-completion)
+- [`:Open urlview` / `:UrlView`](#open-urlview--urlview)
 
 ## Commands
 
@@ -59,3 +64,88 @@ Examples:
 :Open filemanager path=<Tab>     file/directory completion after path=
 :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix filter)
 ```
+
+## `:Open urlview` / `:UrlView`
+
+Collect every link in a scope, then pick one to open — or export the whole
+list as a table, as markdown links, to the clipboard, or to a file.
+
+`:UrlView` is a shallow wrapper around `:Open urlview`; both take exactly the
+same arguments. It replaces the former
+[urlview.nvim](https://github.com/axieax/urlview.nvim) dependency (see
+[integrations.md](integrations.md)).
+
+```
+:UrlView                          links in the current buffer → picker
+:UrlView cwd                      links in every file under the cwd
+:UrlView buffers                  links in every listed, loaded buffer
+:UrlView ~/notes                  links in a file or directory (recursive)
+:'<,'>UrlView                     links in the visual selection only
+```
+
+### Scope (1st argument)
+
+| Scope | What is scanned |
+|---|---|
+| *(omitted)* or `%` | Current buffer |
+| `cwd` | Every file under `getcwd()`, recursively |
+| `buffers` | Every listed, loaded buffer |
+| `<path>` | A file, or a directory (recursively) |
+| *(a range)* | `:'<,'>UrlView` or `:10,20UrlView` scans only those lines |
+
+Directory scans skip the conventional junk (`.git`, `node_modules`, …) via
+lib.nvim's shared ignore list, and skip binary or oversized files.
+
+### Options
+
+| Option | Meaning |
+|---|---|
+| `sort=none\|file\|kind\|alpha` | Ordering. Default `none` (source order). |
+| `out=picker\|table\|clipboard\|mdlinks\|csv\|echo` | Where results go. Default `picker`. |
+| `out=file:<path>` | Write the rendered table to a file. |
+| `match=<lua pattern>` | Only scan files whose basename matches, e.g. `match=%.md$`. |
+| `--paths` | Also report filesystem paths, not just URLs (only ones that exist). |
+| `--all` | Keep duplicate targets (the default de-duplicates). |
+| `--flat` | Do not recurse into subdirectories. |
+
+Flags and `key=value` options may appear in any order, before or after the
+scope.
+
+### Outputs
+
+| `out=` | Result |
+|---|---|
+| `picker` | Interactive list; the pick is opened through the configured handler |
+| `table` | GFM table (Kind / Location / Text / Target) in a scratch buffer |
+| `csv` | Same columns as CSV in a scratch buffer |
+| `mdlinks` | `[label](target)` per line, copied to the clipboard |
+| `clipboard` | The rendered table, copied to the clipboard |
+| `echo` | Printed to the message area |
+| `file:<path>` | The rendered table, written to `<path>` |
+
+`mdlinks` reuses an existing markdown label when there is one, and otherwise
+labels a URL with its host and a path with its basename — `[](…)` would
+render as an invisible link.
+
+### Examples
+
+```
+:UrlView cwd sort=file out=table         a table of every link in the project
+:UrlView cwd match=%.md$ out=mdlinks     markdown links from the docs, to clipboard
+:UrlView ~/notes --paths sort=kind       URLs and existing paths, grouped by kind
+:UrlView % out=file:/tmp/links.md        current buffer's links, written to a file
+:UrlView cwd --flat --all                top level only, duplicates kept
+```
+
+### Tab completion
+
+```
+:UrlView <Tab>                    %  cwd  buffers  <file completion>
+:UrlView cwd sort=<Tab>           none  file  kind  alpha
+:UrlView cwd out=<Tab>            picker  table  clipboard  mdlinks  csv  echo  file:
+```
+
+### Defaults
+
+`sort`, the default output, and the wrapper command's name are configurable —
+see [configuration.md](configuration.md).

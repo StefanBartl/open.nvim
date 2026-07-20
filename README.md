@@ -25,6 +25,17 @@ are in a Neo-tree, nvim-tree, or netrw buffer and opens the node under the
 cursor directly. Built on [lib.nvim](https://github.com/StefanBartl/lib.nvim)
 as a deliberate shared dependency.
 
+It also goes the other way: `:UrlView` lists every link in a buffer, a
+selection, a directory, or the whole project, then hands you a picker — or
+exports the lot as a markdown table, as markdown links, to the clipboard, or
+to a file.
+
+```
+:UrlView                                 links in this buffer → pick one to open
+:UrlView cwd sort=file out=table         every link in the project, as a table
+:UrlView cwd match=%.md$ out=mdlinks     docs links as markdown, to the clipboard
+```
+
 ## Quickstart
 
 Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
@@ -33,7 +44,7 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 -- lazy.nvim
 {
   "StefanBartl/open.nvim",
-  cmd  = "Open",
+  cmd  = { "Open", "UrlView" },
   dependencies = { "StefanBartl/lib.nvim" },
   opts = {},
 }
@@ -50,10 +61,10 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 - [Features](docs/features.md) — handler table and smart context resolution.
 - [Installation](docs/installation.md) — requirements and setup for lazy.nvim, packer, and others.
 - [Configuration](docs/configuration.md) — all `setup()` options and their defaults.
-- [Command Reference](docs/commands.md) — full `:Open` command, scope tokens, and tab-completion.
+- [Command Reference](docs/commands.md) — full `:Open` and `:UrlView` commands, scope tokens, and tab-completion.
 - [Built-in Keywords](docs/keywords.md) — named scope shortcuts for shell, editor, git, SSH, and more config files.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
-- [Integrations](docs/integrations.md) — urlview.nvim integration.
+- [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`).
 - [Health Check](docs/health-check.md) — what `:checkhealth open_nvim` reports.
 - [Bindings](docs/BINDINGS.md) — full inventory of user commands, keymaps, and autocmds.
 - [Roadmap](docs/ROADMAP.md) — planned features.
