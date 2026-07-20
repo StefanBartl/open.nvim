@@ -61,8 +61,12 @@ local function run(ctx)
     cmd = { ed, tmpfile }
   end
 
-  local ok = util.run_detached(cmd, "notepad")
-  if ok then notify.info("Opened temp file: " .. tmpfile) end
+  local ok, err = util.run_detached(cmd, "notepad")
+  if ok then
+    notify.info("Opened temp file: " .. tmpfile)
+  else
+    notify.error(err)
+  end
   return ok
 end
 

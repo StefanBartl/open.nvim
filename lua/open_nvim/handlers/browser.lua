@@ -87,8 +87,12 @@ local function make_named_handler(key, desc, linux_candidates, mac_app, win_toke
         notify.error("[" .. key .. "] " .. (err or "unknown error"))
         return false
       end
-      local ok = util.run_detached(cmd, key)
-      if ok then notify.info("[" .. key .. "] " .. url) end
+      local ok, run_err = util.run_detached(cmd, key)
+      if ok then
+        notify.info("[" .. key .. "] " .. url)
+      else
+        notify.error(run_err)
+      end
       return ok
     end,
   }
@@ -104,8 +108,12 @@ function M.register_all(register_fn)
       local url  = to_url(ctx)
       local plat = platform.get()
       local cmd  = default_browser_cmd(url, plat)
-      local ok   = util.run_detached(cmd, "browser")
-      if ok then notify.info(url) end
+      local ok, err = util.run_detached(cmd, "browser")
+      if ok then
+        notify.info(url)
+      else
+        notify.error(err)
+      end
       return ok
     end,
   })
@@ -145,8 +153,12 @@ function M.register_all(register_fn)
         return false
       end
       local url = to_url(ctx)
-      local ok  = util.run_detached({ "open", "-a", "Safari", url }, "safari")
-      if ok then notify.info(url) end
+      local ok, err = util.run_detached({ "open", "-a", "Safari", url }, "safari")
+      if ok then
+        notify.info(url)
+      else
+        notify.error(err)
+      end
       return ok
     end,
   })
