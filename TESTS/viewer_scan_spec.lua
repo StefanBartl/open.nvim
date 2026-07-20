@@ -1,7 +1,7 @@
--- TESTS/urlview_scan_spec.lua — link extraction.
+-- TESTS/viewer_scan_spec.lua — link extraction.
 
 return function(H)
-  local scan = require("open_nvim.urlview.scan")
+  local scan = require("open_nvim.viewer.scan")
 
   ---@param lines string[]
   ---@param opts table|nil
@@ -130,5 +130,70 @@ return function(H)
     local out = scan.from_sources({ { lines = { "https://x.dev" }, first = 1, file = "/tmp/a.md", bufnr = 7 } })
     H.eq(out[1].file, "/tmp/a.md", "file provenance attached")
     H.eq(out[1].bufnr, 7, "bufnr provenance attached")
+  end
+
+  -- is_url / is_anchor classification ----------------------------------------
+  do
+    H.ok(scan.is_url("https://x.dev"), "https is a URL")
+    H.ok(scan.is_url("ftp://x.dev"), "ftp is a URL")
+    H.ok(scan.is_url("www.x.dev"), "www is a URL")
+    H.falsy(scan.is_url("../notes.md"), "a relative path is not a URL")
+    H.falsy(scan.is_url(nil), "nil is not a URL")
+
+    H.ok(scan.is_anchor("#heading"), "a leading # is an anchor")
+    H.falsy(scan.is_anchor("file.md#heading"), "a path with a fragment is not a bare anchor")
+  end
+
+  -- a markdown link is flagged by target, not by syntax ----------------------
+  do
+    local url_md = scan_lines({ "[docs](https://x.dev)" })
+    H.eq(url_md[1].kind, "mdlink", "syntactic kind stays mdlink")
+    H.ok(url_md[1].is_url, "but a markdown link to a URL is flagged is_url")
+
+    local file_md = scan.from_source(
+      { lines = { "[doc](../notes.md)" }, first = 1, file = "/repo/docs/a.md" }
+    )
+    H.eq(file_md[1].kind, "mdlink", "local markdown link is still an mdlink")
+    H.falsy(file_md[1].is_url, "but is not flagged is_url")
+  end
+
+  -- relative targets resolve against the source file's directory -------------
+  do
+    local out = scan.from_source(
+      { lines = { "[x](../../lua/startup/init.lua)" }, first = 1, file = "/repo/docs/notes/startup.md" }
+    )
+    H.eq(out[1].target, "/repo/lua/startup/init.lua", "relative target resolved against the source dir")
+    H.eq(out[1].raw_target, "../../lua/startup/init.lua", "raw target preserved as written")
+  end
+
+  -- a fragment is kept but not treated as part of the filename ---------------
+  do
+    local out = scan.from_source(
+      { lines = { "[x](./other.md#some-heading)" }, first = 1, file = "/repo/docs/a.md" }
+    )
+    H.eq(out[1].target, "/repo/docs/other.md#some-heading", "path resolved, fragment reattached")
+  end
+
+  -- an absolute target is normalized, not re-anchored ------------------------
+  do
+    local out = scan.from_source(
+      { lines = { "[x](/abs/target.md)" }, first = 1, file = "/repo/docs/a.md" }
+    )
+    H.contains(out[1].target, "/abs/target.md", "absolute target left absolute")
+  end
+
+  -- bare anchors are dropped by default --------------------------------------
+  do
+    local lines = { "[Kontext](#kontext)", "[Real](./real.md)" }
+    local src = { lines = lines, first = 1, file = "/repo/docs/a.md" }
+
+    local without = scan.from_source(src)
+    H.eq(#without, 1, "in-document anchors are dropped by default")
+    H.contains(without[1].target, "real.md", "the surviving link is the file one")
+
+    local with = scan.from_source(src, { anchors = true })
+    H.eq(#with, 2, "anchors = true keeps them")
+    H.ok(with[1].is_anchor, "the anchor is flagged as one")
+    H.eq(with[1].target, "#kontext", "an anchor target is left untouched")
   end
 end

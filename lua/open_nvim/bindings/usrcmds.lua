@@ -8,14 +8,14 @@
 --- "path=" pseudo-flag file completion, named-keyword prefix matching), so
 --- both get their own registered composer types.
 ---
---- `:Open urlview …` coexists with that root route because `tree.walk`
---- consumes literal children greedily: the token "urlview" matches the
+--- `:Open viewer …` coexists with that root route because `tree.walk`
+--- consumes literal children greedily: the token "viewer" matches the
 --- literal child and never reaches the root route's OPEN_TARGET arg. This is
---- only safe as long as no handler is registered under the key "urlview" —
---- such a handler would become unreachable via `:Open urlview`.
+--- only safe as long as no handler is registered under the key "viewer" —
+--- such a handler would become unreachable via `:Open viewer`.
 ---
---- `:UrlView` is the shallow standalone wrapper over the same route body,
---- following replacer.nvim's `:Replace` / `:Replacer` precedent.
+--- `:UrlView` / `:MDLinksView` are shallow standalone wrappers that pin the
+--- kind filter, following replacer.nvim's `:Replace` / `:Replacer` precedent.
 
 local composer = require("lib.nvim.usercmd.composer")
 
@@ -102,42 +102,104 @@ composer.register_type("OPEN_SCOPE", {
 })
 
 -- ---------------------------------------------------------------------------
--- urlview
+-- viewer
 -- ---------------------------------------------------------------------------
 
--- Scope token for `:Open urlview` / `:UrlView`: the literal scope keywords
--- plus ordinary file/directory completion.
-composer.register_type("URLVIEW_SCOPE", {
+local SCOPE_TOKENS = { "%", "cwd", "buffers" }
+
+---@param arg_lead string
+---@return string[]
+local function complete_scope(arg_lead)
+  local out = {}
+  for _, s in ipairs(SCOPE_TOKENS) do
+    if s:sub(1, #arg_lead) == arg_lead then
+      out[#out + 1] = s
+    end
+  end
+  for _, f in ipairs(vim.fn.getcompletion(arg_lead, "file")) do
+    out[#out + 1] = f
+  end
+  return out
+end
+
+-- Scope token for the wrapper commands: the literal scope keywords plus
+-- ordinary file/directory completion.
+composer.register_type("VIEWER_SCOPE", {
+  validate = function(raw) return true, raw, nil end,
+  complete = complete_scope,
+})
+
+-- First positional of `:Open viewer`, which may be either a kind or a scope.
+-- Validation stays soft and the handler disambiguates (see run_viewer): an
+-- `enum` here would reject `:Open viewer cwd` outright rather than reading it
+-- as "all kinds, cwd scope", which is the more useful interpretation.
+composer.register_type("VIEWER_KIND", {
   validate = function(raw) return true, raw, nil end,
   complete = function(arg_lead)
     local out = {}
-    for _, s in ipairs({ "%", "cwd", "buffers" }) do
-      if s:sub(1, #arg_lead) == arg_lead then
-        out[#out + 1] = s
+    local ok, viewer = pcall(require, "open_nvim.viewer")
+    if ok then
+      for _, k in ipairs(viewer.kinds()) do
+        if k:sub(1, #arg_lead) == arg_lead then
+          out[#out + 1] = k
+        end
       end
     end
-    for _, f in ipairs(vim.fn.getcompletion(arg_lead, "file")) do
-      out[#out + 1] = f
+    for _, s in ipairs(complete_scope(arg_lead)) do
+      out[#out + 1] = s
     end
     return out
   end,
 })
 
---- Translate a composer ctx into `urlview.run` options.
+--- Translate a composer ctx into `viewer.run` options.
+---
+--- `fixed_kind` is set by the wrapper commands (`:UrlView` → "urls"), in which
+--- case the first positional is unambiguously the scope. For `:Open viewer`
+--- the first positional may be either, so a value that names a known kind is
+--- read as one and everything else falls through to the scope slot.
 ---@param ctx Lib.UserCmd.Composer.Ctx
-local function run_urlview(ctx)
+---@param fixed_kind string|nil
+local function run_viewer(ctx, fixed_kind)
   local flags = ctx.flags or {}
   local kv = ctx.kv or {}
+  local viewer = require("open_nvim.viewer")
 
-  require("open_nvim.urlview").run({
-    scope = ctx.args.scope,
+  local kind, scope
+  if fixed_kind then
+    kind, scope = fixed_kind, ctx.args.kind
+  else
+    local first, second = ctx.args.kind, ctx.args.scope
+    local known = {}
+    for _, k in ipairs(viewer.kinds()) do
+      known[k] = true
+    end
+    if first and known[first] then
+      kind, scope = first, second
+    else
+      kind, scope = "all", first
+      if second then
+        -- Two positionals where the first is not a kind: the user most likely
+        -- mistyped it, and silently ignoring the extra token would hide that.
+        require("lib.nvim.notify")
+          .create("[open_nvim.viewer]")
+          .warn(("ignoring unrecognized kind '%s'"):format(tostring(first)))
+        scope = second
+      end
+    end
+  end
+
+  viewer.run({
+    kind = kind,
+    scope = scope,
     sort = kv.sort,
     out = kv.out,
     match = kv.match,
     paths = flags.paths == true,
-    -- `--all` keeps duplicate targets; the default de-duplicates, since the
+    anchors = flags.anchors == true,
+    -- `--dupes` keeps duplicate targets; the default de-duplicates, since the
     -- same URL repeated across a repo is noise in a list you are picking from.
-    unique = flags.all ~= true,
+    unique = flags.dupes ~= true,
     recursive = flags.flat ~= true,
     -- A range only counts when one was actually typed (`ctx.range.range > 0`);
     -- nvim reports line1/line2 as the cursor line otherwise, which would
@@ -148,28 +210,59 @@ local function run_urlview(ctx)
   })
 end
 
---- The shared route body for `:Open urlview` and the standalone `:UrlView`.
+---@return Lib.UserCmd.Composer.KvSpec[]
+local function viewer_kv()
+  return {
+    { key = "sort", enum = { "none", "file", "kind", "alpha" } },
+    { key = "out", values = { "picker", "table", "clipboard", "mdlinks", "csv", "echo", "file:" } },
+    { key = "match" },
+  }
+end
+
+---@return Lib.UserCmd.Composer.FlagSpec[]
+local function viewer_flags()
+  return {
+    { name = "paths", bool = true },
+    { name = "anchors", bool = true },
+    { name = "dupes", bool = true },
+    { name = "flat", bool = true },
+  }
+end
+
+--- Route body for `:Open viewer [kind] [scope]`.
 ---@param path string[]
 ---@return Lib.UserCmd.Composer.Route
-local function urlview_route(path)
+local function viewer_route(path)
   return {
     path = path,
     desc = "List links in a scope, then open / export them",
     range = true,
     args = {
-      { name = "scope", type = "URLVIEW_SCOPE", optional = true },
+      { name = "kind", type = "VIEWER_KIND", optional = true },
+      { name = "scope", type = "VIEWER_SCOPE", optional = true },
     },
-    kv = {
-      { key = "sort", enum = { "none", "file", "kind", "alpha" } },
-      { key = "out", values = { "picker", "table", "clipboard", "mdlinks", "csv", "echo", "file:" } },
-      { key = "match" },
+    kv = viewer_kv(),
+    flags = viewer_flags(),
+    run = function(ctx) run_viewer(ctx, nil) end,
+  }
+end
+
+--- Route body for a fixed-kind wrapper command (`:UrlView [scope]`).
+---@param kind string
+---@return Lib.UserCmd.Composer.Route
+local function viewer_fixed_route(kind)
+  return {
+    path = {},
+    desc = ("List %s in a scope, then open / export them"):format(kind),
+    range = true,
+    args = {
+      -- Named `kind` so run_viewer can read the single positional from one
+      -- place regardless of which route shape it came from.
+      { name = "kind", type = "VIEWER_SCOPE", optional = true },
     },
-    flags = {
-      { name = "paths", bool = true },
-      { name = "all", bool = true },
-      { name = "flat", bool = true },
-    },
-    run = run_urlview,
+    kv = viewer_kv(),
+    flags = viewer_flags(),
+    run = function(ctx) run_viewer(ctx, kind) end,
   }
 end
 
@@ -197,19 +290,26 @@ function M.register(cfg)
         desc = "Open path/URL with the specified handler",
         run  = function(ctx) run_open(ctx.args.target, ctx.args.scope) end },
 
-      urlview_route({ "urlview" }),
+      viewer_route({ "viewer" }),
     },
   })
 
-  -- Standalone wrapper. Same route body, registered as its own verb so it
-  -- keeps its own completion and usage listing.
-  local uv_cmd = cfg.urlview and cfg.urlview.command
-  if uv_cmd and uv_cmd ~= "" then
-    composer.verb(uv_cmd, {
-      desc = ":UrlView — list links in a scope, then open / export them",
-      range = true,
-      routes = { urlview_route({}) },
-    })
+  -- Standalone wrappers, one per filter. Each is its own verb rather than a
+  -- `:cmd` alias so it keeps its own completion and usage listing — the same
+  -- precedent as replacer.nvim's :Replace / :Replacer.
+  local commands = (cfg.viewer and cfg.viewer.commands) or {}
+  for _, spec in ipairs({
+    { kind = "urls", name = commands.urls },
+    { kind = "mdlinks", name = commands.mdlinks },
+    { kind = "all", name = commands.all },
+  }) do
+    if type(spec.name) == "string" and spec.name ~= "" then
+      composer.verb(spec.name, {
+        desc = (":%s — list %s in a scope, then open / export them"):format(spec.name, spec.kind),
+        range = true,
+        routes = { viewer_fixed_route(spec.kind) },
+      })
+    end
   end
 end
 

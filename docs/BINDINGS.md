@@ -21,8 +21,9 @@ with `<Tab>` completion, defined in
 | Command | Registered in |
 |---|---|
 | `:Open [target] [scope]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
-| `:Open urlview [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
-| `:UrlView [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) — shallow wrapper over `:Open urlview`; name configurable via `urlview.command`, `false` disables it |
+| `:Open viewer [kind] [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
+| `:UrlView [scope] [options]` | Shallow wrapper pinning `kind=urls`; name from `viewer.commands.urls`, `false` disables it |
+| `:MDLinksView [scope] [options]` | Shallow wrapper pinning `kind=mdlinks`; name from `viewer.commands.mdlinks` |
 
 `:Open` tab-completion:
 - 1st arg (`target`) → all registered handler keys (see `:Open` in the
@@ -30,13 +31,19 @@ with `<Tab>` completion, defined in
 - 2nd arg (`scope`) → `%`, `cfile`, `path=<file completion>`, all named scope
   keywords, then general file completion.
 
-`:Open urlview` / `:UrlView` tab-completion:
-- 1st arg (`scope`) → `%`, `cwd`, `buffers`, then general file completion.
+`:Open viewer` tab-completion:
+- 1st arg → kinds (`all`, `urls`, `mdlinks`, `files`, `paths`) **and** scopes
+  (`%`, `cwd`, `buffers`, files). The handler disambiguates: a token that
+  names a kind is one, anything else is the scope.
+- 2nd arg (`scope`) → `%`, `cwd`, `buffers`, then general file completion.
 - `sort=` → `none`, `file`, `kind`, `alpha`.
 - `out=` → `picker`, `table`, `clipboard`, `mdlinks`, `csv`, `echo`, `file:`.
-- Flags → `--paths`, `--all`, `--flat`. Both commands accept a range.
+- Flags → `--paths`, `--anchors`, `--dupes`, `--flat`.
 
-`urlview` is a reserved handler key: `:Open urlview` matches the literal
+The wrapper commands pin the kind, so their single positional is always the
+scope. All of them accept a range.
+
+`viewer` is a reserved handler key: `:Open viewer` matches the literal
 subcommand route before the flat `:Open [target]` grammar sees it, so a
 handler registered under that key would be unreachable.
 

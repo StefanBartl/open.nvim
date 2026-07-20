@@ -19,52 +19,64 @@ open.open("tab",   "pwsh_profile")    -- open PowerShell profile in a tab
 
 ## Link listing
 
-`require("open_nvim.urlview")` backs `:Open urlview` / `:UrlView`, and each
-step is usable on its own.
+`require("open_nvim.viewer")` backs `:Open viewer` / `:UrlView` /
+`:MDLinksView`, and each step is usable on its own.
 
 ```lua
-local urlview = require("open_nvim.urlview")
+local viewer = require("open_nvim.viewer")
 
 -- Collect. Returns links, err.
-local links = urlview.collect("cwd", {
+local links = viewer.collect("cwd", {
+  kind      = "urls",  -- "all" | "urls" | "mdlinks" | "files" | "paths"
   paths     = false,   -- also report existing filesystem paths
   unique    = true,    -- de-duplicate by target
+  anchors   = false,   -- include bare "#heading" links
   recursive = true,
   match     = "%.md$", -- Lua pattern on the basename
 })
 
 -- Or a line range of the current buffer:
-local sel = urlview.collect(nil, { range = true, line1 = 10, line2 = 20 })
+local sel = viewer.collect(nil, { range = true, line1 = 10, line2 = 20 })
 
-urlview.sort(links, "file")        -- "none" | "file" | "kind" | "alpha"
+viewer.filter(links, "mdlinks")   -- filter an already-collected list
+viewer.sort(links, "file")        -- "none" | "file" | "kind" | "alpha"
+viewer.kinds()                    -- every valid filter token
 
-local headers, rows = urlview.rows(links)   -- for a table/CSV renderer
-local md = urlview.as_markdown(links)       -- "[label](target)" per line
+local labels = viewer.labels(links, 100)  -- aligned, width-capped picker rows
+local headers, rows = viewer.rows(links)  -- for a table/CSV renderer
+local md = viewer.as_markdown(links)      -- "[label](target)" per line
 
-urlview.open(links[1])             -- dispatch through the configured handler
+viewer.open(links[1])             -- browser for a URL, split for a file
 
--- Everything at once, exactly as the user command does it:
-urlview.run({ scope = "cwd", sort = "file", out = "table" })
+-- Everything at once, exactly as the user commands do it:
+viewer.run({ kind = "urls", scope = "cwd", sort = "file", out = "table" })
 ```
 
-Each link is an `OpenNvim.UrlView.Link`:
+Each link is an `OpenNvim.Viewer.Link`:
 
 ```lua
 {
-  target  = "https://example.com",  -- the thing to open
-  kind    = "url",                  -- "url" | "mdlink" | "path"
-  display = "https://example.com",  -- as it appeared in the source
-  text    = nil,                    -- label, for markdown links only
-  lnum    = 12,                     -- 1-based line in its file/buffer
-  col     = 4,                      -- 0-based byte column
-  file    = "/repo/README.md",      -- absolute source path, when known
-  bufnr   = nil,                    -- source buffer, when it came from one
+  target     = "/repo/lua/init.lua",  -- resolved: a URL, or an absolute path
+  raw_target = "../../lua/init.lua",  -- exactly as written in the source
+  kind       = "mdlink",              -- "url" | "mdlink" | "path"
+  is_url     = false,                 -- true when a browser can open it
+  is_anchor  = false,                 -- true for a bare "#heading"
+  display    = "[init](../../lua/init.lua)",
+  text       = "init",                -- label, for markdown links only
+  lnum       = 12,                    -- 1-based line in its file/buffer
+  col        = 4,                     -- 0-based byte column
+  file       = "/repo/docs/a.md",     -- absolute source path, when known
+  bufnr      = nil,                   -- source buffer, when it came from one
 }
 ```
 
+`kind` is syntactic and `is_url` is semantic; filtering on the latter is what
+makes `urls` include `[text](https://…)`.
+
 The scope/render/sink primitives underneath are
 [`lib.nvim.harvest`](https://github.com/StefanBartl/lib.nvim/blob/main/lua/lib/nvim/harvest/README.md)
-and are reusable outside open.nvim.
+and are reusable outside open.nvim. The picker is
+[`lib.nvim.ui.kit.chooser`](https://github.com/StefanBartl/lib.nvim).
 
 See [docs/commands.md](commands.md) for the full list of handlers and scope
 tokens, and [docs/configuration.md](configuration.md) for `setup()` options.

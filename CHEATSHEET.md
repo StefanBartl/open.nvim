@@ -80,7 +80,16 @@
 
 ## Link listing (`:UrlView`)
 
-`:UrlView [scope] [options]` — alias for `:Open urlview [scope] [options]`.
+`:Open viewer [kind] [scope] [options]` — wrappers `:UrlView` (kind=urls) and
+`:MDLinksView` (kind=mdlinks) take `[scope] [options]` only.
+
+| Kind | Keeps |
+|---|---|
+| `all` *(default)* | Everything |
+| `urls` | Target is a URL — including `[text](https://…)` |
+| `mdlinks` | Markdown-syntax links, whatever they point at |
+| `files` | Target is a local file or directory |
+| `paths` | Bare filesystem paths (needs `--paths`) |
 
 | Scope | Scans |
 |---|---|
@@ -96,15 +105,21 @@
 | `out=` | `picker` (default) · `table` · `csv` · `mdlinks` · `clipboard` · `echo` · `file:<path>` |
 | `match=` | Lua pattern on the basename, e.g. `match=%.md$` |
 | `--paths` | Also report existing filesystem paths |
-| `--all` | Keep duplicate targets |
+| `--anchors` | Include `[x](#heading)` anchors (dropped by default) |
+| `--dupes` | Keep duplicate targets |
 | `--flat` | Do not recurse |
 
+In the picker: whole line highlighted, `j`/`k` and arrows only, `<CR>` opens
+(URL → browser, file → Neovim split, directory → file manager), `<Esc>`/`q`
+closes.
+
 ```
-:UrlView                                 this buffer → picker
-:UrlView cwd sort=file out=table         project-wide table
-:UrlView cwd match=%.md$ out=mdlinks     docs links as markdown → clipboard
-:UrlView ~/notes --paths sort=kind       URLs + existing paths, grouped
-:UrlView % out=file:/tmp/links.md        write this buffer's links to a file
+:UrlView                                 URLs in this buffer → picker
+:MDLinksView cwd                         every markdown link in the project
+:Open viewer cwd sort=file out=table     everything, as a table
+:Open viewer files cwd --paths           local targets, incl. bare paths
+:UrlView cwd match=%.md$ out=mdlinks     doc URLs as markdown → clipboard
+:UrlView % out=file:/tmp/links.md        write this buffer's URLs to a file
 :'<,'>UrlView                            just the selection
 ```
 

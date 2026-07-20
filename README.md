@@ -25,15 +25,17 @@ are in a Neo-tree, nvim-tree, or netrw buffer and opens the node under the
 cursor directly. Built on [lib.nvim](https://github.com/StefanBartl/lib.nvim)
 as a deliberate shared dependency.
 
-It also goes the other way: `:UrlView` lists every link in a buffer, a
-selection, a directory, or the whole project, then hands you a picker — or
-exports the lot as a markdown table, as markdown links, to the clipboard, or
-to a file.
+It also goes the other way: `:Open viewer` — with `:UrlView` and
+`:MDLinksView` as shortcuts — lists the links in a buffer, a selection, a
+directory, or the whole project, then hands you a picker. Pick a URL and it
+opens in your browser; pick a markdown link and the document opens in a
+Neovim split. Or export the lot as a markdown table, as markdown links, to
+the clipboard, or to a file.
 
 ```
-:UrlView                                 links in this buffer → pick one to open
-:UrlView cwd sort=file out=table         every link in the project, as a table
-:UrlView cwd match=%.md$ out=mdlinks     docs links as markdown, to the clipboard
+:UrlView                                 URLs in this buffer → pick one to open
+:MDLinksView cwd                         every markdown link in the project
+:Open viewer cwd sort=file out=table     everything, as a table
 ```
 
 ## Quickstart
@@ -44,7 +46,7 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 -- lazy.nvim
 {
   "StefanBartl/open.nvim",
-  cmd  = { "Open", "UrlView" },
+  cmd  = { "Open", "UrlView", "MDLinksView" },
   dependencies = { "StefanBartl/lib.nvim" },
   opts = {},
 }
@@ -61,7 +63,7 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 - [Features](docs/features.md) — handler table and smart context resolution.
 - [Installation](docs/installation.md) — requirements and setup for lazy.nvim, packer, and others.
 - [Configuration](docs/configuration.md) — all `setup()` options and their defaults.
-- [Command Reference](docs/commands.md) — full `:Open` and `:UrlView` commands, scope tokens, and tab-completion.
+- [Command Reference](docs/commands.md) — full `:Open` and `:Open viewer` commands, scope tokens, and tab-completion.
 - [Built-in Keywords](docs/keywords.md) — named scope shortcuts for shell, editor, git, SSH, and more config files.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
 - [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`).
