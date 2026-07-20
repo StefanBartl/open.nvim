@@ -83,6 +83,7 @@ packer: >lua
       "browser",
       "notepad",
       "nvim_internal",
+      "default",
     },
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
@@ -101,7 +102,8 @@ packer: >lua
 `handlers`
   List of handler module keys to load during `setup()`. Removing a key
   prevents those handlers from registering, hiding them from tab-completion.
-  Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal"
+  Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" |
+  "default"
 
 `builtin_keywords`
   Boolean (default true). When false, none of the built-in scope keywords
