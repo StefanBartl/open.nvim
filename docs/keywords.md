@@ -88,7 +88,7 @@ All keywords support tab-completion.
 Add your own in `setup()`:
 
 ```lua
-require("open_nvim").setup({
+require("open").setup({
   keywords = {
     MY_ROADMAP = "E:\\projects\\ROADMAP.md",
     MY_LOGO    = "E:\\assets\\logo.png",

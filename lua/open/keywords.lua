@@ -1,4 +1,4 @@
----@module 'open_nvim.keywords'
+---@module 'open.keywords'
 ---@brief Built-in named scope aliases for common config and system files.
 ---@description
 --- Each entry in the returned table maps a keyword string to either a static
@@ -55,7 +55,7 @@ local function resolve_pwsh_profile()
 end
 
 local function resolve_nvim_init()
-  local platform = require("open_nvim.platform").get()
+  local platform = require("open.platform").get()
   local base = platform.is_win
     and expand("~/AppData/Local/nvim")
     or expand("~/.config/nvim")
@@ -100,7 +100,7 @@ local function resolve_gitmessage()
 end
 
 local function resolve_pip_conf()
-  local platform = require("open_nvim.platform").get()
+  local platform = require("open.platform").get()
   if platform.is_win then
     local appdata = vim.fn.getenv("APPDATA") or ""
     return appdata .. "\\pip\\pip.ini"
@@ -109,7 +109,7 @@ local function resolve_pip_conf()
 end
 
 local function resolve_hosts()
-  local platform = require("open_nvim.platform").get()
+  local platform = require("open.platform").get()
   if platform.is_win then
     return "C:\\Windows\\System32\\drivers\\etc\\hosts"
   end
@@ -127,7 +127,7 @@ end
 ---Return the built-in keyword table for the current platform.
 ---@return table<string, string|fun(): string|nil>
 function M.builtin()
-  local platform = require("open_nvim.platform").get()
+  local platform = require("open.platform").get()
 
   ---@type table<string, string|fun(): string|nil>
   local kw = {}

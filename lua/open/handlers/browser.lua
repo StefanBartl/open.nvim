@@ -1,13 +1,13 @@
----@module 'open_nvim.handlers.browser'
+---@module 'open.handlers.browser'
 ---@brief Handlers that open a URL or text in various browsers.
 ---@description
 --- Registered handlers: browser, chrome, chromium, firefox, edge, safari.
 --- Non-URL text is treated as a Google search query automatically.
 --- Local file paths are opened with the file:// scheme.
 
-local notify   = require("lib.nvim.notify").create("[open_nvim.browser]")
-local platform = require("open_nvim.platform")
-local util     = require("open_nvim.util")
+local notify   = require("lib.nvim.notify").create("[open.browser]")
+local platform = require("open.platform")
+local util     = require("open.util")
 
 local M = {}
 

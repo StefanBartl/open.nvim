@@ -5,7 +5,7 @@
 -- rather than binding it as the root route's `target` argument.
 
 return function(H)
-  require("open_nvim").setup({})
+  require("open").setup({})
 
   local function exists(name)
     return vim.fn.exists(":" .. name) == 2
@@ -17,7 +17,7 @@ return function(H)
 
   -- `:Open viewer` must reach viewer.run, not run_open ----------------------
   do
-    local viewer = require("open_nvim.viewer")
+    local viewer = require("open.viewer")
     local orig = viewer.run
     local got
     viewer.run = function(opts) got = opts end
@@ -102,7 +102,7 @@ return function(H)
   -- `:Open <handler>` must still work — the new literal route must not have
   -- shadowed the flat grammar.
   do
-    local registry = require("open_nvim.registry")
+    local registry = require("open.registry")
     local orig = registry.dispatch
     local seen
     registry.dispatch = function(handler, _ctx)
@@ -119,7 +119,7 @@ return function(H)
   -- No handler may be registered under "viewer", or `:Open viewer` would
   -- become unreachable as a handler target.
   do
-    local registry = require("open_nvim.registry")
+    local registry = require("open.registry")
     for _, key in ipairs(registry.list_keys()) do
       if key == "viewer" then
         error("FAIL: a handler is registered under the reserved key 'viewer'")

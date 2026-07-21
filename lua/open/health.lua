@@ -1,12 +1,12 @@
----@module 'open_nvim.health'
----@brief :checkhealth open_nvim
+---@module 'open.health'
+---@brief :checkhealth open
 
 local M = {}
 
 local function exe(bin) return vim.fn.executable(bin) == 1 end
 
 local function check_neovim()
-  vim.health.start("open_nvim: core")
+  vim.health.start("open: core")
   if vim.fn.has("nvim-0.9") == 1 then
     vim.health.ok("Neovim >= 0.9")
   else
@@ -20,7 +20,7 @@ local function check_neovim()
 end
 
 local function check_lib_nvim()
-  vim.health.start("open_nvim: lib.nvim")
+  vim.health.start("open: lib.nvim")
   if pcall(require, "lib.nvim.notify") then
     vim.health.ok("lib.nvim.notify available")
   else
@@ -36,10 +36,10 @@ local function check_lib_nvim()
 end
 
 local function check_platform()
-  vim.health.start("open_nvim: platform")
-  local ok, platform = pcall(require, "open_nvim.platform")
+  vim.health.start("open: platform")
+  local ok, platform = pcall(require, "open.platform")
   if not ok then
-    vim.health.error("cannot load open_nvim.platform")
+    vim.health.error("cannot load open.platform")
     return
   end
   local p = platform.get()
@@ -51,8 +51,8 @@ local function check_platform()
 end
 
 local function check_executables()
-  vim.health.start("open_nvim: executables")
-  local ok, platform = pcall(require, "open_nvim.platform")
+  vim.health.start("open: executables")
+  local ok, platform = pcall(require, "open.platform")
   if not ok then return end
   local p = platform.get()
 
@@ -117,15 +117,15 @@ local function check_executables()
 end
 
 local function check_handlers()
-  vim.health.start("open_nvim: registered handlers")
-  local ok, reg = pcall(require, "open_nvim.registry")
+  vim.health.start("open: registered handlers")
+  local ok, reg = pcall(require, "open.registry")
   if not ok then
     vim.health.warn("registry not available — run setup() first")
     return
   end
   local keys = reg.list_keys()
   if #keys == 0 then
-    vim.health.warn("no handlers registered — call require('open_nvim').setup()")
+    vim.health.warn("no handlers registered — call require('open').setup()")
     return
   end
   for _, h in ipairs(reg.list()) do

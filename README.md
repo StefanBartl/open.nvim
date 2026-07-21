@@ -67,6 +67,6 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 - [Built-in Keywords](docs/keywords.md) — named scope shortcuts for shell, editor, git, SSH, and more config files.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
 - [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`).
-- [Health Check](docs/health-check.md) — what `:checkhealth open_nvim` reports.
+- [Health Check](docs/health-check.md) — what `:checkhealth open` reports.
 - [Bindings](docs/BINDINGS.md) — full inventory of user commands, keymaps, and autocmds.
 - [Roadmap](docs/ROADMAP.md) — planned features.

@@ -1,7 +1,7 @@
 # open.nvim — Health Check
 
 ```
-:checkhealth open_nvim
+:checkhealth open
 ```
 
 Reports:

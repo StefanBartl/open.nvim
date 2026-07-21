@@ -126,7 +126,7 @@ closes.
 ## Lua API
 
 ```lua
-local open = require("open_nvim")
+local open = require("open")
 
 open.open()                      -- context-aware default
 open.open("browser")             -- explicit handler, auto scope
@@ -139,5 +139,5 @@ open.open("split", "cfile")      -- split on <cfile>
 ```lua
 -- urlview.nvim (superseded by the built-in :UrlView — see docs/integrations.md):
 -- route picked URLs through open.nvim's browser handler
-require("open_nvim.integrations.urlview").setup()
+require("open.integrations.urlview").setup()
 ```

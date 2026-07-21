@@ -18,7 +18,7 @@ Possible future features, in rough priority order.
   - [Long-term / speculative](#long-term-speculative)
     - [Debug / verbose mode](#debug-verbose-mode)
     - [Context cache](#context-cache)
-    - [`open_nvim.sources` plugin integration](#open_nvimsources-plugin-integration)
+    - [`open.sources` plugin integration](#opensources-plugin-integration)
 
 ---
 
@@ -30,13 +30,13 @@ Allow registering custom handlers directly from the config table without
 needing to call `registry.register()` manually:
 
 ```lua
-require("open_nvim").setup({
+require("open").setup({
   custom_handlers = {
     {
       key  = "zathura",
       desc = "Open PDF in Zathura",
       run  = function(ctx)
-        require("open_nvim.util").run_detached({ "zathura", ctx.text }, "zathura")
+        require("open.util").run_detached({ "zathura", ctx.text }, "zathura")
       end,
     },
   },
@@ -55,7 +55,7 @@ Open a path in a new terminal split:
 ### Keymap bindings in config
 
 ```lua
-require("open_nvim").setup({
+require("open").setup({
   keymaps = {
     open_default   = "<leader>oo",  -- :Open
     open_browser   = "<leader>ob",  -- :Open browser
@@ -103,7 +103,7 @@ filemanager = { reveal = true }  -- default true → /select, behaviour
 ### Debug / verbose mode
 
 ```lua
-require("open_nvim").setup({ debug = true })
+require("open").setup({ debug = true })
 ```
 
 Logs every context-gather and dispatch step to `:messages`.
@@ -114,7 +114,7 @@ Cache the result of `gather()` for the duration of a single command
 invocation so that `resolve()` calls within chained operations don't
 re-read the editor state.
 
-### `open_nvim.sources` plugin integration
+### `open.sources` plugin integration
 
 Publish a telescope/fzf-lua source that lists all registered handlers with
 live preview of what they would open for the current context.

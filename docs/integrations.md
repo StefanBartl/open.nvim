@@ -9,9 +9,9 @@
 > table, markdown links, the clipboard, or a file in addition to opening a
 > pick.
 
-The `open_nvim.integrations.urlview` module remains for anyone still running
+The `open.integrations.urlview` module remains for anyone still running
 [urlview.nvim](https://github.com/axieax/urlview.nvim). It is opt-in and is
-not loaded by `open_nvim.setup()`.
+not loaded by `open.setup()`.
 
 It registers a custom `open_in_browser` action so picked URLs are routed
 through the `browser` handler (or whichever handler `default_browser` is set
@@ -25,7 +25,7 @@ place.
   cmd = { "UrlView" },
   dependencies = { "StefanBartl/open.nvim" },
   config = function()
-    require("open_nvim.integrations.urlview").setup()
+    require("open.integrations.urlview").setup()
   end,
 }
 ```

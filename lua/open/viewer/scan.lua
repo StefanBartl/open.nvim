@@ -1,4 +1,4 @@
----@module 'open_nvim.viewer.scan'
+---@module 'open.viewer.scan'
 ---@brief Extract link-like targets (URLs, markdown links, file paths) from lines.
 ---@description
 --- The extraction half of `:Open viewer`. Given `Lib.Harvest.Source` records

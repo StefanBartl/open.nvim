@@ -1,4 +1,4 @@
----@module 'open_nvim.util'
+---@module 'open.util'
 ---@brief Shared low-level utilities for open.nvim.
 ---@description
 --- Provides:

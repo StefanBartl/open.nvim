@@ -1,4 +1,4 @@
----@module 'open_nvim.integrations.urlview'
+---@module 'open.integrations.urlview'
 ---@brief Integration with urlview.nvim (axieax/urlview.nvim).
 ---@description
 --- Registers a custom urlview action "open_in_browser" that routes the
@@ -7,11 +7,11 @@
 --- handler `default_browser` points to (default: "browser", but also
 --- "chrome"/"firefox"/… if the user configured it) is used.
 ---
---- This module is opt-in: it is not loaded by open_nvim.setup(). Call
---- require("open_nvim.integrations.urlview").setup() from urlview.nvim's
+--- This module is opt-in: it is not loaded by open.setup(). Call
+--- require("open.integrations.urlview").setup() from urlview.nvim's
 --- own plugin config.
 
-local notify = require("lib.nvim.notify").create("[open_nvim.integrations.urlview]")
+local notify = require("lib.nvim.notify").create("[open.integrations.urlview]")
 
 local M = {}
 
@@ -36,8 +36,8 @@ local function open_in_browser(raw_url)
     return
   end
 
-  local cfg      = require("open_nvim.config").get()
-  local registry = require("open_nvim.registry")
+  local cfg      = require("open.config").get()
+  local registry = require("open.registry")
 
   ---@type OpenNvim.Context
   local ctx = { text = url, is_url = true, is_path = false }

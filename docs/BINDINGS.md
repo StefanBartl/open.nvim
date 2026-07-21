@@ -1,7 +1,7 @@
 # open.nvim — Bindings
 
 Full inventory of user commands, keymaps, and autocmds registered by
-open.nvim. See [lua/open_nvim/bindings/](../lua/open_nvim/bindings/) for the
+open.nvim. See [lua/open/bindings/](../lua/open/bindings/) for the
 source.
 
 ## Table of content
@@ -16,12 +16,12 @@ source.
 
 Built via [`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim)
 with `<Tab>` completion, defined in
-[lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua).
+[lua/open/bindings/usrcmds.lua](../lua/open/bindings/usrcmds.lua).
 
 | Command | Registered in |
 |---|---|
-| `:Open [target] [scope]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
-| `:Open viewer [kind] [scope] [options]` | [lua/open_nvim/bindings/usrcmds.lua](../lua/open_nvim/bindings/usrcmds.lua) |
+| `:Open [target] [scope]` | [lua/open/bindings/usrcmds.lua](../lua/open/bindings/usrcmds.lua) |
+| `:Open viewer [kind] [scope] [options]` | [lua/open/bindings/usrcmds.lua](../lua/open/bindings/usrcmds.lua) |
 | `:UrlView [scope] [options]` | Shallow wrapper pinning `kind=urls`; name from `viewer.commands.urls`, `false` disables it |
 | `:MDLinksView [scope] [options]` | Shallow wrapper pinning `kind=mdlinks`; name from `viewer.commands.mdlinks` |
 

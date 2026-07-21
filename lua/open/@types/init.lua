@@ -1,5 +1,5 @@
 ---@meta
----@module 'open_nvim.@types'
+---@module 'open.@types'
 ---@brief Shared type definitions for open.nvim.
 
 -- ---------------------------------------------------------------------------

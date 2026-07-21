@@ -1,7 +1,7 @@
 # Tree-buffer feature audit → filetree.nvim port map
 
 **Purpose.** Sweep called for in `FINISH.md`: check whether open.nvim's
-Neo-tree / nvim-tree / netrw handling (`lua/open_nvim/context.lua`) has
+Neo-tree / nvim-tree / netrw handling (`lua/open/context.lua`) has
 anything worth porting into **filetree.nvim**
 (`E:/repos/filetree.nvim`) — cross-platform and filetree-manager agnostic.
 
@@ -16,7 +16,7 @@ below is already superseded there, more generally. No new port targets.
 
 ## How to read
 
-- **Origin**: `open_nvim/context.lua:<line>`.
+- **Origin**: `open/context.lua:<line>`.
 - **filetree.nvim**: the adapter file/function that already does the
   equivalent (more general) thing.
 - **Status:** ✅ already superseded (nothing to port) · 🟡 partial nuance,
@@ -24,11 +24,11 @@ below is already superseded there, more generally. No new port targets.
 
 | Feature | Origin | filetree.nvim | Status |
 |---|---|---|---|
-| Tree-buffer dispatch by `filetype` (neo-tree / NvimTree / netrw) | [context.lua:130-138](../../lua/open_nvim/context.lua) (`resolve_tree_node_path`) | `filetypes` field on each adapter (e.g. [adapter/neotree.lua:17](E:/repos/filetree.nvim/lua/filetree/adapter/neotree.lua), [adapter/nvimtree.lua:10](E:/repos/filetree.nvim/lua/filetree/adapter/nvimtree.lua), [adapter/netrw.lua:7](E:/repos/filetree.nvim/lua/filetree/adapter/netrw.lua)) | ✅ superseded — adapter registry also covers oil.nvim + mini.files |
-| Neo-tree node-path resolution: try a richer node helper first, fall back to `state.tree:get_node()` | [context.lua:72-101](../../lua/open_nvim/context.lua) (`resolve_neotree_path`) | [adapter/neotree.lua:47-68](E:/repos/filetree.nvim/lua/filetree/adapter/neotree.lua) (`node_path`, via `lib.nvim.neotree.node` with local fallback) | ✅ superseded — same fallback *shape* independently arrived at on both sides, which cross-validates the pattern rather than adding anything new |
-| nvim-tree current-node resolution via `api.tree.get_node_under_cursor()` | [context.lua:104-112](../../lua/open_nvim/context.lua) (`resolve_nvimtree_path`) | [adapter/nvimtree.lua:76-91](E:/repos/filetree.nvim/lua/filetree/adapter/nvimtree.lua) (`get_current_node`) | ✅ superseded — adapter version also captures type/depth/expanded state |
-| netrw path resolution: `netrw_curdir` + current line, string-concatenated | [context.lua:115-126](../../lua/open_nvim/context.lua) (`resolve_netrw_path`) | [adapter/netrw.lua:43-114](E:/repos/filetree.nvim/lua/filetree/adapter/netrw.lua) (`parse_netrw_line` + `get_current_node`) | 🟡 see note below — filetree.nvim's version is strictly more correct |
-| `PATH_TARGETS` scope heuristic (does this handler key want a validated path, or cword/visual text?) | [context.lua:144-151, 236](../../lua/open_nvim/context.lua) | — | ➖ different paradigm — filetree.nvim's features operate on adapter node objects, not on a generic scope-token/text heuristic for an arbitrary open command. Nothing to port. |
+| Tree-buffer dispatch by `filetype` (neo-tree / NvimTree / netrw) | [context.lua:130-138](../../lua/open/context.lua) (`resolve_tree_node_path`) | `filetypes` field on each adapter (e.g. [adapter/neotree.lua:17](E:/repos/filetree.nvim/lua/filetree/adapter/neotree.lua), [adapter/nvimtree.lua:10](E:/repos/filetree.nvim/lua/filetree/adapter/nvimtree.lua), [adapter/netrw.lua:7](E:/repos/filetree.nvim/lua/filetree/adapter/netrw.lua)) | ✅ superseded — adapter registry also covers oil.nvim + mini.files |
+| Neo-tree node-path resolution: try a richer node helper first, fall back to `state.tree:get_node()` | [context.lua:72-101](../../lua/open/context.lua) (`resolve_neotree_path`) | [adapter/neotree.lua:47-68](E:/repos/filetree.nvim/lua/filetree/adapter/neotree.lua) (`node_path`, via `lib.nvim.neotree.node` with local fallback) | ✅ superseded — same fallback *shape* independently arrived at on both sides, which cross-validates the pattern rather than adding anything new |
+| nvim-tree current-node resolution via `api.tree.get_node_under_cursor()` | [context.lua:104-112](../../lua/open/context.lua) (`resolve_nvimtree_path`) | [adapter/nvimtree.lua:76-91](E:/repos/filetree.nvim/lua/filetree/adapter/nvimtree.lua) (`get_current_node`) | ✅ superseded — adapter version also captures type/depth/expanded state |
+| netrw path resolution: `netrw_curdir` + current line, string-concatenated | [context.lua:115-126](../../lua/open/context.lua) (`resolve_netrw_path`) | [adapter/netrw.lua:43-114](E:/repos/filetree.nvim/lua/filetree/adapter/netrw.lua) (`parse_netrw_line` + `get_current_node`) | 🟡 see note below — filetree.nvim's version is strictly more correct |
+| `PATH_TARGETS` scope heuristic (does this handler key want a validated path, or cword/visual text?) | [context.lua:144-151, 236](../../lua/open/context.lua) | — | ➖ different paradigm — filetree.nvim's features operate on adapter node objects, not on a generic scope-token/text heuristic for an arbitrary open command. Nothing to port. |
 
 ## Gaps — port targets not yet in filetree.nvim
 
