@@ -3,7 +3,7 @@
 Full defaults:
 
 ```lua
-require("open_nvim").setup({
+require("open").setup({
   command             = "Open",        -- user command name
   default_filemanager = "filemanager", -- handler used for paths when no target given
   default_browser     = "browser",     -- handler used for URLs when no target given

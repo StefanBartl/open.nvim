@@ -1,4 +1,4 @@
----@module 'open_nvim.context'
+---@module 'open.context'
 ---@brief Resolves the target text (path or URL) for the :Open command.
 ---@description
 --- Two-stage resolution:
@@ -22,7 +22,7 @@
 ---      <cfile> if it resolves to an existing path on disk, else buffer path (%).
 ---   3. All other targets (browser, notepad, …):
 ---      visual selection, else <cWORD>, else buffer path (%).
----@see open_nvim.@types
+---@see open.@types
 
 local M = {}
 
@@ -190,7 +190,7 @@ end
 ---@param signals OpenNvim.Signals
 ---@return string
 function M.default_target(signals)
-  local cfg = require("open_nvim.config").get()
+  local cfg = require("open.config").get()
 
   if signals.tree_path then
     return cfg.default_filemanager
@@ -223,7 +223,7 @@ function M.resolve(arg, target, signals)
       text = require("lib.nvim.cross.fs.expand_path")(arg:sub(6))
     else
       -- Check named scope keywords before falling back to verbatim text.
-      local ok_cfg, cfg = pcall(require, "open_nvim.config")
+      local ok_cfg, cfg = pcall(require, "open.config")
       local kw = ok_cfg and cfg.get().keywords and cfg.get().keywords[arg]
       if kw then
         text = type(kw) == "function" and kw() or require("lib.nvim.cross.fs.expand_path")(tostring(kw))

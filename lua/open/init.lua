@@ -1,4 +1,4 @@
----@module 'open_nvim'
+---@module 'open'
 ---@brief Entry point for open.nvim — :Open command and public Lua API.
 ---@description
 --- Registers the :Open [target] [scope] user command with tab-completion
@@ -14,19 +14,19 @@
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> under the cursor
 ---   "path=<path>" → literal path given after "path="
----   (omitted)     → target-aware heuristic (see open_nvim.context)
----@see open_nvim.context
----@see open_nvim.registry
+---   (omitted)     → target-aware heuristic (see open.context)
+---@see open.context
+---@see open.registry
 
 local M = {}
 
 -- Map of handler-module keys (used in cfg.handlers) to require paths.
 local HANDLER_MODULES = {
-  filemanager   = "open_nvim.handlers.filemanager",
-  browser       = "open_nvim.handlers.browser",
-  notepad       = "open_nvim.handlers.notepad",
-  nvim_internal = "open_nvim.handlers.nvim_internal",
-  default       = "open_nvim.handlers.default",
+  filemanager   = "open.handlers.filemanager",
+  browser       = "open.handlers.browser",
+  notepad       = "open.handlers.notepad",
+  nvim_internal = "open.handlers.nvim_internal",
+  default       = "open.handlers.default",
 }
 
 -- ---------------------------------------------------------------------------
@@ -37,15 +37,15 @@ local HANDLER_MODULES = {
 ---@param target string|nil  Handler key; nil → context-aware default.
 ---@param scope  string|nil  Scope token: "%", "cfile", "path=…", or literal.
 function M.open(target, scope)
-  local context  = require("open_nvim.context")
-  local registry = require("open_nvim.registry")
+  local context  = require("open.context")
+  local registry = require("open.registry")
   local signals  = context.gather()
 
   local t   = target and target:lower() or context.default_target(signals)
   local ctx = context.resolve(scope, t, signals)
 
   if not ctx then
-    require("lib.nvim.notify").create("[open_nvim]").warn("Nothing to open")
+    require("lib.nvim.notify").create("[open]").warn("Nothing to open")
     return
   end
 
@@ -59,12 +59,12 @@ end
 ---Configure open.nvim and register the :Open user command.
 ---@param opts OpenNvim.Config|nil
 function M.setup(opts)
-  local cfg_mod = require("open_nvim.config")
+  local cfg_mod = require("open.config")
   cfg_mod.setup(opts)
   local cfg = cfg_mod.get()
 
   -- Load & register handler modules
-  local registry = require("open_nvim.registry")
+  local registry = require("open.registry")
   for _, key in ipairs(cfg.handlers) do
     local mod_path = HANDLER_MODULES[key]
     if mod_path then
@@ -73,14 +73,14 @@ function M.setup(opts)
         pcall(mod.register_all, registry.register)
       end
     else
-      require("lib.nvim.notify").create("[open_nvim]").warn(
+      require("lib.nvim.notify").create("[open]").warn(
         "Unknown handler module key: '" .. key .. "'"
       )
     end
   end
 
   -- Register :Open command
-  require("open_nvim.bindings.usrcmds").register(cfg)
+  require("open.bindings.usrcmds").register(cfg)
 end
 
 return M

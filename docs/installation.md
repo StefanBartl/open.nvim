@@ -9,7 +9,7 @@
 
 - Neovim 0.9+
 - [lib.nvim](https://github.com/StefanBartl/lib.nvim)
-- Platform tools are optional but needed per handler (see `:checkhealth open_nvim`,
+- Platform tools are optional but needed per handler (see `:checkhealth open`,
   documented in [docs/health-check.md](health-check.md))
 
 ## Installing
@@ -36,7 +36,7 @@ use {
   requires = { "StefanBartl/lib.nvim" },
   cmd = { "Open", "UrlView", "MDLinksView" },
   config = function()
-    require("open_nvim").setup()
+    require("open").setup()
   end,
 }
 ```

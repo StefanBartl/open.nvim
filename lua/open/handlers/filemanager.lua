@@ -1,4 +1,4 @@
----@module 'open_nvim.handlers.filemanager'
+---@module 'open.handlers.filemanager'
 ---@brief Handler that opens a path in the system file manager.
 ---@description
 --- Platform dispatch:
@@ -7,9 +7,9 @@
 ---   macOS    → open -R <file>  /  open <dir>  (Finder)
 ---   Linux    → xdg-open, then common managers as fallback
 
-local notify   = require("lib.nvim.notify").create("[open_nvim.filemanager]")
-local platform = require("open_nvim.platform")
-local util     = require("open_nvim.util")
+local notify   = require("lib.nvim.notify").create("[open.filemanager]")
+local platform = require("open.platform")
+local util     = require("open.util")
 
 local M = {}
 

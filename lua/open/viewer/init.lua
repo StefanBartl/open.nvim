@@ -1,4 +1,4 @@
----@module 'open_nvim.viewer'
+---@module 'open.viewer'
 ---@brief `:Open viewer` / `:UrlView` / `:MDLinksView` — list links in a scope,
 ---       then open, export, or copy them.
 ---@description
@@ -6,7 +6,7 @@
 --- built on lib.nvim's harvest primitives:
 ---
 ---   scope  (lib.nvim.harvest.scope) → which lines to look at
----   scan   (open_nvim.viewer.scan)  → what counts as a link
+---   scan   (open.viewer.scan)  → what counts as a link
 ---   filter (here)                   → which kinds to keep
 ---   sort   (here)                   → ordering
 ---   sink   (lib.nvim.harvest.sink)  → picker / table / clipboard / file
@@ -20,14 +20,14 @@
 --- Opening is kind-aware: a URL goes to the browser handler, while a local
 --- file goes to a Neovim split rather than the system file manager — chasing
 --- a markdown link should land you in a buffer you can read and edit.
----@see open_nvim.viewer.scan
+---@see open.viewer.scan
 ---@see lib.nvim.harvest
 
-local notify = require("lib.nvim.notify").create("[open_nvim.viewer]")
+local notify = require("lib.nvim.notify").create("[open.viewer]")
 
 local M = {}
 
--- `OpenNvim.Viewer.Link` is declared in `open_nvim.@types`.
+-- `OpenNvim.Viewer.Link` is declared in `open.@types`.
 
 local SORTS = { none = true, file = true, kind = true, alpha = true, line = true }
 
@@ -58,7 +58,7 @@ end
 
 ---@return table
 local function cfg()
-  local ok, c = pcall(require, "open_nvim.config")
+  local ok, c = pcall(require, "open.config")
   return (ok and c.get().viewer) or {}
 end
 
@@ -73,7 +73,7 @@ end
 function M.collect(scope_token, opts)
   opts = opts or {}
   local harvest = require("lib.nvim.harvest")
-  local scan = require("open_nvim.viewer.scan")
+  local scan = require("open.viewer.scan")
 
   local sources, err
   if opts.range then
@@ -313,9 +313,9 @@ end
 --- should land you somewhere you can read and edit, not in Explorer.
 ---@param lk OpenNvim.Viewer.Link
 function M.open(lk)
-  local registry = require("open_nvim.registry")
-  local scan = require("open_nvim.viewer.scan")
-  local c = require("open_nvim.config").get()
+  local registry = require("open.registry")
+  local scan = require("open.viewer.scan")
+  local c = require("open.config").get()
   local conf = cfg()
 
   if lk.is_url or scan.is_url(lk.target) then

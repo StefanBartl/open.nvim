@@ -1,10 +1,10 @@
----@module 'open_nvim.config'
+---@module 'open.config'
 ---@brief Setup options and defaults for open.nvim.
 
 local M = {}
 
 ---@type OpenNvim.Config
-local defaults = require("open_nvim.config.DEFAULTS")
+local defaults = require("open.config.DEFAULTS")
 
 ---@type OpenNvim.Config
 local current = vim.deepcopy(defaults)
@@ -19,7 +19,7 @@ function M.setup(opts)
   local merged_keywords = {}
 
   if opts.builtin_keywords ~= false then
-    local ok, kw_mod = pcall(require, "open_nvim.keywords")
+    local ok, kw_mod = pcall(require, "open.keywords")
     if ok then
       for k, v in pairs(kw_mod.builtin()) do
         merged_keywords[k] = v

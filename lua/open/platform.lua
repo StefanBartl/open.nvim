@@ -1,4 +1,4 @@
----@module 'open_nvim.platform'
+---@module 'open.platform'
 ---@brief Platform detection for open.nvim.
 ---@description
 --- Determines the host OS once and caches the result for the session.

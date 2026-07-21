@@ -14,10 +14,10 @@ padded with invented action items.
 
 | Helper | Status | Notes |
 |---|---|---|
-| `lib.notify` | ✅ | Every handler and `registry.lua`/`init.lua` creates a scoped notifier via `require("lib.nvim.notify").create("[open_nvim.*]")` — no raw `vim.notify()`/`print()` anywhere. |
+| `lib.notify` | ✅ | Every handler and `registry.lua`/`init.lua` creates a scoped notifier via `require("lib.nvim.notify").create("[open.*]")` — no raw `vim.notify()`/`print()` anywhere. |
 | `lib.map` | N/A | open.nvim registers zero keymaps by design (`docs/BINDINGS.md` shows a *suggested* user keymap, not one the plugin creates). Nothing to migrate. |
 | `lib.usercmd` | ❌ | `bindings/usrcmds.lua:9` calls `vim.api.nvim_create_user_command` directly. `lib.nvim.usercmd.create()` (`E:/repos/lib.nvim/lua/lib/nvim/usercmd/init.lua`) already wraps this with a `pcall`-guarded callback and notify-on-error — exactly the pattern `registry.dispatch` re-implements by hand at `registry.lua:92-95`. Small, one-call migration. |
-| `lib.autocmd` / `lib.augroup` | N/A | open.nvim creates no autocommands at all (confirmed via repo-wide grep — the only `vim.g.loaded_open_nvim` guard in `plugin/open.lua` isn't an autocmd). |
+| `lib.autocmd` / `lib.augroup` | N/A | open.nvim creates no autocommands at all (confirmed via repo-wide grep — the only `vim.g.loaded_open` guard in `plugin/open.lua` isn't an autocmd). |
 | `lib.cross` | ❌ | `platform.lua` hand-rolls `is_win`/`is_mac`/`is_wsl`/`is_linux` detection and caches it locally. `lib.nvim.cross.platform.is` (`E:/repos/lib.nvim/lua/lib/nvim/cross/platform/is.lua`) already provides the same cached, uname-based detection (`is_windows`, `is_wsl`, `is_macos`, `is_linux` sub-modules). This is a genuine duplication, not a stylistic choice — see action item below. |
 | `lib.hover_select` | N/A | open.nvim never prompts the user to pick from a list (`:Open` takes explicit args or resolves automatically); there is no `vim.ui.select` call to replace. |
 | `lib.lazy` | 🟡 | Handler modules are only `require`d inside `setup()` for the keys listed in `cfg.handlers` (`init.lua:66-80`), so unused handler families are never loaded — same *effect* as `lib.lazy`, just hand-written instead of using the shared proxy. Cosmetic, not a functional gap. |
@@ -34,8 +34,8 @@ changes — no other module needs to change alongside them.
 **1. Events bündeln, Logik entkoppeln** — ✅ (N/A)
 No `nvim_create_autocmd` calls anywhere in the plugin (verified by repo-wide
 grep). All entry points are the single `:Open` command
-(`lua/open_nvim/bindings/usrcmds.lua:9`) and the public `M.open()` Lua API
-(`lua/open_nvim/init.lua:39`), both routed through the same
+(`lua/open/bindings/usrcmds.lua:9`) and the public `M.open()` Lua API
+(`lua/open/init.lua:39`), both routed through the same
 `context.gather()` → `context.resolve()` → `registry.dispatch()` pipeline.
 Nothing to bundle.
 
@@ -89,7 +89,7 @@ loop-like structure (`registry.list_keys()` / `list()` in `registry.lua:59-73`)
 only runs for command completion, an already-throttled, human-triggered path.
 
 **9. Debugbarkeit eingeplant?** — 🟡
-`health.lua` gives a solid `:checkhealth open_nvim` covering Neovim version,
+`health.lua` gives a solid `:checkhealth open` covering Neovim version,
 `lib.nvim` presence, detected platform, executables per platform, and
 registered handlers — better-than-typical debuggability for a plugin this
 size. Control flow is easy to follow (gather → resolve → dispatch, one

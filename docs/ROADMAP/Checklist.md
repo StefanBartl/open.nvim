@@ -12,7 +12,7 @@ compression code, no test suite (explicit project decision, out of scope).
 
 ## Schnell-Check (10 Punkte, vor jedem Merge) — ✅ / 🟡
 - Fehlerbehandlung — ✅. Every handler call goes through `registry.dispatch`'s
-  `pcall(handler.run, ctx)` (`lua/open_nvim/registry.lua:92`); optional deps
+  `pcall(handler.run, ctx)` (`lua/open/registry.lua:92`); optional deps
   (`neo-tree`, `nvim-tree`, `config.neotree.utils.node`) are pcall-guarded in
   `context.lua:73,83,93,105,107`.
 - Type Guards — ✅. `registry.register` checks `type(handler)`, `type(handler.key)`,
@@ -184,7 +184,7 @@ modules themselves are also lazily `require`d only for the keys listed in
 - Schichten/Module: clear separation — context (signals) → registry (dispatch)
   → handlers (OS integration); config/@types support both. Low coupling: no
   handler requires another handler; all cross-module reads go through
-  `require("open_nvim.<mod>").get()`/`.gather()`, never reaching into another
+  `require("open.<mod>").get()`/`.gather()`, never reaching into another
   module's internal table.
 - Abhängigkeiten: `ctx` (from `context.resolve`) and `cfg` (from `config.get`)
   are passed as parameters/return values into handler `run(ctx)` functions
@@ -213,7 +213,7 @@ modules themselves are also lazily `require`d only for the keys listed in
 - Import-Reihenfolge — ✅ at plugin scope: `plugin/open.lua` is only a load
   guard; `init.lua` requires config → registry → handler modules → bindings.
 - Datei-Header — ✅ on all files (see Dokumentation section).
-- Typ-Ablage — ✅, dedicated `lua/open_nvim/@types/init.lua`, mirrored by
+- Typ-Ablage — ✅, dedicated `lua/open/@types/init.lua`, mirrored by
   `bindings/`, `config/`, `handlers/` as separate folders — one concern per
   directory, matching the checklist's ideal layout almost exactly.
 
@@ -263,8 +263,8 @@ Checked every `run_detached`/`vim.fn.system` call site in `handlers/*.lua` and
 ## Concentrated action items
 
 1. **De-duplicate `wsl_to_win_path`** — identical private helper exists in
-   both `lua/open_nvim/handlers/filemanager.lua:32-35` and
-   `lua/open_nvim/handlers/default.lua:31-34`. Move to `util.lua` as
+   both `lua/open/handlers/filemanager.lua:32-35` and
+   `lua/open/handlers/default.lua:31-34`. Move to `util.lua` as
    `util.wsl_to_win_path(unix_path)` to keep the one WSL-path-conversion
    concern in one place.
 2. **Add stylua/luacheck (+ optional CI workflow)** — no formatter/linter

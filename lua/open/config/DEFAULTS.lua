@@ -1,4 +1,4 @@
----@module 'open_nvim.config.DEFAULTS'
+---@module 'open.config.DEFAULTS'
 ---@brief Default configuration values for open.nvim.
 
 ---@type OpenNvim.Config

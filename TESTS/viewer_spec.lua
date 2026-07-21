@@ -1,9 +1,9 @@
 -- TESTS/viewer_spec.lua — collect / sort / render / dispatch behavior.
 
 return function(H)
-  local viewer = require("open_nvim.viewer")
+  local viewer = require("open.viewer")
 
-  local scan = require("open_nvim.viewer.scan")
+  local scan = require("open.viewer.scan")
 
   ---@param t table
   local function link(t)
@@ -221,7 +221,7 @@ return function(H)
 
   -- open(): URLs go to the browser -------------------------------------------
   do
-    local registry = require("open_nvim.registry")
+    local registry = require("open.registry")
     local orig = registry.dispatch
     local seen_handler, seen
     registry.dispatch = function(handler, ctx)
@@ -243,7 +243,7 @@ return function(H)
   -- open(): a local file goes into a Neovim buffer, not the file manager -----
   H.tmpdir(function(dir)
     H.write(dir .. "/doc.md", "# Title\n\nbody\n")
-    local registry = require("open_nvim.registry")
+    local registry = require("open.registry")
     local orig = registry.dispatch
     local seen_handler, seen
     registry.dispatch = function(handler, ctx)

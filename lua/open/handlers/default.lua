@@ -1,4 +1,4 @@
----@module 'open_nvim.handlers.default'
+---@module 'open.handlers.default'
 ---@brief Handler that opens a path or URL in the system default application.
 ---@description
 --- Equivalent to a double-click on the file: the OS chooses the application
@@ -10,7 +10,7 @@
 --- upstreamed into (identical platform logic: Windows/WSL/macOS/Linux, incl.
 --- WSL→Windows path translation via wslpath).
 
-local notify = require("lib.nvim.notify").create("[open_nvim.default]")
+local notify = require("lib.nvim.notify").create("[open.default]")
 
 local M = {}
 

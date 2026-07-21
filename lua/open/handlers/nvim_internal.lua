@@ -1,11 +1,11 @@
----@module 'open_nvim.handlers.nvim_internal'
+---@module 'open.handlers.nvim_internal'
 ---@brief Handlers that open files inside the current Neovim session.
 ---@description
 --- Registered handlers: split, vsplit, tab.
 --- Each validates the context path and opens it via the appropriate
 --- Neovim ex-command. URL contexts are rejected.
 
-local notify = require("lib.nvim.notify").create("[open_nvim.nvim_internal]")
+local notify = require("lib.nvim.notify").create("[open.nvim_internal]")
 
 local M = {}
 

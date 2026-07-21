@@ -1,4 +1,4 @@
----@module 'open_nvim.handlers.notepad'
+---@module 'open.handlers.notepad'
 ---@brief Handler that opens text in the system default GUI text editor.
 ---@description
 --- Writes the context text to a temporary file, then launches the
@@ -9,9 +9,9 @@
 ---
 --- "editor" is registered as an alias for "notepad".
 
-local notify   = require("lib.nvim.notify").create("[open_nvim.notepad]")
-local platform = require("open_nvim.platform")
-local util     = require("open_nvim.util")
+local notify   = require("lib.nvim.notify").create("[open.notepad]")
+local platform = require("open.platform")
+local util     = require("open.util")
 
 local M = {}
 

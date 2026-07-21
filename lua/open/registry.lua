@@ -1,11 +1,11 @@
----@module 'open_nvim.registry'
+---@module 'open.registry'
 ---@brief Central handler registry for :Open.
 ---@description
 --- Handlers are registered once during setup() and looked up by key at
 --- command invocation time. Duplicate keys produce a warning to allow
 --- user overrides without hard errors.
 
-local notify = require("lib.nvim.notify").create("[open_nvim.registry]")
+local notify = require("lib.nvim.notify").create("[open.registry]")
 
 local M = {}
 

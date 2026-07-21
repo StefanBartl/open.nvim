@@ -1,7 +1,7 @@
 -- TESTS/viewer_scan_spec.lua — link extraction.
 
 return function(H)
-  local scan = require("open_nvim.viewer.scan")
+  local scan = require("open.viewer.scan")
 
   ---@param lines string[]
   ---@param opts table|nil

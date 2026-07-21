@@ -1,7 +1,7 @@
 # open.nvim — Lua API
 
 ```lua
-local open = require("open_nvim")
+local open = require("open")
 
 -- Context-aware open (same as :Open with no args)
 open.open()
@@ -19,11 +19,11 @@ open.open("tab",   "pwsh_profile")    -- open PowerShell profile in a tab
 
 ## Link listing
 
-`require("open_nvim.viewer")` backs `:Open viewer` / `:UrlView` /
+`require("open.viewer")` backs `:Open viewer` / `:UrlView` /
 `:MDLinksView`, and each step is usable on its own.
 
 ```lua
-local viewer = require("open_nvim.viewer")
+local viewer = require("open.viewer")
 
 -- Collect. Returns links, err.
 local links = viewer.collect("cwd", {

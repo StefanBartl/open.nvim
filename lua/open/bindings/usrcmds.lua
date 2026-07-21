@@ -1,4 +1,4 @@
----@module 'open_nvim.bindings.usrcmds'
+---@module 'open.bindings.usrcmds'
 ---@brief Registers the :Open (and :UrlView) user commands via lib.nvim.usercmd.composer.
 ---@description
 --- `:Open [target] [scope]` is a flat, no-subcommand grammar, so it uses
@@ -25,15 +25,15 @@ local M = {}
 ---@param target_raw string|nil
 ---@param scope       string|nil
 local function run_open(target_raw, scope)
-  local context  = require("open_nvim.context")
-  local registry = require("open_nvim.registry")
+  local context  = require("open.context")
+  local registry = require("open.registry")
   local signals  = context.gather()
 
   local target = target_raw and target_raw:lower() or context.default_target(signals)
   local ctx    = context.resolve(scope, target, signals)
 
   if not ctx then
-    require("lib.nvim.notify").create("[open_nvim]").warn("Nothing to open")
+    require("lib.nvim.notify").create("[open]").warn("Nothing to open")
     return
   end
 
@@ -45,7 +45,7 @@ end
 composer.register_type("OPEN_TARGET", {
   validate = function(raw) return true, raw, nil end,
   complete = function(arg_lead)
-    local ok_r, reg = pcall(require, "open_nvim.registry")
+    local ok_r, reg = pcall(require, "open.registry")
     if not ok_r then return {} end
     local names, out = reg.list_keys(), {}
     for i = 1, #names do
@@ -80,7 +80,7 @@ composer.register_type("OPEN_SCOPE", {
       end
     end
 
-    local ok_cfg, kw_cfg = pcall(require, "open_nvim.config")
+    local ok_cfg, kw_cfg = pcall(require, "open.config")
     if ok_cfg then
       local kw_names = {}
       for name in pairs(kw_cfg.get().keywords or {}) do
@@ -137,7 +137,7 @@ composer.register_type("VIEWER_KIND", {
   validate = function(raw) return true, raw, nil end,
   complete = function(arg_lead)
     local out = {}
-    local ok, viewer = pcall(require, "open_nvim.viewer")
+    local ok, viewer = pcall(require, "open.viewer")
     if ok then
       for _, k in ipairs(viewer.kinds()) do
         if k:sub(1, #arg_lead) == arg_lead then
@@ -163,7 +163,7 @@ composer.register_type("VIEWER_KIND", {
 local function run_viewer(ctx, fixed_kind)
   local flags = ctx.flags or {}
   local kv = ctx.kv or {}
-  local viewer = require("open_nvim.viewer")
+  local viewer = require("open.viewer")
 
   local kind, scope
   if fixed_kind then
@@ -182,7 +182,7 @@ local function run_viewer(ctx, fixed_kind)
         -- Two positionals where the first is not a kind: the user most likely
         -- mistyped it, and silently ignoring the extra token would hide that.
         require("lib.nvim.notify")
-          .create("[open_nvim.viewer]")
+          .create("[open.viewer]")
           .warn(("ignoring unrecognized kind '%s'"):format(tostring(first)))
         scope = second
       end
