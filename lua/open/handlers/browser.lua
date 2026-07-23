@@ -35,10 +35,14 @@ end
 ---@return string[]
 local function default_browser_cmd(url, plat)
   if plat.is_win then
-    return { "cmd.exe", "/C", "start", '""', url }
+    -- explorer.exe hands the URL straight to the registered protocol handler,
+    -- with no cmd.exe re-tokenizing in between — see util.cmd_escape_unquoted
+    -- for why `cmd.exe /C start` silently truncates URLs containing `&`.
+    return { "explorer.exe", url }
   elseif plat.is_wsl then
     if vim.fn.executable("wslview") == 1 then return { "wslview", url } end
-    return { "cmd.exe", "/C", "start", '""', url }
+    if vim.fn.executable("explorer.exe") == 1 then return { "explorer.exe", url } end
+    return { "cmd.exe", "/C", "start", '""', util.cmd_escape_unquoted(url) }
   elseif plat.is_mac then
     return { "open", url }
   else
@@ -55,11 +59,15 @@ end
 ---@return string[]|nil, string|nil
 local function named_browser_cmd(url, plat, linux_candidates, mac_app, win_token)
   if plat.is_win then
-    return { "cmd.exe", "/C", "start", win_token, url }, nil
+    -- Selecting a SPECIFIC (non-default) browser requires cmd.exe's `start
+    -- <token>` resolution — explorer.exe alone can't target a named app — so
+    -- the URL must be shielded from cmd.exe's own tokenizer instead; see
+    -- util.cmd_escape_unquoted.
+    return { "cmd.exe", "/C", "start", win_token, util.cmd_escape_unquoted(url) }, nil
   elseif plat.is_wsl then
     local exec = util.find_exec(linux_candidates)
     if exec then return { exec, url }, nil end
-    return { "cmd.exe", "/C", "start", win_token, url }, nil
+    return { "cmd.exe", "/C", "start", win_token, util.cmd_escape_unquoted(url) }, nil
   elseif plat.is_mac then
     return { "open", "-a", mac_app, url }, nil
   else
