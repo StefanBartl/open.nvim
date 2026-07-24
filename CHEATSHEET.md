@@ -144,4 +144,7 @@ open.open("split", "cfile")      -- split on <cfile>
 -- urlview.nvim (superseded by the built-in :UrlView — see docs/integrations.md):
 -- route picked URLs through open.nvim's browser handler
 require("open.integrations.urlview").setup()
+
+-- telescope.nvim (opt-in): pick a handler, previewing what it would open
+require("open.integrations.telescope").picker()
 ```

@@ -55,6 +55,17 @@ require("open").setup({
     -- open_manager = "<leader>of",  -- :Open filemanager
   },
 
+  -- `filemanager` handler settings.
+  filemanager = {
+    reveal = true, -- false: navigate to a file's parent dir instead of selecting it
+  },
+
+  -- When true, logs every context-gather and dispatch step to :messages.
+  debug = false,
+
+  -- Handler-choice picker for ambiguous no-target invocations. Off by default.
+  picker = { enabled = false },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. false = do not register.
