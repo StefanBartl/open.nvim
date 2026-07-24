@@ -43,6 +43,15 @@ function M.open(target, scope)
 
   context.with_cache(function()
     local signals = context.gather()
+    local cfg = require("open.config").get()
+
+    if not target and cfg.picker and cfg.picker.enabled then
+      local candidates = context.candidate_targets(signals)
+      if #candidates > 1 then
+        require("open.picker").select(candidates, scope, signals)
+        return
+      end
+    end
 
     local t   = target and target:lower() or context.default_target(signals)
     local ctx = context.resolve(scope, t, signals)

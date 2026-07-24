@@ -130,7 +130,11 @@
 ---@field keymaps             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
 ---@field filemanager         OpenNvim.Filemanager.Config  `filemanager` handler settings
 ---@field debug               boolean   Log every context-gather/resolve/dispatch step to :messages (default false)
+---@field picker              OpenNvim.Picker.Config  Handler-choice picker for ambiguous no-target invocations
 ---@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
+
+---@class OpenNvim.Picker.Config
+---@field enabled boolean  When true, an ambiguous no-target `:Open` shows a vim.ui.select picker (default false)
 
 ---@class OpenNvim.Filemanager.Config
 ---@field reveal boolean  true (default): reveal/select a file; false: navigate to its parent dir

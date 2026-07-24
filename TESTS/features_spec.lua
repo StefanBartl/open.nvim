@@ -156,6 +156,68 @@ return function(H)
     H.falsy(require("open.config").is_debug(), "debug defaults to false")
   end
 
+  -- picker integration --------------------------------------------------------
+  do
+    local context = require("open.context")
+
+    H.eq(#context.candidate_targets({ tree_path = "/x" }), 1,
+      "a tree node has exactly one candidate target")
+
+    local url_candidates = context.candidate_targets({ cword = "https://example.com" })
+    H.ok(#url_candidates > 1, "a URL-like context has more than one candidate target")
+
+    local path_candidates = context.candidate_targets({ cfile_path = "/tmp/x" })
+    H.ok(#path_candidates > 1, "an existing-path context has more than one candidate target")
+
+    -- picker.enabled = false (default): no picker prompt, dispatch happens
+    -- exactly as before.
+    do
+      require("open").setup({})
+      local registry = require("open.registry")
+      local orig_dispatch = registry.dispatch
+      local orig_select = vim.ui.select
+      local dispatched, prompted = nil, false
+
+      registry.dispatch = function(target) dispatched = target end
+      vim.ui.select = function(...) prompted = true end
+
+      require("open").open("filemanager", "path=/tmp")
+
+      registry.dispatch = orig_dispatch
+      vim.ui.select = orig_select
+
+      H.eq(dispatched, "filemanager", "explicit target still dispatches directly")
+      H.falsy(prompted, "vim.ui.select is not invoked when picker.enabled is false")
+    end
+
+    -- picker.enabled = true + ambiguous context + no explicit target: prompt.
+    do
+      require("open").setup({ picker = { enabled = true } })
+      local registry = require("open.registry")
+      local orig_dispatch = registry.dispatch
+      local orig_select = vim.ui.select
+      local dispatched, seen_items = nil, nil
+
+      registry.dispatch = function(target) dispatched = target end
+      vim.ui.select = function(items, _opts, on_choice)
+        seen_items = items
+        on_choice(items[1])
+      end
+
+      H.scratch({ "https://example.com" })
+      vim.fn.setpos(".", { 0, 1, 1, 0 })
+      require("open").open(nil, nil)
+
+      registry.dispatch = orig_dispatch
+      vim.ui.select = orig_select
+
+      H.ok(seen_items and #seen_items > 1, "picker prompts with multiple candidates for a URL context")
+      H.ok(dispatched, "the chosen candidate is dispatched")
+
+      require("open").setup({ picker = { enabled = false } })
+    end
+  end
+
   -- context cache -------------------------------------------------------------
   do
     local context = require("open.context")

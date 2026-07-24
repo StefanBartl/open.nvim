@@ -270,6 +270,32 @@ function M.default_target(signals)
   return cfg.default_filemanager
 end
 
+---Candidate handler keys for a no-explicit-target invocation, used by the
+---opt-in `picker` feature (see |open-config|) to offer a choice instead of
+---the single automatic pick `default_target()` would make.
+---@param signals OpenNvim.Signals
+---@return string[]
+function M.candidate_targets(signals)
+  local cfg = require("open.config").get()
+
+  if signals.tree_path then
+    return { cfg.default_filemanager }
+  end
+
+  local probe = signals.cfile or signals.cword or signals.buffer_path or ""
+  local is_url = probe:match("^https?://") or probe:match("^ftp://") or probe:match("^www%.")
+
+  if is_url then
+    return { cfg.default_browser, "notepad" }
+  end
+
+  if signals.cfile_path then
+    return { cfg.default_filemanager, "split", "vsplit", "tab" }
+  end
+
+  return { cfg.default_filemanager }
+end
+
 ---Resolve what should be opened for `target`.
 ---@param arg     string|nil             Explicit scope: "%", "cfile", "path=…", or literal.
 ---@param target  string|nil             Handler key the context is being built for.

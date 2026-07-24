@@ -98,6 +98,7 @@ packer: >lua
     keymaps          = {},   -- optional keymaps; none registered by default
     filemanager      = { reveal = true },  -- false: navigate instead of reveal/select
     debug            = false, -- true: log gather/resolve/dispatch steps to :messages
+    picker           = { enabled = false }, -- true: vim.ui.select on ambiguous no-target calls
   })
 <
 
@@ -173,6 +174,18 @@ packer: >lua
 `debug`
   Boolean (default false). When true, logs every `context.gather()`,
   `context.resolve()`, and `registry.dispatch()` step to `:messages`.
+
+`picker`
+  `enabled` (default false). When true, a no-target `:Open`/`open.open()`
+  call whose context has more than one meaningful handler shows a
+  `vim.ui.select` prompt instead of picking one automatically. Candidates:
+
+    tree-buffer node          default_filemanager only (no prompt)
+    looks like a URL          default_browser, notepad
+    <cfile> is an existing path  default_filemanager, split, vsplit, tab
+    anything else             default_filemanager only
+
+  An explicit target always bypasses the picker.
 
 `viewer`
   Settings for |:Open-viewer|. Keys:
@@ -629,6 +642,7 @@ Reports:
     platform.lua            OS detection, cached per session
     util.lua                run_detached(), url_encode(), find_exec()
     keywords.lua            built-in named scope keyword table
+    picker.lua              opt-in vim.ui.select handler-choice prompt
     health.lua              :checkhealth open
     @types/init.lua         LuaLS type definitions
     bindings/
