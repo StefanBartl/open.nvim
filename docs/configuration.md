@@ -46,6 +46,15 @@ require("open").setup({
     -- },
   },
 
+  -- Optional keymaps for common invocations. Empty by default (no default
+  -- keymaps are registered). Valid keys: open_default, open_browser,
+  -- open_manager. Values are the {lhs} passed to vim.keymap.set().
+  keymaps = {
+    -- open_default = "<leader>oo",  -- :Open
+    -- open_browser = "<leader>ob",  -- :Open browser
+    -- open_manager = "<leader>of",  -- :Open filemanager
+  },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. false = do not register.
@@ -86,6 +95,31 @@ require("open").setup({
   },
 })
 ```
+
+## `keymaps`
+
+None registered by default. Set any of these to a keymap `lhs` to register a
+normal-mode mapping for that fixed invocation:
+
+| Key | Triggers |
+|---|---|
+| `open_default` | `:Open` (context-aware default) |
+| `open_browser` | `:Open browser` |
+| `open_manager` | `:Open filemanager` |
+
+```lua
+require("open").setup({
+  keymaps = {
+    open_default = "<leader>oo",
+    open_browser = "<leader>ob",
+    open_manager = "<leader>of",
+  },
+})
+```
+
+An unrecognized key warns and is ignored. For anything not covered by these
+three fixed targets, map `:Open ...` yourself — see
+[docs/BINDINGS.md](BINDINGS.md#keymaps).
 
 ## `viewer`
 

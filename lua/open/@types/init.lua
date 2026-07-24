@@ -125,6 +125,13 @@
 ---@field builtin_keywords    boolean   Load built-in scope keywords (default true)
 ---@field keywords            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
 ---@field custom_handlers     OpenNvim.Handler[]  User-defined handlers, registered alongside `handlers`
+---@field keymaps             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
 ---@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
+
+---Optional keymaps registered by setup(). Unset keys register nothing.
+---@class OpenNvim.Keymaps
+---@field open_default string|nil  lhs for `:Open` (context-aware default)
+---@field open_browser string|nil  lhs for `:Open browser`
+---@field open_manager string|nil  lhs for `:Open filemanager`
 
 return {}
