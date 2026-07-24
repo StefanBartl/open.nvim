@@ -31,6 +31,7 @@ Two command families, both built via
 :Open split                    open file in a horizontal split
 :Open vsplit                   open file in a vertical split
 :Open tab                      open file in a new tab
+:Open terminal                 open a terminal split in the target's directory
 ```
 
 ## Scope (2nd argument)
@@ -53,6 +54,8 @@ Examples:
 :Open tab zshrc                   open ~/.zshrc in a new tab
 :Open split pwsh_profile          open PowerShell $PROFILE in a split
 :Open default MY_ROADMAP          open a user keyword with the default app
+:Open terminal                    open a terminal in the current buffer's directory
+:Open terminal cfile              open a terminal in <cfile>'s parent directory
 ```
 
 ## Tab completion

@@ -20,6 +20,7 @@
 ---| '"split"'         # Open file in Neovim horizontal split
 ---| '"vsplit"'        # Open file in Neovim vertical split
 ---| '"tab"'           # Open file in Neovim new tab
+---| '"terminal"'      # Open a terminal split in the target's directory
 ---| string            # User-registered extension key
 
 -- ---------------------------------------------------------------------------

@@ -32,6 +32,7 @@ See [README.md](../README.md) for a quickstart, and
 | `split` | File path → Neovim horizontal split | all |
 | `vsplit` | File path → Neovim vertical split | all |
 | `tab` | File path → Neovim new tab | all |
+| `terminal` | Path → terminal split in that directory (file → its parent dir) | all |
 
 ## Smart context resolution
 

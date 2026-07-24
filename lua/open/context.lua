@@ -148,6 +148,7 @@ local PATH_TARGETS = {
   split       = true,
   vsplit      = true,
   tab         = true,
+  terminal    = true,
 }
 
 -- ---------------------------------------------------------------------------

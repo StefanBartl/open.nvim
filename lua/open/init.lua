@@ -27,6 +27,7 @@ local HANDLER_MODULES = {
   notepad       = "open.handlers.notepad",
   nvim_internal = "open.handlers.nvim_internal",
   default       = "open.handlers.default",
+  terminal      = "open.handlers.terminal",
 }
 
 -- ---------------------------------------------------------------------------

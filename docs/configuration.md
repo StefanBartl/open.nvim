@@ -16,6 +16,7 @@ require("open").setup({
     "notepad",
     "nvim_internal",
     "default",
+    "terminal",
   },
 
   -- Built-in named scope keywords (shell profiles, git, SSH, …).
