@@ -25,6 +25,8 @@ Two command families, both built via
 :Open chrome                   open in Google Chrome
 :Open firefox                  open in Mozilla Firefox
 :Open edge                     open in Microsoft Edge
+:Open brave                    open in Brave
+:Open opera                    open in Opera
 :Open safari                   open in Safari (macOS only)
 :Open notepad                  copy text to a temp file and open in GUI editor
 :Open editor                   alias for notepad

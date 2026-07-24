@@ -104,7 +104,10 @@ local function check_executables()
 
   -- Browser candidates (all platforms)
   local found_browser = false
-  for _, b in ipairs({ "google-chrome", "google-chrome-stable", "chromium", "firefox", "firefox-esr", "microsoft-edge" }) do
+  for _, b in ipairs({
+    "google-chrome", "google-chrome-stable", "chromium", "firefox", "firefox-esr",
+    "microsoft-edge", "brave-browser", "brave", "opera",
+  }) do
     if exe(b) then
       vim.health.ok("browser on PATH: " .. b)
       found_browser = true
