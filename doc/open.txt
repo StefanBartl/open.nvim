@@ -90,6 +90,7 @@ packer: >lua
       "notepad",
       "nvim_internal",
       "default",
+      "terminal",
     },
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
@@ -110,7 +111,7 @@ packer: >lua
   List of handler module keys to load during `setup()`. Removing a key
   prevents those handlers from registering, hiding them from tab-completion.
   Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" |
-  "default"
+  "default" | "terminal"
 
 `builtin_keywords`
   Boolean (default true). When false, none of the built-in scope keywords
@@ -251,6 +252,13 @@ split | vsplit | tab ~
   `split`  → horizontal split   (`split`)
   `vsplit` → vertical split     (`vsplit`)
   `tab`    → new tab            (`tabedit`)
+
+terminal ~
+  Open a terminal split in the target's directory.
+  URL contexts are rejected. A file target resolves to its parent directory;
+  a directory target is used as-is.
+    :Open terminal          terminal in the current buffer's directory
+    :Open terminal cfile    terminal in <cfile>'s parent directory
 
 ==============================================================================
 6. KEYWORDS                                                    *open-keywords*
@@ -583,6 +591,7 @@ Reports:
       browser.lua           browser + chrome/chromium/firefox/edge/safari
       notepad.lua           notepad/editor (temp-file → GUI editor)
       nvim_internal.lua     split / vsplit / tab
+      terminal.lua          terminal split in the target's directory
     viewer/
       init.lua              :Open viewer — filter/sort/format/open
       scan.lua              link extraction (URLs, md links, paths)

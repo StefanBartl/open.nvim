@@ -33,6 +33,7 @@
 | Nvim split | `split` | File path → horizontal split in Neovim | all |
 | Nvim vsplit | `vsplit` | File path → vertical split in Neovim | all |
 | Nvim tab | `tab` | File path → new tab in Neovim | all |
+| Terminal | `terminal` | Path → terminal split in that directory (file → its parent dir) | all |
 
 ## Scope tokens (2nd argument)
 
