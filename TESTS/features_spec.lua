@@ -156,6 +156,42 @@ return function(H)
     H.falsy(require("open.config").is_debug(), "debug defaults to false")
   end
 
+  -- context cache -------------------------------------------------------------
+  do
+    local context = require("open.context")
+    local orig_bufname = vim.api.nvim_buf_get_name
+    local calls = 0
+    vim.api.nvim_buf_get_name = function(...)
+      calls = calls + 1
+      return orig_bufname(...)
+    end
+
+    context.with_cache(function()
+      context.gather()
+      context.gather()
+      context.gather()
+    end)
+    H.eq(calls, 1, "gather() only reads editor state once inside with_cache")
+
+    calls = 0
+    context.gather()
+    context.gather()
+    H.eq(calls, 2, "gather() is not cached outside with_cache")
+
+    -- Nested with_cache: the inner call must not clear the outer's cache.
+    calls = 0
+    context.with_cache(function()
+      context.gather()
+      context.with_cache(function()
+        context.gather()
+      end)
+      context.gather()
+    end)
+    H.eq(calls, 1, "nested with_cache reuses the outer cache")
+
+    vim.api.nvim_buf_get_name = orig_bufname
+  end
+
   -- scope = "git" -----------------------------------------------------------
   do
     require("open").setup({})

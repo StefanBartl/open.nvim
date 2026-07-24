@@ -559,6 +559,14 @@ After calling `setup()`, the following functions are available:
     require("open").open("split", "nvim_init")
     require("open").open("tab",   "pwsh_profile")
 <
+                                                    *open.context.with_cache()*
+`require("open.context").with_cache(fn)`
+
+  For extension authors building on `open.context` directly (e.g. a picker
+  that resolves several candidate handlers against the same context):
+  memoizes `context.gather()`'s result for the duration of `fn`, so nested
+  `gather()`/`resolve()` calls reuse one read of editor state instead of
+  re-reading it. `:Open` itself already runs through this.
 
 ==============================================================================
 10. INTEGRATIONS                                            *open-integrations*
@@ -616,7 +624,8 @@ Reports:
     init.lua                setup() — config, handler loading, :Open command
     config.lua              defaults + merged active config
     registry.lua            handler register / get / list
-    context.lua             gather() + resolve() — two-stage resolution
+    context.lua             gather() + resolve() — two-stage resolution;
+                            with_cache() memoizes gather() per invocation
     platform.lua            OS detection, cached per session
     util.lua                run_detached(), url_encode(), find_exec()
     keywords.lua            built-in named scope keyword table

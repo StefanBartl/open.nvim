@@ -80,3 +80,28 @@ and are reusable outside open.nvim. The picker is
 
 See [docs/commands.md](commands.md) for the full list of handlers and scope
 tokens, and [docs/configuration.md](configuration.md) for `setup()` options.
+
+## `open.context` (for extension authors)
+
+`require("open.context")` backs every `:Open` invocation and is reusable by
+code that needs to gather/resolve context of its own — e.g. a picker
+that previews what several handlers would open for the current buffer.
+
+```lua
+local context = require("open.context")
+
+-- Gather once, resolve against it multiple times without re-reading state.
+context.with_cache(function()
+  local signals = context.gather()
+  local ctx_a = context.resolve(nil, "filemanager", signals)
+  local ctx_b = context.resolve(nil, "browser", signals)
+end)
+```
+
+`context.gather()` reads the current tree-buffer node, `<cfile>`, `<cWORD>`,
+visual selection, and buffer path — each a real editor-state read. Calling it
+repeatedly within one command invocation (e.g. once per candidate handler in
+a picker) is wasted work; `with_cache(fn)` memoizes `gather()`'s result for
+the duration of `fn`, so nested calls reuse the same read. `:Open` itself
+runs through `with_cache` already — this only matters for code building on
+top of `open.context` directly.

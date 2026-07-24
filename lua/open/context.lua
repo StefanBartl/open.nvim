@@ -28,6 +28,30 @@
 local M = {}
 
 -- ---------------------------------------------------------------------------
+-- Per-invocation cache
+-- ---------------------------------------------------------------------------
+
+---@type OpenNvim.Signals|nil
+local _cached_signals = nil
+local _cache_active = false
+
+---Run `fn()` with `M.gather()` memoized for its duration, so any nested
+---`M.resolve()` call that gathers its own signals (i.e. is not given a
+---pre-gathered `signals` table) reuses the same read of editor state
+---instead of re-reading it.
+---@param fn fun()
+function M.with_cache(fn)
+  local was_active = _cache_active
+  _cache_active = true
+  local ok, err = pcall(fn)
+  if not was_active then
+    _cache_active = false
+    _cached_signals = nil
+  end
+  if not ok then error(err, 0) end
+end
+
+-- ---------------------------------------------------------------------------
 -- Debug logging
 -- ---------------------------------------------------------------------------
 
@@ -183,8 +207,13 @@ local PATH_TARGETS = {
 -- ---------------------------------------------------------------------------
 
 ---Gather raw context signals without making any target-specific decision.
+---Memoized for the duration of an enclosing `M.with_cache()` call.
 ---@return OpenNvim.Signals
 function M.gather()
+  if _cache_active and _cached_signals then
+    return _cached_signals
+  end
+
   ---@type OpenNvim.Signals
   local signals = {}
 
@@ -215,6 +244,10 @@ function M.gather()
     "gather: tree_path=%s cfile=%s cword=%s visual=%s buffer_path=%s",
     tostring(signals.tree_path), tostring(signals.cfile),
     tostring(signals.cword), tostring(signals.visual), tostring(signals.buffer_path)))
+
+  if _cache_active then
+    _cached_signals = signals
+  end
 
   return signals
 end
