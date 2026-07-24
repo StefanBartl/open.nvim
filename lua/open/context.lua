@@ -12,6 +12,7 @@
 --- Explicit override tokens for `arg`:
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> text under the cursor
+---   "git"         → nearest Git root (`git rev-parse --show-toplevel`)
 ---   "path=<path>" → literal path given after "path="
 ---   anything else → used verbatim as the resolved text
 ---
@@ -62,6 +63,19 @@ local function resolve_existing_path(candidate)
   end
 
   return nil
+end
+
+-- ---------------------------------------------------------------------------
+-- Git root resolution
+-- ---------------------------------------------------------------------------
+
+---Resolve the nearest Git root directory (relative to the cwd), if any.
+---@return string|nil
+local function resolve_git_root()
+  local out = vim.fn.system({ "git", "rev-parse", "--show-toplevel" })
+  if vim.v.shell_error ~= 0 then return nil end
+  out = out:gsub("[\r\n]+$", "")
+  return out ~= "" and out or nil
 end
 
 -- ---------------------------------------------------------------------------
@@ -220,6 +234,8 @@ function M.resolve(arg, target, signals)
       text = signals.buffer_path
     elseif arg == "cfile" then
       text = signals.cfile
+    elseif arg == "git" then
+      text = resolve_git_root()
     elseif arg:sub(1, 5) == "path=" then
       text = require("lib.nvim.cross.fs.expand_path")(arg:sub(6))
     else

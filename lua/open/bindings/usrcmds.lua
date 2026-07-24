@@ -73,7 +73,7 @@ composer.register_type("OPEN_SCOPE", {
     end
 
     local out    = {}
-    local scopes = { "%", "cfile", "path=" }
+    local scopes = { "%", "cfile", "git", "path=" }
     for i = 1, #scopes do
       if scopes[i]:sub(1, #arg_lead) == arg_lead then
         out[#out + 1] = scopes[i]

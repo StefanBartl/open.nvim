@@ -91,4 +91,19 @@ return function(H)
     H.ok(opera, "opera handler registered")
     H.eq(opera.desc, "Open in Opera", "opera handler desc")
   end
+
+  -- scope = "git" -----------------------------------------------------------
+  do
+    require("open").setup({})
+    local context = require("open.context")
+
+    -- The test suite itself runs inside a git worktree, so "git" must
+    -- resolve to some existing directory containing a .git entry point.
+    local ctx = context.resolve("git", "filemanager", {})
+    H.ok(ctx, "git scope resolves to a context inside a git repo")
+    if ctx then
+      H.ok(ctx.is_path, "git scope resolves to an existing path")
+      H.falsy(ctx.is_url, "git scope is not a URL")
+    end
+  end
 end
