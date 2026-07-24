@@ -1,11 +1,15 @@
 ---@module 'open.handlers.filemanager'
 ---@brief Handler that opens a path in the system file manager.
 ---@description
---- Platform dispatch:
+--- Platform dispatch (`filemanager.reveal = true`, the default):
 ---   Windows  → explorer.exe /select,<path>  (reveals file in Explorer)
 ---   WSL      → explorer.exe via wslpath conversion
 ---   macOS    → open -R <file>  /  open <dir>  (Finder)
 ---   Linux    → xdg-open, then common managers as fallback
+---
+--- With `filemanager.reveal = false`, a file target navigates to its parent
+--- directory instead of being selected there. Directory targets are always
+--- navigated into, regardless of `reveal`.
 
 local notify   = require("lib.nvim.notify").create("[open.filemanager]")
 local platform = require("open.platform")
@@ -60,21 +64,40 @@ function M.register_all(register_fn)
       end
 
       local plat = platform.get()
+      local cfg  = require("open.config").get()
+      local reveal = cfg.filemanager == nil or cfg.filemanager.reveal ~= false
+      local file = is_file(path)
       local cmd
 
       if plat.is_win then
-        cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. path }
+        if file and reveal then
+          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. path }
+        else
+          local target = file and vim.fn.fnamemodify(path, ":h") or path
+          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", target }
+        end
 
       elseif plat.is_wsl then
-        local win_path = wsl_to_win_path(path)
-        if not win_path then
-          notify.error("wslpath conversion failed for: " .. path)
+        local unix_target = (file and not reveal) and vim.fn.fnamemodify(path, ":h") or path
+        local win_target  = wsl_to_win_path(unix_target)
+        if not win_target then
+          notify.error("wslpath conversion failed for: " .. unix_target)
           return false
         end
-        cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. win_path }
+        if file and reveal then
+          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. win_target }
+        else
+          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", win_target }
+        end
 
       elseif plat.is_mac then
-        cmd = is_file(path) and { "open", "-R", path } or { "open", path }
+        if file and reveal then
+          cmd = { "open", "-R", path }
+        elseif file then
+          cmd = { "open", vim.fn.fnamemodify(path, ":h") }
+        else
+          cmd = { "open", path }
+        end
 
       else
         local mgr = linux_file_manager()
@@ -82,7 +105,8 @@ function M.register_all(register_fn)
           notify.error("No file manager found on PATH")
           return false
         end
-        cmd = { mgr, path }
+        local target = (file and not reveal) and vim.fn.fnamemodify(path, ":h") or path
+        cmd = { mgr, target }
       end
 
       local ok, err = util.run_detached(cmd, "filemanager")

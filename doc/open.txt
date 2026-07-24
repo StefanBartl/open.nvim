@@ -96,6 +96,7 @@ packer: >lua
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
     custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
     keymaps          = {},   -- optional keymaps; none registered by default
+    filemanager      = { reveal = true },  -- false: navigate instead of reveal/select
   })
 <
 
@@ -158,6 +159,15 @@ packer: >lua
       },
     })
 <
+
+`filemanager`
+  Settings for the `filemanager` handler. Keys:
+
+    reveal    true (default): reveal a file (select it in its parent
+              directory). false: navigate to it (open its parent directory
+              without selecting). Directories are always navigated into
+              regardless of this setting — there is nothing to select for a
+              directory target.
 
 `viewer`
   Settings for |:Open-viewer|. Keys:
@@ -259,6 +269,8 @@ filemanager ~
   WSL:     `explorer.exe` via `wslpath` conversion.
   macOS:   `open -R <file>` (Finder reveal) or `open <dir>`.
   Linux:   `xdg-open` first, then nautilus/thunar/dolphin/nemo/pcmanfm/caja.
+  With `filemanager.reveal = false`, a file target navigates to its parent
+  directory instead of being revealed/selected there. See |open-config|.
 
 notepad | editor ~
   Write the context text to a temporary `.txt` file and open it in the
