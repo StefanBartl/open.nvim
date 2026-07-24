@@ -66,7 +66,7 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 - [Command Reference](docs/commands.md) — full `:Open` and `:Open viewer` commands, scope tokens, and tab-completion.
 - [Built-in Keywords](docs/keywords.md) — named scope shortcuts for shell, editor, git, SSH, and more config files.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
-- [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`).
+- [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`) and an opt-in telescope.nvim source.
 - [Health Check](docs/health-check.md) — what `:checkhealth open` reports.
 - [Bindings](docs/BINDINGS.md) — full inventory of user commands, keymaps, and autocmds.
 - [Roadmap](docs/ROADMAP.md) — planned features.

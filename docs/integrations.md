@@ -45,3 +45,33 @@ memory keep working.
 Note that both cannot own `:UrlView` at once — whichever registers last wins.
 If you want a different name for open.nvim's wrapper, or none at all, set
 `viewer.commands.urls` (see [configuration.md](configuration.md)).
+
+## telescope.nvim
+
+`open.integrations.telescope` is an opt-in
+[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) source
+that lists every registered handler with a live preview of what it would
+open for the current context, and dispatches whichever one you pick — the
+same effect as `:Open <key>`, but browsable and previewable first. Not
+loaded by `open.setup()`.
+
+```lua
+require("open.integrations.telescope").picker()
+```
+
+Or register it as a telescope extension once (e.g. in your telescope
+config), then call it through `telescope.extensions`:
+
+```lua
+require("telescope").register_extension(
+  require("open.integrations.telescope").extension()
+)
+
+-- later, anywhere:
+require("telescope").extensions.open.open()
+```
+
+Each row shows the handler's key and description; the previewer shows what
+that handler would actually open (path or URL) for the buffer you called it
+from — so you can tell `notepad` and `filemanager` apart before committing.
+`<CR>` dispatches the handler exactly like `:Open <key>` would.

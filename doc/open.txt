@@ -27,6 +27,7 @@ CONTENTS                                                        *open-contents*
   9. Lua API ...................... |open-api|
  10. Integrations ................. |open-integrations|
      10.1 urlview.nvim ............ |open-integrations-urlview|
+     10.2 telescope.nvim .......... |open-integrations-telescope|
  11. Health check ................. |open-health|
  12. Architecture ................. |open-architecture|
 
@@ -614,6 +615,33 @@ lazy.nvim: >lua
   set in `opts`. Pass `false` instead of a table to only register the
   action without calling `urlview.setup()` yourself.
 
+------------------------------------------------------------------------------
+10.2 telescope.nvim                                *open-integrations-telescope*
+
+Opt-in telescope.nvim source listing every registered handler, with a live
+preview of what it would open for the current context, and dispatching
+whichever one is picked — the same effect as `:Open {key}`, but browsable
+and previewable first. Not loaded by `open.setup()`. >lua
+
+  require("open.integrations.telescope").picker()
+<
+                                          *open.integrations.telescope.picker()*
+`require("open.integrations.telescope").picker([opts])`
+
+  Opens the picker. `opts` is forwarded to telescope's `pickers.new()`.
+
+                                       *open.integrations.telescope.extension()*
+`require("open.integrations.telescope").extension()`
+
+  Returns a table shaped for `telescope.register_extension()`: >lua
+    require("telescope").register_extension(
+      require("open.integrations.telescope").extension()
+    )
+
+    -- later, anywhere:
+    require("telescope").extensions.open.open()
+<
+
 ==============================================================================
 11. HEALTH CHECK                                               *open-health*
 
@@ -659,6 +687,7 @@ Reports:
       scan.lua              link extraction (URLs, md links, paths)
     integrations/
       urlview.lua           urlview.nvim "open_in_browser" action (opt-in)
+      telescope.lua         telescope.nvim handler-picker source (opt-in)
 
 Each leaf module exposes only plain functions or a `register_all(fn)` entry
 point; `init.lua` is the only place that registers a user command.

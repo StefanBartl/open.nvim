@@ -218,6 +218,20 @@ return function(H)
     end
   end
 
+  -- open.integrations.telescope ---------------------------------------------
+  do
+    local telescope_integration = require("open.integrations.telescope")
+
+    -- telescope.nvim is not on rtp in this test run: picker() must warn and
+    -- return without erroring, not crash.
+    local ok = pcall(telescope_integration.picker)
+    H.ok(ok, "telescope integration picker() does not error when telescope.nvim is absent")
+
+    local ext = telescope_integration.extension()
+    H.ok(type(ext) == "table" and type(ext.exports) == "table" and type(ext.exports.open) == "function",
+      "extension() returns a telescope.register_extension()-shaped table")
+  end
+
   -- context cache -------------------------------------------------------------
   do
     local context = require("open.context")
