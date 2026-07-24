@@ -33,6 +33,18 @@ require("open").setup({
     -- MY_LOGO    = function() return vim.fn.expand("~/assets/logo.png") end,
   },
 
+  -- User-defined handlers, registered in addition to the built-in ones
+  -- listed in `handlers` above. Each entry is a full OpenNvim.Handler.
+  custom_handlers = {
+    -- {
+    --   key  = "zathura",
+    --   desc = "Open PDF in Zathura",
+    --   run  = function(ctx)
+    --     return require("open.util").run_detached({ "zathura", ctx.text }, "zathura")
+    --   end,
+    -- },
+  },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. false = do not register.
@@ -51,6 +63,28 @@ require("open").setup({
 
 See [docs/keywords.md](keywords.md) for the full list of built-in keywords and
 how to define your own.
+
+## `custom_handlers`
+
+Register your own handlers directly from `setup()` instead of calling
+`require("open.registry").register()` yourself. Each entry is a full
+`OpenNvim.Handler` — `key`, `desc`, and a `run(ctx)` function returning a
+boolean. They are registered after the built-in `handlers` modules, so a
+`key` here overrides a built-in handler of the same name.
+
+```lua
+require("open").setup({
+  custom_handlers = {
+    {
+      key  = "zathura",
+      desc = "Open PDF in Zathura",
+      run  = function(ctx)
+        return require("open.util").run_detached({ "zathura", ctx.text }, "zathura")
+      end,
+    },
+  },
+})
+```
 
 ## `viewer`
 

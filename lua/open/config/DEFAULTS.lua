@@ -12,6 +12,10 @@ return {
   builtin_keywords = true,   -- set false to disable all built-in scope keywords
   keywords         = {},     -- user-defined keyword → path overrides / additions
 
+  -- User-defined handlers, registered in addition to the `handlers` module
+  -- list above. Each entry is an OpenNvim.Handler: { key, desc, run }.
+  custom_handlers = {},
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

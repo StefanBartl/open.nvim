@@ -79,6 +79,11 @@ function M.setup(opts)
     end
   end
 
+  -- Register user-defined handlers from `custom_handlers`.
+  for _, handler in ipairs(cfg.custom_handlers or {}) do
+    registry.register(handler)
+  end
+
   -- Register :Open command
   require("open.bindings.usrcmds").register(cfg)
 end

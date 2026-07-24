@@ -93,6 +93,7 @@ packer: >lua
     },
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
+    custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
   })
 <
 
@@ -120,6 +121,23 @@ packer: >lua
   (expanded at resolution time) or a `fun(): string|nil` for dynamic paths.
   User entries override built-in entries with the same key.
   See |open-keywords-user|.
+
+`custom_handlers`
+  List of user-defined `OpenNvim.Handler` tables (`key`, `desc`, `run`),
+  registered in addition to the built-in `handlers` modules. A `key` here
+  overrides a built-in handler of the same name. Example: >lua
+    require("open").setup({
+      custom_handlers = {
+        {
+          key  = "zathura",
+          desc = "Open PDF in Zathura",
+          run  = function(ctx)
+            return require("open.util").run_detached({ "zathura", ctx.text }, "zathura")
+          end,
+        },
+      },
+    })
+<
 
 `viewer`
   Settings for |:Open-viewer|. Keys:
