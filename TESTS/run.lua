@@ -67,6 +67,7 @@ local specs = {
   "viewer_scan_spec.lua",
   "viewer_spec.lua",
   "usrcmds_spec.lua",
+  "features_spec.lua",
 }
 
 local failed = 0
