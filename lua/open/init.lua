@@ -40,17 +40,20 @@ local HANDLER_MODULES = {
 function M.open(target, scope)
   local context  = require("open.context")
   local registry = require("open.registry")
-  local signals  = context.gather()
 
-  local t   = target and target:lower() or context.default_target(signals)
-  local ctx = context.resolve(scope, t, signals)
+  context.with_cache(function()
+    local signals = context.gather()
 
-  if not ctx then
-    require("lib.nvim.notify").create("[open]").warn("Nothing to open")
-    return
-  end
+    local t   = target and target:lower() or context.default_target(signals)
+    local ctx = context.resolve(scope, t, signals)
 
-  registry.dispatch(t, ctx)
+    if not ctx then
+      require("lib.nvim.notify").create("[open]").warn("Nothing to open")
+      return
+    end
+
+    registry.dispatch(t, ctx)
+  end)
 end
 
 -- ---------------------------------------------------------------------------

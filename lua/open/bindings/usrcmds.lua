@@ -27,17 +27,20 @@ local M = {}
 local function run_open(target_raw, scope)
   local context  = require("open.context")
   local registry = require("open.registry")
-  local signals  = context.gather()
 
-  local target = target_raw and target_raw:lower() or context.default_target(signals)
-  local ctx    = context.resolve(scope, target, signals)
+  context.with_cache(function()
+    local signals = context.gather()
 
-  if not ctx then
-    require("lib.nvim.notify").create("[open]").warn("Nothing to open")
-    return
-  end
+    local target = target_raw and target_raw:lower() or context.default_target(signals)
+    local ctx    = context.resolve(scope, target, signals)
 
-  registry.dispatch(target, ctx)
+    if not ctx then
+      require("lib.nvim.notify").create("[open]").warn("Nothing to open")
+      return
+    end
+
+    registry.dispatch(target, ctx)
+  end)
 end
 
 -- 1st positional: handler key. Validation stays soft (registry.dispatch
