@@ -43,6 +43,10 @@ See [README.md](../README.md) for a quickstart, and
 - Cursor on a **file path** → falls back to `filemanager`
 - Visual selection → used as the target text
 
+Opt in to `picker.enabled = true` (see [configuration.md](configuration.md#picker))
+to get a `vim.ui.select` prompt instead of the automatic choice whenever a
+no-target invocation has more than one meaningful handler for the context.
+
 ## Link listing (`:UrlView`)
 
 `:Open viewer [kind]` — with `:UrlView` and `:MDLinksView` as shortcuts —

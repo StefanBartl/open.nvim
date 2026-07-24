@@ -150,6 +150,33 @@ step to `:messages` via `lib.nvim.notify`, tagged `[open.context]` /
 `[open.registry]`. Off by default. Useful for understanding why a given
 `:Open` invocation resolved to the text it did.
 
+## `picker`
+
+```lua
+require("open").setup({
+  picker = { enabled = false },  -- default
+})
+```
+
+When `enabled = true` and `:Open` (or `open.open()`) is called with **no
+explicit target** and the current context has more than one meaningful
+handler (see below), a `vim.ui.select` prompt lets you choose instead of
+open.nvim silently picking one. Any `vim.ui.select` override —
+telescope-ui-select, fzf-lua, dressing.nvim — is used automatically; the
+built-in `vim.ui.select` otherwise.
+
+Candidates by context:
+
+| Context | Candidates |
+|---|---|
+| Tree-buffer node | `default_filemanager` only (no ambiguity, no prompt) |
+| Looks like a URL | `default_browser`, `notepad` |
+| `<cfile>` resolves to an existing path | `default_filemanager`, `split`, `vsplit`, `tab` |
+| Anything else | `default_filemanager` only |
+
+An explicit target (`:Open browser`, `open.open("browser")`) always bypasses
+the picker, same as before this option existed.
+
 ## `viewer`
 
 | Key | Default | Meaning |
