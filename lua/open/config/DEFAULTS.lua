@@ -32,6 +32,9 @@ return {
     reveal = true,
   },
 
+  -- When true, logs every context-gather and dispatch step to :messages.
+  debug = false,
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

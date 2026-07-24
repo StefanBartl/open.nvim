@@ -80,6 +80,13 @@ end
 ---@param target string
 ---@param ctx    OpenNvim.Context
 function M.dispatch(target, ctx)
+  local ok_cfg, cfg = pcall(require, "open.config")
+  if ok_cfg and cfg.is_debug() then
+    notify.info(string.format(
+      "dispatch: target=%s text=%q is_url=%s is_path=%s",
+      target, tostring(ctx and ctx.text), tostring(ctx and ctx.is_url), tostring(ctx and ctx.is_path)))
+  end
+
   local handler = M.get(target)
   if not handler then
     notify.error(

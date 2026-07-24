@@ -139,6 +139,17 @@ macOS Finder distinguish reveal from navigate at the OS level; on Linux the
 handler passes the file's parent directory to the file manager instead of
 the file itself when `reveal = false`.
 
+## `debug`
+
+```lua
+require("open").setup({ debug = true })
+```
+
+Logs every `context.gather()`, `context.resolve()`, and `registry.dispatch()`
+step to `:messages` via `lib.nvim.notify`, tagged `[open.context]` /
+`[open.registry]`. Off by default. Useful for understanding why a given
+`:Open` invocation resolved to the text it did.
+
 ## `viewer`
 
 | Key | Default | Meaning |

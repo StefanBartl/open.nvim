@@ -28,6 +28,19 @@
 local M = {}
 
 -- ---------------------------------------------------------------------------
+-- Debug logging
+-- ---------------------------------------------------------------------------
+
+---Log `msg` to :messages when `setup({ debug = true })` is active.
+---@param msg string
+local function debug_log(msg)
+  local ok, cfg = pcall(require, "open.config")
+  if ok and cfg.is_debug() then
+    require("lib.nvim.notify").create("[open.context]").info(msg)
+  end
+end
+
+-- ---------------------------------------------------------------------------
 -- URL heuristic
 -- ---------------------------------------------------------------------------
 
@@ -198,6 +211,11 @@ function M.gather()
   local bufname = vim.api.nvim_buf_get_name(0)
   signals.buffer_path = (bufname ~= "" and bufname) or nil
 
+  debug_log(string.format(
+    "gather: tree_path=%s cfile=%s cword=%s visual=%s buffer_path=%s",
+    tostring(signals.tree_path), tostring(signals.cfile),
+    tostring(signals.cword), tostring(signals.visual), tostring(signals.buffer_path)))
+
   return signals
 end
 
@@ -256,13 +274,22 @@ function M.resolve(arg, target, signals)
     text = signals.visual or signals.cword or signals.buffer_path
   end
 
-  if not text or text == "" then return nil end
+  if not text or text == "" then
+    debug_log(string.format("resolve: arg=%s target=%s → nothing to open", tostring(arg), tostring(target)))
+    return nil
+  end
 
-  return {
+  local ctx = {
     text    = text,
     is_url  = looks_like_url(text),
     is_path = resolve_existing_path(text) ~= nil,
   }
+
+  debug_log(string.format(
+    "resolve: arg=%s target=%s → text=%q is_url=%s is_path=%s",
+    tostring(arg), tostring(target), ctx.text, tostring(ctx.is_url), tostring(ctx.is_path)))
+
+  return ctx
 end
 
 return M

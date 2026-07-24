@@ -129,6 +129,33 @@ return function(H)
     end)
   end
 
+  -- debug mode --------------------------------------------------------------
+  do
+    require("open").setup({ debug = true })
+    H.ok(require("open.config").is_debug(), "debug=true is reflected by config.is_debug()")
+
+    local seen_any = false
+    local orig_create = require("lib.nvim.notify").create
+    require("lib.nvim.notify").create = function(tag)
+      local inst = orig_create(tag)
+      local orig_info = inst.info
+      inst.info = function(...)
+        seen_any = true
+        return orig_info(...)
+      end
+      return inst
+    end
+
+    local context = require("open.context")
+    context.gather()
+
+    require("lib.nvim.notify").create = orig_create
+    H.ok(seen_any, "debug=true causes context.gather() to emit an info log")
+
+    require("open").setup({ debug = false })
+    H.falsy(require("open.config").is_debug(), "debug defaults to false")
+  end
+
   -- scope = "git" -----------------------------------------------------------
   do
     require("open").setup({})
