@@ -47,4 +47,10 @@ function M.get()
   return current
 end
 
+---Whether verbose/debug logging is enabled (`setup({ debug = true })`).
+---@return boolean
+function M.is_debug()
+  return current.debug == true
+end
+
 return M

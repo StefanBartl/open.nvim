@@ -97,6 +97,7 @@ packer: >lua
     custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
     keymaps          = {},   -- optional keymaps; none registered by default
     filemanager      = { reveal = true },  -- false: navigate instead of reveal/select
+    debug            = false, -- true: log gather/resolve/dispatch steps to :messages
   })
 <
 
@@ -168,6 +169,10 @@ packer: >lua
               without selecting). Directories are always navigated into
               regardless of this setting — there is nothing to select for a
               directory target.
+
+`debug`
+  Boolean (default false). When true, logs every `context.gather()`,
+  `context.resolve()`, and `registry.dispatch()` step to `:messages`.
 
 `viewer`
   Settings for |:Open-viewer|. Keys:

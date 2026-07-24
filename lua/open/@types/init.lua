@@ -129,6 +129,7 @@
 ---@field custom_handlers     OpenNvim.Handler[]  User-defined handlers, registered alongside `handlers`
 ---@field keymaps             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
 ---@field filemanager         OpenNvim.Filemanager.Config  `filemanager` handler settings
+---@field debug               boolean   Log every context-gather/resolve/dispatch step to :messages (default false)
 ---@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
 
 ---@class OpenNvim.Filemanager.Config
