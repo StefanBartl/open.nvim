@@ -19,6 +19,11 @@ return {
   -- list above. Each entry is an OpenNvim.Handler: { key, desc, run }.
   custom_handlers = {},
 
+  -- Optional keymaps for common invocations. Empty by default — open.nvim
+  -- ships with no default keymaps. Valid keys: "open_default" | "open_browser"
+  -- | "open_manager". Values are the {lhs} passed to vim.keymap.set().
+  keymaps = {},
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

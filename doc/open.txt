@@ -95,6 +95,7 @@ packer: >lua
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
     custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
+    keymaps          = {},   -- optional keymaps; none registered by default
   })
 <
 
@@ -136,6 +137,24 @@ packer: >lua
             return require("open.util").run_detached({ "zathura", ctx.text }, "zathura")
           end,
         },
+      },
+    })
+<
+
+`keymaps`
+  Optional keymaps for common invocations. None registered by default.
+  Valid keys and what they trigger:
+
+    open_default    lhs for `:Open` (context-aware default)
+    open_browser    lhs for `:Open browser`
+    open_manager    lhs for `:Open filemanager`
+
+  An unrecognized key warns and registers nothing. Example: >lua
+    require("open").setup({
+      keymaps = {
+        open_default = "<leader>oo",
+        open_browser = "<leader>ob",
+        open_manager = "<leader>of",
       },
     })
 <
@@ -586,6 +605,7 @@ Reports:
     @types/init.lua         LuaLS type definitions
     bindings/
       usrcmds.lua           :Open — built on lib.nvim.usercmd.composer
+      keymaps.lua           optional keymaps declared via cfg.keymaps
     handlers/
       filemanager.lua       Explorer / Finder / xdg-open
       browser.lua           browser + chrome/chromium/firefox/edge/safari

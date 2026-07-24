@@ -87,6 +87,9 @@ function M.setup(opts)
 
   -- Register :Open command
   require("open.bindings.usrcmds").register(cfg)
+
+  -- Register optional keymaps (none by default).
+  require("open.bindings.keymaps").register(cfg)
 end
 
 return M

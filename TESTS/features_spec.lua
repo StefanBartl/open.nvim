@@ -49,4 +49,32 @@ return function(H)
       end
     end)
   end
+
+  -- keymaps -------------------------------------------------------------
+  do
+    require("open").setup({
+      keymaps = {
+        open_default = "zzootest",
+        open_browser = "zzobtest",
+        open_manager = "zzoftest",
+        bogus_name   = "zzoxtest",
+      },
+    })
+
+    local function mapped_rhs(lhs)
+      for _, m in ipairs(vim.api.nvim_get_keymap("n")) do
+        if m.lhs == lhs then return m.rhs end
+      end
+      return nil
+    end
+
+    H.eq(mapped_rhs("zzootest"), "<Cmd>Open<CR>", "open_default keymap maps to :Open")
+    H.eq(mapped_rhs("zzobtest"), "<Cmd>Open browser<CR>", "open_browser keymap maps to :Open browser")
+    H.eq(mapped_rhs("zzoftest"), "<Cmd>Open filemanager<CR>", "open_manager keymap maps to :Open filemanager")
+    H.falsy(mapped_rhs("zzoxtest"), "unknown keymaps.* name registers nothing")
+
+    vim.keymap.del("n", "zzootest")
+    vim.keymap.del("n", "zzobtest")
+    vim.keymap.del("n", "zzoftest")
+  end
 end

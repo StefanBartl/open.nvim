@@ -52,15 +52,26 @@ tokens.
 
 ## Keymaps
 
-None. open.nvim ships with no default keymaps and no `keymaps` config option
-— use `:Open ...` directly, or map it yourself:
+None by default. `setup()` accepts an optional `keymaps` table to register
+fixed, common invocations without writing `vim.keymap.set` yourself:
+
+```lua
+require("open").setup({
+  keymaps = {
+    open_default = "<leader>oo",  -- :Open
+    open_browser = "<leader>ob",  -- :Open browser
+    open_manager = "<leader>of",  -- :Open filemanager
+  },
+})
+```
+
+Registered in [lua/open/bindings/keymaps.lua](../lua/open/bindings/keymaps.lua).
+An unrecognized key in `keymaps` warns and registers nothing. You can still
+map `:Open` (or any other invocation) yourself instead:
 
 ```lua
 vim.keymap.set("n", "<leader>oo", "<Cmd>Open<CR>")
 ```
-
-Built-in keymap bindings (configurable via `setup()`) are tracked as a
-near-term idea in [docs/ROADMAP.md](ROADMAP.md#keymap-bindings-in-config).
 
 ## Autocmds
 
