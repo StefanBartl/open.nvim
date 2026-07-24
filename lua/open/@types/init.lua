@@ -13,6 +13,8 @@
 ---| '"chromium"'      # Chromium
 ---| '"edge"'          # Microsoft Edge
 ---| '"firefox"'       # Mozilla Firefox
+---| '"brave"'         # Brave
+---| '"opera"'         # Opera
 ---| '"safari"'        # Safari (macOS only)
 ---| '"filemanager"'   # System file manager
 ---| '"notepad"'       # System default GUI text editor

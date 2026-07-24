@@ -77,4 +77,18 @@ return function(H)
     vim.keymap.del("n", "zzobtest")
     vim.keymap.del("n", "zzoftest")
   end
+
+  -- brave / opera browser handlers -----------------------------------------
+  do
+    require("open").setup({})
+    local registry = require("open.registry")
+
+    local brave = registry.get("brave")
+    H.ok(brave, "brave handler registered")
+    H.eq(brave.desc, "Open in Brave", "brave handler desc")
+
+    local opera = registry.get("opera")
+    H.ok(opera, "opera handler registered")
+    H.eq(opera.desc, "Open in Opera", "opera handler desc")
+  end
 end

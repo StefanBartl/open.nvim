@@ -26,6 +26,8 @@
 | Chromium | `chromium` | Named browser: Chromium | Linux · WSL · Win · Mac |
 | Mozilla Firefox | `firefox` | Named browser: Mozilla Firefox | Linux · WSL · Win · Mac |
 | Microsoft Edge | `edge` | Named browser: Microsoft Edge | Linux · WSL · Win · Mac |
+| Brave | `brave` | Named browser: Brave | Linux · WSL · Win · Mac |
+| Opera | `opera` | Named browser: Opera | Linux · WSL · Win · Mac |
 | Safari | `safari` | Named browser: Safari | macOS only |
 | File manager | `filemanager` | Path → Explorer / Finder / xdg-open | all |
 | GUI text editor | `notepad` | Text → temp `.txt` → notepad.exe / TextEdit / gedit… | all |

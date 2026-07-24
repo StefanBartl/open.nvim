@@ -247,7 +247,7 @@ browser ~
   Non-URL text is treated as a Google search query.
   Local file paths are wrapped in a `file://` scheme.
 
-chrome | chromium | firefox | edge | safari ~
+chrome | chromium | firefox | edge | brave | opera | safari ~
   Same as `browser` but launch a specific named browser.
   `safari` only works on macOS.
 

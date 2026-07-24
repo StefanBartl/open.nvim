@@ -25,6 +25,8 @@ See [README.md](../README.md) for a quickstart, and
 | `chromium` | Chromium | Linux / WSL / Windows / macOS |
 | `firefox` | Mozilla Firefox | Linux / WSL / Windows / macOS |
 | `edge` | Microsoft Edge | Linux / WSL / Windows / macOS |
+| `brave` | Brave | Linux / WSL / Windows / macOS |
+| `opera` | Opera | Linux / WSL / Windows / macOS |
 | `safari` | Safari | macOS only |
 | `filemanager` | Path → system file manager (Explorer / Finder / xdg-open) | all |
 | `notepad` | Text → temp file → GUI text editor | all |

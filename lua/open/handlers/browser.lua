@@ -151,6 +151,18 @@ function M.register_all(register_fn)
     "Microsoft Edge", "msedge"
   ))
 
+  register_fn(make_named_handler(
+    "brave", "Open in Brave",
+    { "brave-browser", "brave" },
+    "Brave Browser", "brave"
+  ))
+
+  register_fn(make_named_handler(
+    "opera", "Open in Opera",
+    { "opera" },
+    "Opera", "opera"
+  ))
+
   -- Safari (macOS only) --------------------------------------------------
   register_fn({
     key  = "safari",
