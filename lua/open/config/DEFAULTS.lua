@@ -24,6 +24,14 @@ return {
   -- | "open_manager". Values are the {lhs} passed to vim.keymap.set().
   keymaps = {},
 
+  -- `filemanager` handler settings.
+  filemanager = {
+    -- true (default): reveal a file (select it in its parent directory).
+    -- false: navigate to it (open its parent directory without selecting).
+    -- Directories are always navigated into, regardless of this setting.
+    reveal = true,
+  },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

@@ -92,6 +92,43 @@ return function(H)
     H.eq(opera.desc, "Open in Opera", "opera handler desc")
   end
 
+  -- filemanager reveal option ----------------------------------------------
+  do
+    require("open").setup({ filemanager = { reveal = false } })
+    H.eq(require("open.config").get().filemanager.reveal, false, "filemanager.reveal is configurable")
+
+    require("open").setup({})
+    H.eq(require("open.config").get().filemanager.reveal, true, "filemanager.reveal defaults to true")
+
+    H.tmpdir(function(dir)
+      local file = dir .. "/reveal_test.txt"
+      H.write(file, "x")
+
+      local filemanager = require("open.handlers.filemanager")
+      local registered
+      filemanager.register_all(function(h) registered = h return true end)
+
+      local util = require("open.util")
+      local orig_run_detached = util.run_detached
+      local seen_cmd
+
+      util.run_detached = function(cmd) seen_cmd = cmd return true end
+
+      require("open").setup({ filemanager = { reveal = true } })
+      registered.run({ text = file, is_url = false, is_path = true })
+      local reveal_cmd = table.concat(seen_cmd, " ")
+
+      require("open").setup({ filemanager = { reveal = false } })
+      registered.run({ text = file, is_url = false, is_path = true })
+      local navigate_cmd = table.concat(seen_cmd, " ")
+
+      util.run_detached = orig_run_detached
+
+      H.ok(reveal_cmd ~= navigate_cmd,
+        "filemanager.reveal=true and reveal=false build different commands for a file target")
+    end)
+  end
+
   -- scope = "git" -----------------------------------------------------------
   do
     require("open").setup({})

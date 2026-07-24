@@ -121,6 +121,24 @@ An unrecognized key warns and is ignored. For anything not covered by these
 three fixed targets, map `:Open ...` yourself — see
 [docs/BINDINGS.md](BINDINGS.md#keymaps).
 
+## `filemanager`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `reveal` | `true` | Reveal a file (select it in its parent directory) instead of navigating into that directory. |
+
+```lua
+require("open").setup({
+  filemanager = { reveal = false },
+})
+```
+
+Directories are always navigated into, regardless of `reveal` — there is
+nothing to "select" for a directory target. Only Windows Explorer and
+macOS Finder distinguish reveal from navigate at the OS level; on Linux the
+handler passes the file's parent directory to the file manager instead of
+the file itself when `reveal = false`.
+
 ## `viewer`
 
 | Key | Default | Meaning |

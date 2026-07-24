@@ -128,7 +128,11 @@
 ---@field keywords            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
 ---@field custom_handlers     OpenNvim.Handler[]  User-defined handlers, registered alongside `handlers`
 ---@field keymaps             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
+---@field filemanager         OpenNvim.Filemanager.Config  `filemanager` handler settings
 ---@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
+
+---@class OpenNvim.Filemanager.Config
+---@field reveal boolean  true (default): reveal/select a file; false: navigate to its parent dir
 
 ---Optional keymaps registered by setup(). Unset keys register nothing.
 ---@class OpenNvim.Keymaps
