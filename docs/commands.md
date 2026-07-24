@@ -43,6 +43,7 @@ Two command families, both built via
 | *(omitted)* | Target-aware heuristic (tree node → cfile → buffer path or cWORD) |
 | `%` | Current buffer's file path |
 | `cfile` | `<cfile>` text under the cursor |
+| `git` | Nearest Git root (`git rev-parse --show-toplevel`) |
 | `path=<path>` | Literal path (supports file completion after `path=`) |
 | `<keyword>` | Named scope keyword (see [docs/keywords.md](keywords.md)) |
 | `<text>` | Any other text is used verbatim |
@@ -58,14 +59,15 @@ Examples:
 :Open default MY_ROADMAP          open a user keyword with the default app
 :Open terminal                    open a terminal in the current buffer's directory
 :Open terminal cfile              open a terminal in <cfile>'s parent directory
+:Open filemanager git             open the current Git root in the file manager
 ```
 
 ## Tab completion
 
 ```
 :Open <Tab>                      all registered handler names
-:Open browser <Tab>              %  cfile  path=  <keywords>  <file completion>
-:Open split <Tab>                %  cfile  path=  <keywords>  <file completion>
+:Open browser <Tab>              %  cfile  git  path=  <keywords>  <file completion>
+:Open split <Tab>                %  cfile  git  path=  <keywords>  <file completion>
 :Open filemanager path=<Tab>     file/directory completion after path=
 :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix filter)
 ```

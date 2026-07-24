@@ -211,6 +211,7 @@ The second argument controls what text is passed to the handler.
 
   "%"           Current buffer's file path.
   "cfile"       `<cfile>` text under the cursor.
+  "git"         Nearest Git root (`git rev-parse --show-toplevel`).
   "path=<path>" Literal path (supports file completion after `path=`).
   <keyword>     Named scope alias — see |open-keywords|.
   <anything>    Any other text is used verbatim as the resolved path/URL.
@@ -227,6 +228,7 @@ Examples using keywords: >
   :Open split pwsh_profile     open PowerShell $PROFILE in a split
   :Open split gitconfig        open ~/.gitconfig in a split
   :Open split MY_ROADMAP       open a user-defined keyword
+  :Open filemanager git        open the current Git root in the file manager
 <
 
 ------------------------------------------------------------------------------
@@ -376,7 +378,7 @@ To disable all built-in keywords: >lua
 `:Open` completes context-sensitively: >
 
   :Open <Tab>                      all registered handler names
-  :Open browser <Tab>              %  cfile  path=  <keywords>  <files>
+  :Open browser <Tab>              %  cfile  git  path=  <keywords>  <files>
   :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix match)
   :Open filemanager path=<Tab>     file/directory completion after path=
 <
