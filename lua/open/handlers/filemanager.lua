@@ -70,11 +70,16 @@ function M.register_all(register_fn)
       local cmd
 
       if plat.is_win then
+        -- explorer.exe is invoked directly (no cmd.exe /c start wrapper):
+        -- the target program is already known, so routing through cmd.exe's
+        -- `start` just exposes the same `&`-truncation bug that
+        -- open.util.cmd_escape_unquoted documents for the browser handler,
+        -- for no benefit.
         if file and reveal then
-          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. path }
+          cmd = { "explorer.exe", "/select," .. path }
         else
           local target = file and vim.fn.fnamemodify(path, ":h") or path
-          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", target }
+          cmd = { "explorer.exe", target }
         end
 
       elseif plat.is_wsl then
@@ -85,9 +90,9 @@ function M.register_all(register_fn)
           return false
         end
         if file and reveal then
-          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", "/select," .. win_target }
+          cmd = { "explorer.exe", "/select," .. win_target }
         else
-          cmd = { "cmd.exe", "/c", "start", '""', "explorer.exe", win_target }
+          cmd = { "explorer.exe", win_target }
         end
 
       elseif plat.is_mac then
