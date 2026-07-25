@@ -267,7 +267,7 @@ default ~
   Open in the system default application — equivalent to a double-click.
   The OS picks the app based on the file extension or URL scheme:
   `.pdf` → PDF viewer, `.docx` → Word, `https://` → default browser, etc.
-  Windows:   `cmd.exe /C start "" <path>`
+  Windows:   `explorer.exe <path>`
   WSL:       converts path via `wslpath`, then same as Windows;
              falls back to `xdg-open` for Linux-only paths
   macOS:     `open <path>`
