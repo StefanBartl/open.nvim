@@ -3,9 +3,11 @@
 ---@description
 --- Used by both `open.open()` and `:Open` when `cfg.picker.enabled == true`
 --- and `open.context.candidate_targets()` returns more than one candidate
---- for the current context. Uses `vim.ui.select`, so any `vim.ui.select`
---- override (telescope-ui-select, fzf-lua, dressing.nvim) is picked up
---- automatically; the built-in `vim.ui.select` is used otherwise.
+--- for the current context. Routes through `lib.nvim.ui.kit.select` with
+--- `respect_override = true`: any `vim.ui.select` override (telescope-ui-
+--- select, fzf-lua, dressing.nvim) is still picked up automatically, but
+--- kit's own themed chooser is used when nothing has overridden it, instead
+--- of the built-in `vim.ui.select`.
 
 local M = {}
 
@@ -17,23 +19,26 @@ function M.select(candidates, scope, signals)
   local context  = require("open.context")
   local registry = require("open.registry")
 
-  vim.ui.select(candidates, {
-    prompt = "Open with:",
+  require("lib.nvim.ui.kit").select({
+    items = candidates,
+    title = "Open with:",
+    respect_override = true,
     format_item = function(key)
       local h = registry.get(key)
       return h and string.format("%-14s  %s", h.key, h.desc) or key
     end,
-  }, function(choice)
-    if not choice then return end
+    on_select = function(choice)
+      if not choice then return end
 
-    local ctx = context.resolve(scope, choice, signals)
-    if not ctx then
-      require("lib.nvim.notify").create("[open]").warn("Nothing to open")
-      return
-    end
+      local ctx = context.resolve(scope, choice, signals)
+      if not ctx then
+        require("lib.nvim.notify").create("[open]").warn("Nothing to open")
+        return
+      end
 
-    registry.dispatch(choice, ctx)
-  end)
+      registry.dispatch(choice, ctx)
+    end,
+  })
 end
 
 return M
