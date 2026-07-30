@@ -3,7 +3,8 @@
 ---@description
 --- Writes the context text to a temporary file, then launches the
 --- platform's GUI text editor.
----   Windows / WSL  → notepad.exe
+---   Windows        → notepad.exe
+---   WSL            → notepad.exe, temp path converted via wslpath first
 ---   macOS          → open -e (TextEdit)
 ---   Linux          → xdg-open, then: gedit, kate, mousepad, leafpad, pluma, xed
 ---

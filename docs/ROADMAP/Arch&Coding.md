@@ -168,18 +168,30 @@ loop. None of the micro-benchmark guidance (table pre-sizing, `t[i]=v`,
 weak-table memoization, GC tuning) has anything to attach to at this scale.
 
 ## Concentrated action items
-1. **Add a minimal test entry point.** No `test/` directory exists at all
-   (§6). Even a small headless smoke test exercising `context.resolve()`
-   against synthetic signals and one handler's pure `to_url`/`resolve_path`
-   helper would close the biggest gap found in this audit.
-2. **Adopt `lib.usercmd` for the one `:Open` registration** in
-   `bindings/usrcmds.lua:9`, for consistency with the personal `lib.nvim`
-   convention — low value on its own (only one command exists) but closes
-   the NVIM-Config-specific gap outright.
-3. **Consider a `safe_call`-style wrapper** if error handling ever needs to
-   grow past ad hoc `notify.error(string)` — not urgent given the plugin's
-   size, but §1/§7 both call for structured error results rather than bare
-   strings.
+1. ~~**Add a minimal test entry point.**~~ — ✅ done, and the finding was
+   already stale when written: `TESTS/` exists with six specs
+   (`features`, `usrcmds`, `viewer`, `viewer_scan`, `harvest_render`,
+   `harvest_scope`), a shared `harness.lua` and a headless `run.lua` that
+   exits non-zero on failure. It is now gated in CI
+   (`.github/workflows/ci.yml`) alongside stylua and luacheck.
+2. ~~**Adopt `lib.usercmd` for the one `:Open` registration**~~ — ✅ done,
+   also stale as written: `bindings/usrcmds.lua` builds every command
+   through `lib.nvim.usercmd.composer`, including two custom completion
+   types (`OPEN_TARGET`, `OPEN_SCOPE`) and the `:UrlView`/`:MDLinksView`
+   wrapper verbs.
+3. **Consider a `safe_call`-style wrapper** — still open, still not urgent.
+   Error handling remains ad hoc `notify.error(string)`, which is
+   proportionate at this size; revisit only if a caller ever needs to
+   branch on *why* a dispatch failed rather than just report it.
 4. No action needed on §§3/4/8/9/10 — these are correctly N/A for a
    plugin this size; do not add ceremony (metatables, weak tables, caches)
    that has nothing to justify it yet.
+
+## Status
+
+Items 1 and 2 were both already satisfied by the time this audit was
+re-read; they are marked done rather than deleted so a future run does not
+re-flag them. Item 3 is the only genuinely open line, and is deliberately
+deferred. Platform detection likewise already delegates to
+`lib.nvim.cross.platform.*` (`platform.lua`), and WSL path conversion now
+goes through the shared `lib.nvim.cross.fs.wslpath`.

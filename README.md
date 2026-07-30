@@ -7,6 +7,7 @@
         open files, URLs, and paths from anywhere in Neovim
 </pre>
 
+[![CI](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9%2B-57A143?logo=neovim&logoColor=white)
 ![Lua](https://img.shields.io/badge/Made%20with-Lua-2C2D72?logo=lua&logoColor=white)
 ![Depends](https://img.shields.io/badge/depends-lib.nvim-orange)

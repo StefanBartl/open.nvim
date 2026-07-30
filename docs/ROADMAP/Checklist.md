@@ -262,17 +262,35 @@ Checked every `run_detached`/`vim.fn.system` call site in `handlers/*.lua` and
 
 ## Concentrated action items
 
-1. **De-duplicate `wsl_to_win_path`** — identical private helper exists in
-   both `lua/open/handlers/filemanager.lua:32-35` and
-   `lua/open/handlers/default.lua:31-34`. Move to `util.lua` as
-   `util.wsl_to_win_path(unix_path)` to keep the one WSL-path-conversion
-   concern in one place.
-2. **Add stylua/luacheck (+ optional CI workflow)** — no formatter/linter
-   config exists in the repo. Low urgency for a solo/small plugin, but cheap
-   to add and matches the tooling bar already set in the sibling
-   filetree.nvim repo.
-3. No other gaps found worth actioning beyond what `docs/ROADMAP.md` already
-   tracks (custom handlers via `setup()`, `terminal` handler, keymap config,
-   `git`-scope, picker integration, `reveal` option, debug mode, context
-   cache). Everything else in the source checklist that doesn't reduce to
-   ➖ N/A for a dispatcher plugin of this size is already ✅.
+All worked off — see the status notes below.
+
+1. ~~**De-duplicate `wsl_to_win_path`**~~ — ✅ done. Rather than moving it to
+   this plugin's `util.lua`, it was upstreamed to
+   `lib.nvim.cross.fs.wslpath` (`to_win`/`to_unix`), since the same private
+   helper existed in *three* places once `lib.nvim.cross.open_default`'s own
+   copy is counted. Both `handlers/filemanager.lua` and
+   `handlers/default.lua` now call the shared module.
+2. ~~**Add stylua/luacheck (+ optional CI workflow)**~~ — ✅ done.
+   `stylua.toml` + `.luacheckrc` mirror pickers.nvim's settings;
+   `.github/workflows/ci.yml` gates on `stylua --check`, `luacheck` and the
+   headless `TESTS/run.lua` suite (with lib.nvim checked out as a sibling).
+   The tree is stylua-formatted and luacheck-clean (0 warnings, 0 errors).
+3. No other gaps found worth actioning. `docs/ROADMAP.md` is now empty —
+   every feature it tracked (custom handlers via `setup()`, `terminal`
+   handler, keymap config, `git`-scope, picker integration, `reveal`
+   option, debug mode, context cache) has shipped.
+
+## Found while working off the above
+
+- **WSL bug in the `notepad` handler** (fixed): `notepad.exe` is a Windows
+  binary but was handed the raw tempfile path (`/tmp/nvimXXX/0`), which it
+  cannot resolve — `:Open notepad` under WSL always failed with a
+  file-not-found dialog. It now converts via `cross.fs.wslpath.to_win`
+  first, the same way the filemanager handler already did.
+- **`TESTS/viewer_spec.lua`'s "URLs go to the browser" case** recorded the
+  dispatched handler but never asserted on it, so it would have passed even
+  if a URL had gone somewhere else entirely. The implied assertion is now
+  made (and passes).
+- Note for future audit runs: this file's §6 "no `test/` directory exists"
+  finding was already stale when written — `TESTS/` exists with 6 specs and
+  a headless runner, and is now wired into CI.
