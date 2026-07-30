@@ -232,10 +232,12 @@ return function(H)
     viewer.open(link({ target = "www.example.com", kind = "url" }))
     H.eq(seen.text, "https://www.example.com", "www target gains a scheme")
     H.ok(seen.is_url, "dispatched as a URL")
+    H.eq(seen_handler, "browser", "a URL is dispatched to the browser handler")
 
     -- A markdown link whose target is a URL must also go to the browser.
     viewer.open(link({ target = "https://md.dev", kind = "mdlink", text = "x" }))
     H.ok(seen.is_url, "markdown link to a URL dispatches as a URL")
+    H.eq(seen_handler, "browser", "a markdown link to a URL also goes to the browser")
 
     registry.dispatch = orig
   end

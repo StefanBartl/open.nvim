@@ -48,8 +48,18 @@ local function run(ctx)
   local plat = platform.get()
   local cmd
 
-  if plat.is_win or plat.is_wsl then
+  if plat.is_win then
     cmd = { "notepad.exe", tmpfile }
+  elseif plat.is_wsl then
+    -- notepad.exe is a Windows binary and cannot open a Linux path: the temp
+    -- file lives at something like /tmp/nvimXXX/0, which it would report as
+    -- not found. Convert to the \\wsl$\... form first.
+    local win_tmp = require("lib.nvim.cross.fs.wslpath").to_win(tmpfile)
+    if not win_tmp then
+      notify.error("wslpath conversion failed for: " .. tmpfile)
+      return false
+    end
+    cmd = { "notepad.exe", win_tmp }
   elseif plat.is_mac then
     cmd = { "open", "-e", tmpfile }
   else
@@ -61,11 +71,11 @@ local function run(ctx)
     cmd = { ed, tmpfile }
   end
 
-  local ok, err = util.run_detached(cmd, "notepad")
+  local ok, spawn_err = util.run_detached(cmd, "notepad")
   if ok then
     notify.info("Opened temp file: " .. tmpfile)
   else
-    notify.error(err)
+    notify.error(spawn_err)
   end
   return ok
 end
