@@ -9,9 +9,9 @@
 ---
 --- "editor" is registered as an alias for "notepad".
 
-local notify   = require("lib.nvim.notify").create("[open.notepad]")
+local notify = require("lib.nvim.notify").create("[open.notepad]")
 local platform = require("open.platform")
-local util     = require("open.util")
+local util = require("open.util")
 
 local M = {}
 
@@ -31,8 +31,13 @@ end
 ---@return string|nil
 local function linux_editor()
   return util.find_exec({
-    "xdg-open", "gedit", "kate",
-    "mousepad", "leafpad", "pluma", "xed",
+    "xdg-open",
+    "gedit",
+    "kate",
+    "mousepad",
+    "leafpad",
+    "pluma",
+    "xed",
   })
 end
 
@@ -83,14 +88,14 @@ end
 ---@param register_fn fun(h: OpenNvim.Handler): boolean
 function M.register_all(register_fn)
   register_fn({
-    key  = "notepad",
+    key = "notepad",
     desc = "Open text in the system default GUI text editor (via temp file)",
-    run  = run,
+    run = run,
   })
   register_fn({
-    key  = "editor",
+    key = "editor",
     desc = "Alias for notepad: open text in system default GUI text editor",
-    run  = run,
+    run = run,
   })
 end
 

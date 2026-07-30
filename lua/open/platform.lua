@@ -11,9 +11,9 @@
 --- OpenNvim.Platform table shape, not to avoid repeated syscalls.
 
 local is_windows = require("lib.nvim.cross.platform.is_windows")
-local is_macos   = require("lib.nvim.cross.platform.is_macos")
-local is_wsl     = require("lib.nvim.cross.platform.is_wsl")
-local is_linux   = require("lib.nvim.cross.platform.is_linux")
+local is_macos = require("lib.nvim.cross.platform.is_macos")
+local is_wsl = require("lib.nvim.cross.platform.is_wsl")
+local is_linux = require("lib.nvim.cross.platform.is_linux")
 
 local M = {}
 
@@ -26,9 +26,9 @@ function M.get()
   if _cache then return _cache end
 
   _cache = {
-    is_win   = is_windows(),
-    is_mac   = is_macos(),
-    is_wsl   = is_wsl(),
+    is_win = is_windows(),
+    is_mac = is_macos(),
+    is_wsl = is_wsl(),
     is_linux = is_linux(),
   }
 

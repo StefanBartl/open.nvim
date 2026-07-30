@@ -11,12 +11,8 @@ return function(H)
     local lk = vim.tbl_extend("force", base, t)
     -- Mirror what scan.lua derives, so the helper cannot drift from the real
     -- shape and make a filter test pass for the wrong reason.
-    if lk.is_url == nil then
-      lk.is_url = scan.is_url(lk.target)
-    end
-    if lk.is_anchor == nil then
-      lk.is_anchor = scan.is_anchor(lk.target)
-    end
+    if lk.is_url == nil then lk.is_url = scan.is_url(lk.target) end
+    if lk.is_anchor == nil then lk.is_anchor = scan.is_anchor(lk.target) end
     lk.raw_target = lk.raw_target or lk.target
     return lk
   end
@@ -95,7 +91,8 @@ return function(H)
   -- as_markdown --------------------------------------------------------------
   do
     -- A markdown link keeps its own label.
-    local kept = viewer.as_markdown({ link({ target = "https://x.dev", kind = "mdlink", text = "Docs" }) })
+    local kept =
+      viewer.as_markdown({ link({ target = "https://x.dev", kind = "mdlink", text = "Docs" }) })
     H.eq(kept, "[Docs](https://x.dev)", "existing label preserved")
 
     -- A bare URL has no label; falling back to the host keeps the output from
@@ -196,8 +193,11 @@ return function(H)
       local byte = assert(label:find("https://", 1, true), "label has no target")
       return vim.fn.strdisplaywidth(label:sub(1, byte - 1))
     end
-    H.eq(target_col(labels[1]), target_col(labels[2]),
-      "target column starts at the same display column on every row")
+    H.eq(
+      target_col(labels[1]),
+      target_col(labels[2]),
+      "target column starts at the same display column on every row"
+    )
   end
 
   -- labels: a huge list still produces bounded rows --------------------------

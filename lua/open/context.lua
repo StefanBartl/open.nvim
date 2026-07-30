@@ -59,9 +59,7 @@ end
 ---@param msg string
 local function debug_log(msg)
   local ok, cfg = pcall(require, "open.config")
-  if ok and cfg.is_debug() then
-    require("lib.nvim.notify").create("[open.context]").info(msg)
-  end
+  if ok and cfg.is_debug() then require("lib.nvim.notify").create("[open.context]").info(msg) end
 end
 
 -- ---------------------------------------------------------------------------
@@ -88,13 +86,11 @@ local function resolve_existing_path(candidate)
   if type(candidate) ~= "string" or candidate == "" then return nil end
 
   local expanded = vim.fn.expand(candidate)
-  if expanded ~= "" and vim.uv.fs_stat(expanded) then
-    return expanded
-  end
+  if expanded ~= "" and vim.uv.fs_stat(expanded) then return expanded end
 
   local bufdir = vim.fn.expand("%:p:h")
   if bufdir ~= "" then
-    local sep    = package.config:sub(1, 1)
+    local sep = package.config:sub(1, 1)
     local joined = bufdir:gsub("[/\\]$", "") .. sep .. candidate
     if vim.uv.fs_stat(joined) then return joined end
   end
@@ -124,7 +120,7 @@ local function resolve_neotree_path()
   local ok_m, manager = pcall(require, "neo-tree.sources.manager")
   if not ok_m then return nil end
 
-  local buf    = vim.api.nvim_get_current_buf()
+  local buf = vim.api.nvim_get_current_buf()
   local source = (vim.b[buf] and vim.b[buf].neo_tree_source) or "filesystem"
 
   local ok_s, state = pcall(manager.get_state, source)
@@ -155,7 +151,9 @@ end
 local function resolve_nvimtree_path()
   local ok, api = pcall(require, "nvim-tree.api")
   if not ok then return nil end
-  local ok_n, node = pcall(function() return api.tree.get_node_under_cursor() end)
+  local ok_n, node = pcall(function()
+    return api.tree.get_node_under_cursor()
+  end)
   if ok_n and node and node.absolute_path and node.absolute_path ~= "" then
     return node.absolute_path
   end
@@ -164,11 +162,11 @@ end
 
 ---@return string|nil
 local function resolve_netrw_path()
-  local buf    = vim.api.nvim_get_current_buf()
+  local buf = vim.api.nvim_get_current_buf()
   local curdir = vim.b[buf] and vim.b[buf].netrw_curdir
   if not curdir or curdir == "" then return nil end
 
-  local line  = vim.api.nvim_get_current_line()
+  local line = vim.api.nvim_get_current_line()
   local entry = line and line:match("^%s*(.-)%s*$")
   if not entry or entry == "" then return curdir end
 
@@ -182,9 +180,9 @@ local function resolve_tree_node_path()
   local buf = vim.api.nvim_get_current_buf()
   if not vim.api.nvim_buf_is_valid(buf) then return nil end
   local ft = vim.bo[buf].filetype
-  if ft == "neo-tree"  then return resolve_neotree_path() end
-  if ft == "NvimTree"  then return resolve_nvimtree_path() end
-  if ft == "netrw"     then return resolve_netrw_path() end
+  if ft == "neo-tree" then return resolve_neotree_path() end
+  if ft == "NvimTree" then return resolve_nvimtree_path() end
+  if ft == "netrw" then return resolve_netrw_path() end
   return nil
 end
 
@@ -196,10 +194,10 @@ end
 ---@type table<string, boolean>
 local PATH_TARGETS = {
   filemanager = true,
-  split       = true,
-  vsplit      = true,
-  tab         = true,
-  terminal    = true,
+  split = true,
+  vsplit = true,
+  tab = true,
+  terminal = true,
 }
 
 -- ---------------------------------------------------------------------------
@@ -210,9 +208,7 @@ local PATH_TARGETS = {
 ---Memoized for the duration of an enclosing `M.with_cache()` call.
 ---@return OpenNvim.Signals
 function M.gather()
-  if _cache_active and _cached_signals then
-    return _cached_signals
-  end
+  if _cache_active and _cached_signals then return _cached_signals end
 
   ---@type OpenNvim.Signals
   local signals = {}
@@ -220,7 +216,7 @@ function M.gather()
   signals.tree_path = resolve_tree_node_path()
 
   local cfile = vim.fn.expand("<cfile>")
-  signals.cfile      = (cfile ~= "" and cfile) or nil
+  signals.cfile = (cfile ~= "" and cfile) or nil
   signals.cfile_path = resolve_existing_path(signals.cfile)
 
   local cword = vim.fn.expand("<cWORD>")
@@ -229,8 +225,8 @@ function M.gather()
   local mode = vim.fn.mode()
   if mode == "v" or mode == "V" or mode == "\22" then
     local ok, sel = pcall(function()
-      local s     = vim.fn.getpos("'<")
-      local e     = vim.fn.getpos("'>")
+      local s = vim.fn.getpos("'<")
+      local e = vim.fn.getpos("'>")
       local lines = vim.api.nvim_buf_get_text(0, s[2] - 1, s[3] - 1, e[2] - 1, e[3], {})
       return table.concat(lines, "")
     end)
@@ -240,14 +236,18 @@ function M.gather()
   local bufname = vim.api.nvim_buf_get_name(0)
   signals.buffer_path = (bufname ~= "" and bufname) or nil
 
-  debug_log(string.format(
-    "gather: tree_path=%s cfile=%s cword=%s visual=%s buffer_path=%s",
-    tostring(signals.tree_path), tostring(signals.cfile),
-    tostring(signals.cword), tostring(signals.visual), tostring(signals.buffer_path)))
+  debug_log(
+    string.format(
+      "gather: tree_path=%s cfile=%s cword=%s visual=%s buffer_path=%s",
+      tostring(signals.tree_path),
+      tostring(signals.cfile),
+      tostring(signals.cword),
+      tostring(signals.visual),
+      tostring(signals.buffer_path)
+    )
+  )
 
-  if _cache_active then
-    _cached_signals = signals
-  end
+  if _cache_active then _cached_signals = signals end
 
   return signals
 end
@@ -258,9 +258,7 @@ end
 function M.default_target(signals)
   local cfg = require("open.config").get()
 
-  if signals.tree_path then
-    return cfg.default_filemanager
-  end
+  if signals.tree_path then return cfg.default_filemanager end
 
   local probe = signals.cfile or signals.cword or signals.buffer_path or ""
   if probe:match("^https?://") or probe:match("^ftp://") or probe:match("^www%.") then
@@ -278,20 +276,14 @@ end
 function M.candidate_targets(signals)
   local cfg = require("open.config").get()
 
-  if signals.tree_path then
-    return { cfg.default_filemanager }
-  end
+  if signals.tree_path then return { cfg.default_filemanager } end
 
   local probe = signals.cfile or signals.cword or signals.buffer_path or ""
   local is_url = probe:match("^https?://") or probe:match("^ftp://") or probe:match("^www%.")
 
-  if is_url then
-    return { cfg.default_browser, "notepad" }
-  end
+  if is_url then return { cfg.default_browser, "notepad" } end
 
-  if signals.cfile_path then
-    return { cfg.default_filemanager, "split", "vsplit", "tab" }
-  end
+  if signals.cfile_path then return { cfg.default_filemanager, "split", "vsplit", "tab" } end
 
   return { cfg.default_filemanager }
 end
@@ -320,7 +312,8 @@ function M.resolve(arg, target, signals)
       local ok_cfg, cfg = pcall(require, "open.config")
       local kw = ok_cfg and cfg.get().keywords and cfg.get().keywords[arg]
       if kw then
-        text = type(kw) == "function" and kw() or require("lib.nvim.cross.fs.expand_path")(tostring(kw))
+        text = type(kw) == "function" and kw()
+          or require("lib.nvim.cross.fs.expand_path")(tostring(kw))
       else
         text = arg
       end
@@ -334,19 +327,32 @@ function M.resolve(arg, target, signals)
   end
 
   if not text or text == "" then
-    debug_log(string.format("resolve: arg=%s target=%s → nothing to open", tostring(arg), tostring(target)))
+    debug_log(
+      string.format(
+        "resolve: arg=%s target=%s → nothing to open",
+        tostring(arg),
+        tostring(target)
+      )
+    )
     return nil
   end
 
   local ctx = {
-    text    = text,
-    is_url  = looks_like_url(text),
+    text = text,
+    is_url = looks_like_url(text),
     is_path = resolve_existing_path(text) ~= nil,
   }
 
-  debug_log(string.format(
-    "resolve: arg=%s target=%s → text=%q is_url=%s is_path=%s",
-    tostring(arg), tostring(target), ctx.text, tostring(ctx.is_url), tostring(ctx.is_path)))
+  debug_log(
+    string.format(
+      "resolve: arg=%s target=%s → text=%q is_url=%s is_path=%s",
+      tostring(arg),
+      tostring(target),
+      ctx.text,
+      tostring(ctx.is_url),
+      tostring(ctx.is_path)
+    )
+  )
 
   return ctx
 end

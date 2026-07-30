@@ -5,9 +5,9 @@
 --- Non-URL text is treated as a Google search query automatically.
 --- Local file paths are opened with the file:// scheme.
 
-local notify   = require("lib.nvim.notify").create("[open.browser]")
+local notify = require("lib.nvim.notify").create("[open.browser]")
 local platform = require("open.platform")
-local util     = require("open.util")
+local util = require("open.util")
 
 local M = {}
 
@@ -19,13 +19,9 @@ local SEARCH_BASE = "https://www.google.com/search?q="
 local function to_url(ctx)
   local text = ctx.text
 
-  if ctx.is_url then
-    return text:match("^www%.") and ("https://" .. text) or text
-  end
+  if ctx.is_url then return text:match("^www%.") and ("https://" .. text) or text end
 
-  if ctx.is_path then
-    return "file://" .. vim.fn.expand(text)
-  end
+  if ctx.is_path then return "file://" .. vim.fn.expand(text) end
 
   return SEARCH_BASE .. util.url_encode(text)
 end
@@ -73,8 +69,7 @@ local function named_browser_cmd(url, plat, linux_candidates, mac_app, win_token
   else
     local exec = util.find_exec(linux_candidates)
     if not exec then
-      return nil, "None of the candidates found on PATH: "
-        .. table.concat(linux_candidates, ", ")
+      return nil, "None of the candidates found on PATH: " .. table.concat(linux_candidates, ", ")
     end
     return { exec, url }, nil
   end
@@ -85,10 +80,10 @@ end
 ---@return OpenNvim.Handler
 local function make_named_handler(key, desc, linux_candidates, mac_app, win_token)
   return {
-    key  = key,
+    key = key,
     desc = desc,
-    run  = function(ctx)
-      local url  = to_url(ctx)
+    run = function(ctx)
+      local url = to_url(ctx)
       local plat = platform.get()
       local cmd, err = named_browser_cmd(url, plat, linux_candidates, mac_app, win_token)
       if not cmd then
@@ -110,12 +105,12 @@ end
 function M.register_all(register_fn)
   -- System default -------------------------------------------------------
   register_fn({
-    key  = "browser",
+    key = "browser",
     desc = "Open in the system default browser (plain text → Google search)",
-    run  = function(ctx)
-      local url  = to_url(ctx)
+    run = function(ctx)
+      local url = to_url(ctx)
       local plat = platform.get()
-      local cmd  = default_browser_cmd(url, plat)
+      local cmd = default_browser_cmd(url, plat)
       local ok, err = util.run_detached(cmd, "browser")
       if ok then
         notify.info(url)
@@ -127,47 +122,63 @@ function M.register_all(register_fn)
   })
 
   -- Named browsers -------------------------------------------------------
-  register_fn(make_named_handler(
-    "chrome", "Open in Google Chrome",
-    { "google-chrome", "google-chrome-stable", "chromium", "chromium-browser" },
-    "Google Chrome", "chrome"
-  ))
+  register_fn(
+    make_named_handler(
+      "chrome",
+      "Open in Google Chrome",
+      { "google-chrome", "google-chrome-stable", "chromium", "chromium-browser" },
+      "Google Chrome",
+      "chrome"
+    )
+  )
 
-  register_fn(make_named_handler(
-    "chromium", "Open in Chromium",
-    { "chromium", "chromium-browser", "google-chrome" },
-    "Chromium", "chrome"
-  ))
+  register_fn(
+    make_named_handler(
+      "chromium",
+      "Open in Chromium",
+      { "chromium", "chromium-browser", "google-chrome" },
+      "Chromium",
+      "chrome"
+    )
+  )
 
-  register_fn(make_named_handler(
-    "firefox", "Open in Mozilla Firefox",
-    { "firefox", "firefox-esr" },
-    "Firefox", "firefox"
-  ))
+  register_fn(
+    make_named_handler(
+      "firefox",
+      "Open in Mozilla Firefox",
+      { "firefox", "firefox-esr" },
+      "Firefox",
+      "firefox"
+    )
+  )
 
-  register_fn(make_named_handler(
-    "edge", "Open in Microsoft Edge",
-    { "microsoft-edge", "microsoft-edge-stable", "microsoft-edge-dev" },
-    "Microsoft Edge", "msedge"
-  ))
+  register_fn(
+    make_named_handler(
+      "edge",
+      "Open in Microsoft Edge",
+      { "microsoft-edge", "microsoft-edge-stable", "microsoft-edge-dev" },
+      "Microsoft Edge",
+      "msedge"
+    )
+  )
 
-  register_fn(make_named_handler(
-    "brave", "Open in Brave",
-    { "brave-browser", "brave" },
-    "Brave Browser", "brave"
-  ))
+  register_fn(
+    make_named_handler(
+      "brave",
+      "Open in Brave",
+      { "brave-browser", "brave" },
+      "Brave Browser",
+      "brave"
+    )
+  )
 
-  register_fn(make_named_handler(
-    "opera", "Open in Opera",
-    { "opera" },
-    "Opera", "opera"
-  ))
+  register_fn(make_named_handler("opera", "Open in Opera", { "opera" }, "Opera", "opera"))
 
   -- Safari (macOS only) --------------------------------------------------
   register_fn({
-    key  = "safari",
+    key = "safari",
     desc = "Open in Safari (macOS only)",
-    run  = function(ctx)
+    run = function(ctx)
       if not platform.get().is_mac then
         notify.warn("Safari is only available on macOS")
         return false

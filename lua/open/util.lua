@@ -30,9 +30,7 @@ function M.run_detached(cmd, label)
   -- Neovim<0.10-jobstart fallback chain to lib.nvim.cross.run.run_detached
   -- (this module's own version was upstreamed into it).
   local ok, err = require("lib.nvim.cross.run").run_detached(cmd)
-  if not ok then
-    return false, "Failed to launch '" .. label .. "': " .. tostring(err)
-  end
+  if not ok then return false, "Failed to launch '" .. label .. "': " .. tostring(err) end
   return true
 end
 
@@ -61,9 +59,7 @@ end
 ---@return string|nil
 function M.find_exec(candidates)
   for _, name in ipairs(candidates) do
-    if vim.fn.executable(name) == 1 then
-      return name
-    end
+    if vim.fn.executable(name) == 1 then return name end
   end
   return nil
 end

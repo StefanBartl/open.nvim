@@ -22,12 +22,12 @@ local M = {}
 
 -- Map of handler-module keys (used in cfg.handlers) to require paths.
 local HANDLER_MODULES = {
-  filemanager   = "open.handlers.filemanager",
-  browser       = "open.handlers.browser",
-  notepad       = "open.handlers.notepad",
+  filemanager = "open.handlers.filemanager",
+  browser = "open.handlers.browser",
+  notepad = "open.handlers.notepad",
   nvim_internal = "open.handlers.nvim_internal",
-  default       = "open.handlers.default",
-  terminal      = "open.handlers.terminal",
+  default = "open.handlers.default",
+  terminal = "open.handlers.terminal",
 }
 
 -- ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@ local HANDLER_MODULES = {
 ---@param target string|nil  Handler key; nil → context-aware default.
 ---@param scope  string|nil  Scope token: "%", "cfile", "path=…", or literal.
 function M.open(target, scope)
-  local context  = require("open.context")
+  local context = require("open.context")
   local registry = require("open.registry")
 
   context.with_cache(function()
@@ -53,7 +53,7 @@ function M.open(target, scope)
       end
     end
 
-    local t   = target and target:lower() or context.default_target(signals)
+    local t = target and target:lower() or context.default_target(signals)
     local ctx = context.resolve(scope, t, signals)
 
     if not ctx then
@@ -86,9 +86,9 @@ function M.setup(opts)
         pcall(mod.register_all, registry.register)
       end
     else
-      require("lib.nvim.notify").create("[open]").warn(
-        "Unknown handler module key: '" .. key .. "'"
-      )
+      require("lib.nvim.notify")
+        .create("[open]")
+        .warn("Unknown handler module key: '" .. key .. "'")
     end
   end
 

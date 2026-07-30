@@ -127,7 +127,9 @@ return function(H)
 
   -- provenance is attached ---------------------------------------------------
   do
-    local out = scan.from_sources({ { lines = { "https://x.dev" }, first = 1, file = "/tmp/a.md", bufnr = 7 } })
+    local out = scan.from_sources({
+      { lines = { "https://x.dev" }, first = 1, file = "/tmp/a.md", bufnr = 7 },
+    })
     H.eq(out[1].file, "/tmp/a.md", "file provenance attached")
     H.eq(out[1].bufnr, 7, "bufnr provenance attached")
   end
@@ -150,35 +152,41 @@ return function(H)
     H.eq(url_md[1].kind, "mdlink", "syntactic kind stays mdlink")
     H.ok(url_md[1].is_url, "but a markdown link to a URL is flagged is_url")
 
-    local file_md = scan.from_source(
-      { lines = { "[doc](../notes.md)" }, first = 1, file = "/repo/docs/a.md" }
-    )
+    local file_md =
+      scan.from_source({ lines = { "[doc](../notes.md)" }, first = 1, file = "/repo/docs/a.md" })
     H.eq(file_md[1].kind, "mdlink", "local markdown link is still an mdlink")
     H.falsy(file_md[1].is_url, "but is not flagged is_url")
   end
 
   -- relative targets resolve against the source file's directory -------------
   do
-    local out = scan.from_source(
-      { lines = { "[x](../../lua/startup/init.lua)" }, first = 1, file = "/repo/docs/notes/startup.md" }
+    local out = scan.from_source({
+      lines = { "[x](../../lua/startup/init.lua)" },
+      first = 1,
+      file = "/repo/docs/notes/startup.md",
+    })
+    H.eq(
+      out[1].target,
+      "/repo/lua/startup/init.lua",
+      "relative target resolved against the source dir"
     )
-    H.eq(out[1].target, "/repo/lua/startup/init.lua", "relative target resolved against the source dir")
     H.eq(out[1].raw_target, "../../lua/startup/init.lua", "raw target preserved as written")
   end
 
   -- a fragment is kept but not treated as part of the filename ---------------
   do
-    local out = scan.from_source(
-      { lines = { "[x](./other.md#some-heading)" }, first = 1, file = "/repo/docs/a.md" }
-    )
+    local out = scan.from_source({
+      lines = { "[x](./other.md#some-heading)" },
+      first = 1,
+      file = "/repo/docs/a.md",
+    })
     H.eq(out[1].target, "/repo/docs/other.md#some-heading", "path resolved, fragment reattached")
   end
 
   -- an absolute target is normalized, not re-anchored ------------------------
   do
-    local out = scan.from_source(
-      { lines = { "[x](/abs/target.md)" }, first = 1, file = "/repo/docs/a.md" }
-    )
+    local out =
+      scan.from_source({ lines = { "[x](/abs/target.md)" }, first = 1, file = "/repo/docs/a.md" })
     H.contains(out[1].target, "/abs/target.md", "absolute target left absolute")
   end
 

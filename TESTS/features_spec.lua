@@ -11,9 +11,12 @@ return function(H)
     require("open").setup({
       custom_handlers = {
         {
-          key  = "test_custom_handler",
+          key = "test_custom_handler",
           desc = "test handler",
-          run  = function() seen = true return true end,
+          run = function()
+            seen = true
+            return true
+          end,
         },
       },
     })
@@ -31,7 +34,10 @@ return function(H)
     H.tmpdir(function(dir)
       local terminal = require("open.handlers.terminal")
       local registered
-      terminal.register_all(function(h) registered = h return true end)
+      terminal.register_all(function(h)
+        registered = h
+        return true
+      end)
       H.eq(registered.key, "terminal", "terminal handler registers under key 'terminal'")
 
       local win_count_before = #vim.api.nvim_list_wins()
@@ -40,13 +46,12 @@ return function(H)
       H.ok(ok, "terminal handler run() succeeds for an existing directory")
       H.eq(vim.bo.buftype, "terminal", "terminal handler opens a :terminal buffer")
 
-      local ok_url = registered.run({ text = "https://example.com", is_url = true, is_path = false })
+      local ok_url =
+        registered.run({ text = "https://example.com", is_url = true, is_path = false })
       H.falsy(ok_url, "terminal handler rejects a URL context")
 
       vim.cmd("bwipeout!")
-      if #vim.api.nvim_list_wins() > win_count_before then
-        vim.cmd("close")
-      end
+      if #vim.api.nvim_list_wins() > win_count_before then vim.cmd("close") end
     end)
   end
 
@@ -57,7 +62,7 @@ return function(H)
         open_default = "zzootest",
         open_browser = "zzobtest",
         open_manager = "zzoftest",
-        bogus_name   = "zzoxtest",
+        bogus_name = "zzoxtest",
       },
     })
 
@@ -69,8 +74,16 @@ return function(H)
     end
 
     H.eq(mapped_rhs("zzootest"), "<Cmd>Open<CR>", "open_default keymap maps to :Open")
-    H.eq(mapped_rhs("zzobtest"), "<Cmd>Open browser<CR>", "open_browser keymap maps to :Open browser")
-    H.eq(mapped_rhs("zzoftest"), "<Cmd>Open filemanager<CR>", "open_manager keymap maps to :Open filemanager")
+    H.eq(
+      mapped_rhs("zzobtest"),
+      "<Cmd>Open browser<CR>",
+      "open_browser keymap maps to :Open browser"
+    )
+    H.eq(
+      mapped_rhs("zzoftest"),
+      "<Cmd>Open filemanager<CR>",
+      "open_manager keymap maps to :Open filemanager"
+    )
     H.falsy(mapped_rhs("zzoxtest"), "unknown keymaps.* name registers nothing")
 
     vim.keymap.del("n", "zzootest")
@@ -95,10 +108,18 @@ return function(H)
   -- filemanager reveal option ----------------------------------------------
   do
     require("open").setup({ filemanager = { reveal = false } })
-    H.eq(require("open.config").get().filemanager.reveal, false, "filemanager.reveal is configurable")
+    H.eq(
+      require("open.config").get().filemanager.reveal,
+      false,
+      "filemanager.reveal is configurable"
+    )
 
     require("open").setup({})
-    H.eq(require("open.config").get().filemanager.reveal, true, "filemanager.reveal defaults to true")
+    H.eq(
+      require("open.config").get().filemanager.reveal,
+      true,
+      "filemanager.reveal defaults to true"
+    )
 
     H.tmpdir(function(dir)
       local file = dir .. "/reveal_test.txt"
@@ -106,13 +127,19 @@ return function(H)
 
       local filemanager = require("open.handlers.filemanager")
       local registered
-      filemanager.register_all(function(h) registered = h return true end)
+      filemanager.register_all(function(h)
+        registered = h
+        return true
+      end)
 
       local util = require("open.util")
       local orig_run_detached = util.run_detached
       local seen_cmd
 
-      util.run_detached = function(cmd) seen_cmd = cmd return true end
+      util.run_detached = function(cmd)
+        seen_cmd = cmd
+        return true
+      end
 
       require("open").setup({ filemanager = { reveal = true } })
       registered.run({ text = file, is_url = false, is_path = true })
@@ -124,8 +151,10 @@ return function(H)
 
       util.run_detached = orig_run_detached
 
-      H.ok(reveal_cmd ~= navigate_cmd,
-        "filemanager.reveal=true and reveal=false build different commands for a file target")
+      H.ok(
+        reveal_cmd ~= navigate_cmd,
+        "filemanager.reveal=true and reveal=false build different commands for a file target"
+      )
     end)
   end
 
@@ -160,8 +189,11 @@ return function(H)
   do
     local context = require("open.context")
 
-    H.eq(#context.candidate_targets({ tree_path = "/x" }), 1,
-      "a tree node has exactly one candidate target")
+    H.eq(
+      #context.candidate_targets({ tree_path = "/x" }),
+      1,
+      "a tree node has exactly one candidate target"
+    )
 
     local url_candidates = context.candidate_targets({ cword = "https://example.com" })
     H.ok(#url_candidates > 1, "a URL-like context has more than one candidate target")
@@ -178,8 +210,12 @@ return function(H)
       local orig_select = vim.ui.select
       local dispatched, prompted = nil, false
 
-      registry.dispatch = function(target) dispatched = target end
-      vim.ui.select = function(...) prompted = true end
+      registry.dispatch = function(target)
+        dispatched = target
+      end
+      vim.ui.select = function(...)
+        prompted = true
+      end
 
       require("open").open("filemanager", "path=/tmp")
 
@@ -198,7 +234,9 @@ return function(H)
       local orig_select = vim.ui.select
       local dispatched, seen_items = nil, nil
 
-      registry.dispatch = function(target) dispatched = target end
+      registry.dispatch = function(target)
+        dispatched = target
+      end
       vim.ui.select = function(items, _opts, on_choice)
         seen_items = items
         on_choice(items[1])
@@ -211,7 +249,10 @@ return function(H)
       registry.dispatch = orig_dispatch
       vim.ui.select = orig_select
 
-      H.ok(seen_items and #seen_items > 1, "picker prompts with multiple candidates for a URL context")
+      H.ok(
+        seen_items and #seen_items > 1,
+        "picker prompts with multiple candidates for a URL context"
+      )
       H.ok(dispatched, "the chosen candidate is dispatched")
 
       require("open").setup({ picker = { enabled = false } })
@@ -228,8 +269,10 @@ return function(H)
     H.ok(ok, "telescope integration picker() does not error when telescope.nvim is absent")
 
     local ext = telescope_integration.extension()
-    H.ok(type(ext) == "table" and type(ext.exports) == "table" and type(ext.exports.open) == "function",
-      "extension() returns a telescope.register_extension()-shaped table")
+    H.ok(
+      type(ext) == "table" and type(ext.exports) == "table" and type(ext.exports.open) == "function",
+      "extension() returns a telescope.register_extension()-shaped table"
+    )
   end
 
   -- context cache -------------------------------------------------------------

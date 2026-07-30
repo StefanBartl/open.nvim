@@ -25,7 +25,7 @@ local M = {}
 ---@param target_raw string|nil
 ---@param scope       string|nil
 local function run_open(target_raw, scope)
-  local context  = require("open.context")
+  local context = require("open.context")
   local registry = require("open.registry")
 
   context.with_cache(function()
@@ -41,7 +41,7 @@ local function run_open(target_raw, scope)
     end
 
     local target = target_raw and target_raw:lower() or context.default_target(signals)
-    local ctx    = context.resolve(scope, target, signals)
+    local ctx = context.resolve(scope, target, signals)
 
     if not ctx then
       require("lib.nvim.notify").create("[open]").warn("Nothing to open")
@@ -55,15 +55,15 @@ end
 -- 1st positional: handler key. Validation stays soft (registry.dispatch
 -- reports unknown targets itself); completion lists live registry keys.
 composer.register_type("OPEN_TARGET", {
-  validate = function(raw) return true, raw, nil end,
+  validate = function(raw)
+    return true, raw, nil
+  end,
   complete = function(arg_lead)
     local ok_r, reg = pcall(require, "open.registry")
     if not ok_r then return {} end
     local names, out = reg.list_keys(), {}
     for i = 1, #names do
-      if names[i]:sub(1, #arg_lead) == arg_lead then
-        out[#out + 1] = names[i]
-      end
+      if names[i]:sub(1, #arg_lead) == arg_lead then out[#out + 1] = names[i] end
     end
     return out
   end,
@@ -73,7 +73,9 @@ composer.register_type("OPEN_TARGET", {
 -- named scope keywords, and general file completion — "path=<lead>" gets
 -- file completion on the part after the prefix, re-prefixed on return.
 composer.register_type("OPEN_SCOPE", {
-  validate = function(raw) return true, raw, nil end,
+  validate = function(raw)
+    return true, raw, nil
+  end,
   complete = function(arg_lead)
     if arg_lead:sub(1, 5) == "path=" then
       local rest = arg_lead:sub(6)
@@ -84,21 +86,17 @@ composer.register_type("OPEN_SCOPE", {
       return candidates
     end
 
-    local out    = {}
+    local out = {}
     local scopes = { "%", "cfile", "git", "path=" }
     for i = 1, #scopes do
-      if scopes[i]:sub(1, #arg_lead) == arg_lead then
-        out[#out + 1] = scopes[i]
-      end
+      if scopes[i]:sub(1, #arg_lead) == arg_lead then out[#out + 1] = scopes[i] end
     end
 
     local ok_cfg, kw_cfg = pcall(require, "open.config")
     if ok_cfg then
       local kw_names = {}
       for name in pairs(kw_cfg.get().keywords or {}) do
-        if name:sub(1, #arg_lead) == arg_lead then
-          kw_names[#kw_names + 1] = name
-        end
+        if name:sub(1, #arg_lead) == arg_lead then kw_names[#kw_names + 1] = name end
       end
       table.sort(kw_names)
       for _, n in ipairs(kw_names) do
@@ -124,9 +122,7 @@ local SCOPE_TOKENS = { "%", "cwd", "buffers" }
 local function complete_scope(arg_lead)
   local out = {}
   for _, s in ipairs(SCOPE_TOKENS) do
-    if s:sub(1, #arg_lead) == arg_lead then
-      out[#out + 1] = s
-    end
+    if s:sub(1, #arg_lead) == arg_lead then out[#out + 1] = s end
   end
   for _, f in ipairs(vim.fn.getcompletion(arg_lead, "file")) do
     out[#out + 1] = f
@@ -137,7 +133,9 @@ end
 -- Scope token for the wrapper commands: the literal scope keywords plus
 -- ordinary file/directory completion.
 composer.register_type("VIEWER_SCOPE", {
-  validate = function(raw) return true, raw, nil end,
+  validate = function(raw)
+    return true, raw, nil
+  end,
   complete = complete_scope,
 })
 
@@ -146,15 +144,15 @@ composer.register_type("VIEWER_SCOPE", {
 -- `enum` here would reject `:Open viewer cwd` outright rather than reading it
 -- as "all kinds, cwd scope", which is the more useful interpretation.
 composer.register_type("VIEWER_KIND", {
-  validate = function(raw) return true, raw, nil end,
+  validate = function(raw)
+    return true, raw, nil
+  end,
   complete = function(arg_lead)
     local out = {}
     local ok, viewer = pcall(require, "open.viewer")
     if ok then
       for _, k in ipairs(viewer.kinds()) do
-        if k:sub(1, #arg_lead) == arg_lead then
-          out[#out + 1] = k
-        end
+        if k:sub(1, #arg_lead) == arg_lead then out[#out + 1] = k end
       end
     end
     for _, s in ipairs(complete_scope(arg_lead)) do
@@ -255,7 +253,9 @@ local function viewer_route(path)
     },
     kv = viewer_kv(),
     flags = viewer_flags(),
-    run = function(ctx) run_viewer(ctx, nil) end,
+    run = function(ctx)
+      run_viewer(ctx, nil)
+    end,
   }
 end
 
@@ -274,7 +274,9 @@ local function viewer_fixed_route(kind)
     },
     kv = viewer_kv(),
     flags = viewer_flags(),
-    run = function(ctx) run_viewer(ctx, kind) end,
+    run = function(ctx)
+      run_viewer(ctx, kind)
+    end,
   }
 end
 
@@ -289,18 +291,24 @@ function M.register(cfg)
     desc = ":Open — open path/URL with the specified handler",
 
     -- Bare `:Open` (zero args) never reaches the routes table below.
-    default = function() run_open(nil, nil) end,
+    default = function()
+      run_open(nil, nil)
+    end,
 
     routes = {
       -- `path = {}` is the root route: it matches with no literal
       -- subcommand, reproducing the flat `:Open [target] [scope]` grammar.
-      { path = {},
+      {
+        path = {},
         args = {
           { name = "target", type = "OPEN_TARGET", optional = true },
-          { name = "scope",  type = "OPEN_SCOPE",   optional = true },
+          { name = "scope", type = "OPEN_SCOPE", optional = true },
         },
         desc = "Open path/URL with the specified handler",
-        run  = function(ctx) run_open(ctx.args.target, ctx.args.scope) end },
+        run = function(ctx)
+          run_open(ctx.args.target, ctx.args.scope)
+        end,
+      },
 
       viewer_route({ "viewer" }),
     },
