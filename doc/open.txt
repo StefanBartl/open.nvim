@@ -294,7 +294,9 @@ filemanager ~
 notepad | editor ~
   Write the context text to a temporary `.txt` file and open it in the
   platform GUI text editor:
-    Windows/WSL: `notepad.exe`
+    Windows:     `notepad.exe`
+    WSL:         `notepad.exe`, with the temp path converted via `wslpath`
+                 first — a Windows binary cannot resolve a Linux path.
     macOS:       `open -e` (TextEdit)
     Linux:       `xdg-open`, then gedit/kate/mousepad/leafpad/pluma/xed
 
