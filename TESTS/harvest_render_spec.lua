@@ -57,7 +57,7 @@ return function(H)
     local out = render.csv({ "a", "b" }, { { "1", "2" } })
     H.eq(out, "a,b\n1,2", "plain csv round-trips")
 
-    local quoted = render.csv(nil, { { 'has,comma', 'has"quote' } })
+    local quoted = render.csv(nil, { { "has,comma", 'has"quote' } })
     H.contains(quoted, '"has,comma"', "a field containing the separator is quoted")
     H.contains(quoted, '"has""quote"', "an embedded quote is doubled")
 
@@ -66,7 +66,11 @@ return function(H)
 
   -- lines --------------------------------------------------------------------
   do
-    H.eq(render.lines({ { "a", "b" }, { "c", "d" } }, "-"), "a-b\nc-d", "lines joins cells and rows")
+    H.eq(
+      render.lines({ { "a", "b" }, { "c", "d" } }, "-"),
+      "a-b\nc-d",
+      "lines joins cells and rows"
+    )
     H.eq(render.lines({}), "", "no rows renders as empty string")
   end
 end

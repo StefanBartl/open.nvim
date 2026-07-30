@@ -28,16 +28,16 @@ function M.setup(opts)
   end
 
   for k, v in pairs(opts.keywords or {}) do
-    merged_keywords[k] = v  -- user overrides built-ins
+    merged_keywords[k] = v -- user overrides built-ins
   end
 
   -- Deep-extend everything else, then attach the pre-built keyword map.
   local opts_rest = vim.tbl_deep_extend("force", {}, opts)
-  opts_rest.keywords         = nil
+  opts_rest.keywords = nil
   opts_rest.builtin_keywords = nil
 
-  current                  = vim.tbl_deep_extend("force", defaults, opts_rest)
-  current.keywords         = merged_keywords
+  current = vim.tbl_deep_extend("force", defaults, opts_rest)
+  current.keywords = merged_keywords
   current.builtin_keywords = opts.builtin_keywords ~= false
 end
 

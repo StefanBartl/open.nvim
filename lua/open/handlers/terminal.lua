@@ -30,9 +30,9 @@ end
 ---@param register_fn fun(h: OpenNvim.Handler): boolean
 function M.register_all(register_fn)
   register_fn({
-    key  = "terminal",
+    key = "terminal",
     desc = "Open a terminal split in the target's directory",
-    run  = function(ctx)
+    run = function(ctx)
       local dir, err = resolve_dir(ctx)
       if not dir then
         notify.error(err or "unknown error")

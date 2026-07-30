@@ -36,8 +36,8 @@ function M.register(cfg)
         local rhs = target and ("<Cmd>" .. cfg.command .. " " .. target .. "<CR>")
           or ("<Cmd>" .. cfg.command .. "<CR>")
         vim.keymap.set("n", lhs, rhs, {
-          desc    = "open.nvim: " .. name,
-          silent  = true,
+          desc = "open.nvim: " .. name,
+          silent = true,
           noremap = true,
         })
       end

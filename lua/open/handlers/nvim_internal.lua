@@ -18,9 +18,7 @@ local function resolve_file_path(ctx)
   local expanded = vim.fn.expand(ctx.text)
   if expanded == "" then return nil, "Cannot expand path: " .. ctx.text end
 
-  if not vim.uv.fs_stat(expanded) then
-    return nil, "Path does not exist: " .. expanded
-  end
+  if not vim.uv.fs_stat(expanded) then return nil, "Path does not exist: " .. expanded end
 
   return expanded, nil
 end
@@ -48,19 +46,19 @@ end
 ---@param register_fn fun(h: OpenNvim.Handler): boolean
 function M.register_all(register_fn)
   register_fn({
-    key  = "split",
+    key = "split",
     desc = "Open file in a new horizontal split inside Neovim",
-    run  = make_nvim_open_fn("split", "split"),
+    run = make_nvim_open_fn("split", "split"),
   })
   register_fn({
-    key  = "vsplit",
+    key = "vsplit",
     desc = "Open file in a new vertical split inside Neovim",
-    run  = make_nvim_open_fn("vsplit", "vsplit"),
+    run = make_nvim_open_fn("vsplit", "vsplit"),
   })
   register_fn({
-    key  = "tab",
+    key = "tab",
     desc = "Open file in a new Neovim tab",
-    run  = make_nvim_open_fn("tabedit", "tab"),
+    run = make_nvim_open_fn("tabedit", "tab"),
   })
 end
 

@@ -45,9 +45,7 @@ end
 ---@param s string
 ---@return string
 local function strip_angle_brackets(s)
-  if s:match("^<.+>$") then
-    return s:sub(2, -2)
-  end
+  if s:match("^<.+>$") then return s:sub(2, -2) end
   return s
 end
 
@@ -64,9 +62,7 @@ end
 ---@param target string|nil
 ---@return boolean
 function M.is_url(target)
-  if not target or target == "" then
-    return false
-  end
+  if not target or target == "" then return false end
   return target:match("^%a[%w+.-]*://") ~= nil or target:match("^www%.") ~= nil
 end
 
@@ -93,24 +89,18 @@ end
 ---@param base_dir string|nil
 ---@return string
 function M.resolve(target, base_dir)
-  if target == "" or M.is_url(target) or M.is_anchor(target) then
-    return target
-  end
+  if target == "" or M.is_url(target) or M.is_anchor(target) then return target end
   -- Split a trailing "#anchor" off before touching the filesystem: the
   -- fragment is not part of the filename, and leaving it on would make every
   -- "file.md#section" link resolve to a path that does not exist.
   local path, frag = target:match("^([^#]*)(#.*)$")
   path = path or target
   frag = frag or ""
-  if path == "" then
-    return target
-  end
+  if path == "" then return target end
   if is_absolute(path) then
     return vim.fs.normalize(vim.fn.fnamemodify(vim.fn.expand(path), ":p")) .. frag
   end
-  if not base_dir or base_dir == "" then
-    return target
-  end
+  if not base_dir or base_dir == "" then return target end
   return vim.fs.normalize(vim.fn.fnamemodify(base_dir .. "/" .. path, ":p")) .. frag
 end
 
@@ -121,13 +111,9 @@ end
 ---@param base_dir string|nil
 ---@return string|nil abs
 local function resolve_path(tok, base_dir)
-  if tok == "" or #tok < 3 then
-    return nil
-  end
+  if tok == "" or #tok < 3 then return nil end
   -- Must contain a separator or start with ~ — a bare word is not a path.
-  if not (tok:find("[/\\]") or tok:match("^~")) then
-    return nil
-  end
+  if not (tok:find("[/\\]") or tok:match("^~")) then return nil end
   local candidates = {}
   local expanded = vim.fn.expand(tok)
   if is_absolute(expanded) then
@@ -139,9 +125,7 @@ local function resolve_path(tok, base_dir)
 
   for _, c in ipairs(candidates) do
     local p = vim.fn.fnamemodify(c, ":p")
-    if vim.fn.filereadable(p) == 1 or vim.fn.isdirectory(p) == 1 then
-      return vim.fs.normalize(p)
-    end
+    if vim.fn.filereadable(p) == 1 or vim.fn.isdirectory(p) == 1 then return vim.fs.normalize(p) end
   end
   return nil
 end
@@ -154,18 +138,14 @@ end
 function M.from_line(line, lnum, opts)
   opts = opts or {}
   local out = {}
-  if not line or line == "" then
-    return out
-  end
+  if not line or line == "" then return out end
 
   -- 1) Markdown inline links, recording the spans they consume.
   local covered = {}
   local from = 1
   while true do
     local s, e, text, target = line:find("%[(.-)%]%((.-)%)", from)
-    if not s then
-      break
-    end
+    if not s then break end
     if target and target ~= "" then
       local raw = strip_angle_brackets(trim(target))
       out[#out + 1] = {
@@ -188,9 +168,7 @@ function M.from_line(line, lnum, opts)
   ---@return boolean
   local function is_covered(s)
     for _, r in ipairs(covered) do
-      if s >= r[1] and s <= r[2] then
-        return true
-      end
+      if s >= r[1] and s <= r[2] then return true end
     end
     return false
   end
@@ -200,9 +178,7 @@ function M.from_line(line, lnum, opts)
     local us = 1
     while true do
       local s, e = line:find(pat, us)
-      if not s then
-        break
-      end
+      if not s then break end
       if not is_covered(s) then
         local url = strip_trailing_punct(line:sub(s, e))
         if url ~= "" then
@@ -228,9 +204,7 @@ function M.from_line(line, lnum, opts)
     local pos = 1
     while true do
       local s, e, tok = line:find("([%w%._%-~/\\:]+)", pos)
-      if not s then
-        break
-      end
+      if not s then break end
       if not is_covered(s) then
         local abs = resolve_path(strip_trailing_punct(tok), opts.base_dir)
         if abs then

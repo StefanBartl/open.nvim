@@ -29,9 +29,9 @@ end
 ---@param register_fn fun(h: OpenNvim.Handler): boolean
 function M.register_all(register_fn)
   register_fn({
-    key  = "default",
+    key = "default",
     desc = "Open in the system default application (like a double-click)",
-    run  = run,
+    run = run,
   })
 end
 

@@ -20,7 +20,9 @@ return function(H)
     local viewer = require("open.viewer")
     local orig = viewer.run
     local got
-    viewer.run = function(opts) got = opts end
+    viewer.run = function(opts)
+      got = opts
+    end
 
     vim.cmd("Open viewer")
     H.ok(got, ":Open viewer routes to viewer.run")

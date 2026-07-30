@@ -16,7 +16,7 @@ local M = {}
 ---@param scope      string|nil      Scope token to resolve against the choice.
 ---@param signals    OpenNvim.Signals  Pre-gathered signals (not re-read).
 function M.select(candidates, scope, signals)
-  local context  = require("open.context")
+  local context = require("open.context")
   local registry = require("open.registry")
 
   require("lib.nvim.ui.kit").select({

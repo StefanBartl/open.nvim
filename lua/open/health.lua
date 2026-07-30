@@ -3,7 +3,9 @@
 
 local M = {}
 
-local function exe(bin) return vim.fn.executable(bin) == 1 end
+local function exe(bin)
+  return vim.fn.executable(bin) == 1
+end
 
 local function check_neovim()
   vim.health.start("open: core")
@@ -43,10 +45,10 @@ local function check_platform()
     return
   end
   local p = platform.get()
-  local detected = p.is_win   and "Windows (native)"
-               or  p.is_wsl   and "WSL (Windows host, Linux kernel)"
-               or  p.is_mac   and "macOS"
-               or               "Linux"
+  local detected = p.is_win and "Windows (native)"
+    or p.is_wsl and "WSL (Windows host, Linux kernel)"
+    or p.is_mac and "macOS"
+    or "Linux"
   vim.health.ok("Detected: " .. detected)
 end
 
@@ -68,19 +70,28 @@ local function check_executables()
     else
       vim.health.warn("notepad.exe not on PATH")
     end
-
   elseif p.is_wsl then
-    if exe("wslview")  then vim.health.ok("wslview available (browser fallback)")
-    else                    vim.health.info("wslview not found — will use cmd.exe /C start") end
-    if exe("wslpath")  then vim.health.ok("wslpath available (filemanager path conversion)")
-    else                    vim.health.warn("wslpath not found — filemanager handler will fail in WSL") end
-    if exe("cmd.exe")  then vim.health.ok("cmd.exe available")
-    else                    vim.health.warn("cmd.exe not on PATH") end
-
+    if exe("wslview") then
+      vim.health.ok("wslview available (browser fallback)")
+    else
+      vim.health.info("wslview not found — will use cmd.exe /C start")
+    end
+    if exe("wslpath") then
+      vim.health.ok("wslpath available (filemanager path conversion)")
+    else
+      vim.health.warn("wslpath not found — filemanager handler will fail in WSL")
+    end
+    if exe("cmd.exe") then
+      vim.health.ok("cmd.exe available")
+    else
+      vim.health.warn("cmd.exe not on PATH")
+    end
   elseif p.is_mac then
-    if exe("open") then vim.health.ok("open available (filemanager + browser + notepad/editor)")
-    else                vim.health.error("open not found — most handlers will fail on macOS") end
-
+    if exe("open") then
+      vim.health.ok("open available (filemanager + browser + notepad/editor)")
+    else
+      vim.health.error("open not found — most handlers will fail on macOS")
+    end
   else
     -- Linux
     if exe("xdg-open") then
@@ -105,8 +116,15 @@ local function check_executables()
   -- Browser candidates (all platforms)
   local found_browser = false
   for _, b in ipairs({
-    "google-chrome", "google-chrome-stable", "chromium", "firefox", "firefox-esr",
-    "microsoft-edge", "brave-browser", "brave", "opera",
+    "google-chrome",
+    "google-chrome-stable",
+    "chromium",
+    "firefox",
+    "firefox-esr",
+    "microsoft-edge",
+    "brave-browser",
+    "brave",
+    "opera",
   }) do
     if exe(b) then
       vim.health.ok("browser on PATH: " .. b)

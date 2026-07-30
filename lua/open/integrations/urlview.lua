@@ -21,9 +21,7 @@ local M = {}
 local function sanitize_url(raw_url)
   local url = vim.trim(raw_url or "")
   if url == "" then return nil end
-  if not url:match("^%a[%w+.-]*:") then
-    url = "http://" .. url
-  end
+  if not url:match("^%a[%w+.-]*:") then url = "http://" .. url end
   return url
 end
 
@@ -36,7 +34,7 @@ local function open_in_browser(raw_url)
     return
   end
 
-  local cfg      = require("open.config").get()
+  local cfg = require("open.config").get()
   local registry = require("open.registry")
 
   ---@type OpenNvim.Context
@@ -70,9 +68,7 @@ function M.setup(opts)
   end
 
   opts = opts or {}
-  if opts.default_action == nil then
-    opts.default_action = "open_in_browser"
-  end
+  if opts.default_action == nil then opts.default_action = "open_in_browser" end
   if opts.default_picker == nil and pcall(require, "telescope") then
     opts.default_picker = "telescope"
   end

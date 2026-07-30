@@ -31,9 +31,7 @@ package.path = table.concat({
 -- failures. `$LIB_NVIM_PATH` overrides both (useful in CI).
 local function add_lib_nvim()
   local candidates = {}
-  if vim.env.LIB_NVIM_PATH then
-    candidates[#candidates + 1] = vim.env.LIB_NVIM_PATH
-  end
+  if vim.env.LIB_NVIM_PATH then candidates[#candidates + 1] = vim.env.LIB_NVIM_PATH end
   candidates[#candidates + 1] = repo .. "/../lib.nvim"
   candidates[#candidates + 1] = vim.fn.stdpath("data") .. "/lazy/lib.nvim"
 

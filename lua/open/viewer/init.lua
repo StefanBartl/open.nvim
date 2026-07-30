@@ -38,11 +38,21 @@ local SORTS = { none = true, file = true, kind = true, alpha = true, line = true
 --- instead of "things written without brackets".
 ---@type table<string, fun(lk: OpenNvim.Viewer.Link): boolean>
 local FILTERS = {
-  all = function() return true end,
-  urls = function(lk) return lk.is_url == true end,
-  mdlinks = function(lk) return lk.kind == "mdlink" end,
-  files = function(lk) return lk.is_url ~= true and not lk.is_anchor end,
-  paths = function(lk) return lk.kind == "path" end,
+  all = function()
+    return true
+  end,
+  urls = function(lk)
+    return lk.is_url == true
+  end,
+  mdlinks = function(lk)
+    return lk.kind == "mdlink"
+  end,
+  files = function(lk)
+    return lk.is_url ~= true and not lk.is_anchor
+  end,
+  paths = function(lk)
+    return lk.kind == "path"
+  end,
 }
 
 --- The kind tokens `run` accepts, for completion.
@@ -84,9 +94,7 @@ function M.collect(scope_token, opts)
       match = opts.match,
     })
   end
-  if err then
-    return {}, err
-  end
+  if err then return {}, err end
 
   local links = scan.from_sources(sources, {
     paths = opts.paths,
@@ -104,14 +112,10 @@ end
 function M.filter(links, kind)
   kind = kind or "all"
   local pred = FILTERS[kind]
-  if not pred or kind == "all" then
-    return links
-  end
+  if not pred or kind == "all" then return links end
   local out = {}
   for _, lk in ipairs(links) do
-    if pred(lk) then
-      out[#out + 1] = lk
-    end
+    if pred(lk) then out[#out + 1] = lk end
   end
   return out
 end
@@ -131,35 +135,23 @@ end
 ---@return OpenNvim.Viewer.Link[]
 function M.sort(links, how)
   how = how or "none"
-  if how == "none" or not SORTS[how] then
-    return links
-  end
+  if how == "none" or not SORTS[how] then return links end
 
   local function by_pos(a, b)
     local af, bf = a.file or "", b.file or ""
-    if af ~= bf then
-      return af < bf
-    end
-    if a.lnum ~= b.lnum then
-      return a.lnum < b.lnum
-    end
+    if af ~= bf then return af < bf end
+    if a.lnum ~= b.lnum then return a.lnum < b.lnum end
     return (a.col or 0) < (b.col or 0)
   end
 
   table.sort(links, function(a, b)
-    if how == "file" or how == "line" then
-      return by_pos(a, b)
-    end
+    if how == "file" or how == "line" then return by_pos(a, b) end
     if how == "kind" then
-      if a.kind ~= b.kind then
-        return a.kind < b.kind
-      end
+      if a.kind ~= b.kind then return a.kind < b.kind end
       return by_pos(a, b)
     end
     local at, bt = (a.target or ""):lower(), (b.target or ""):lower()
-    if at ~= bt then
-      return at < bt
-    end
+    if at ~= bt then return at < bt end
     return by_pos(a, b)
   end)
 
@@ -175,15 +167,18 @@ end
 ---@param max integer
 ---@return string
 local function shorten(s, max)
-  if max < 4 or vim.fn.strdisplaywidth(s) <= max then
-    return s
-  end
+  if max < 4 or vim.fn.strdisplaywidth(s) <= max then return s end
   local ok, mod = pcall(require, "lib.nvim.fs.path_shorten")
   if ok then
     local fn = type(mod) == "function" and mod or (type(mod) == "table" and mod.shorten)
     if type(fn) == "function" then
       local ok2, short = pcall(fn, s, { max_len = max, style = "fit" })
-      if ok2 and type(short) == "string" and short ~= "" and vim.fn.strdisplaywidth(short) <= max then
+      if
+        ok2
+        and type(short) == "string"
+        and short ~= ""
+        and vim.fn.strdisplaywidth(short) <= max
+      then
         return short
       end
     end
@@ -210,9 +205,7 @@ end
 ---@param lk OpenNvim.Viewer.Link
 ---@return string
 function M.where(lk)
-  if lk.file then
-    return ("%s:%d"):format(vim.fn.fnamemodify(lk.file, ":t"), lk.lnum)
-  end
+  if lk.file then return ("%s:%d"):format(vim.fn.fnamemodify(lk.file, ":t"), lk.lnum) end
   return ("buf:%d"):format(lk.lnum)
 end
 
@@ -222,14 +215,10 @@ end
 ---@param lk OpenNvim.Viewer.Link
 ---@return string
 function M.display_target(lk)
-  if lk.is_url then
-    return lk.target
-  end
+  if lk.is_url then return lk.target end
   local cwd = vim.fs.normalize(vim.fn.getcwd())
   local t = vim.fs.normalize(lk.target)
-  if t:sub(1, #cwd + 1) == cwd .. "/" then
-    return t:sub(#cwd + 2)
-  end
+  if t:sub(1, #cwd + 1) == cwd .. "/" then return t:sub(#cwd + 2) end
   return t
 end
 
@@ -321,9 +310,7 @@ function M.open(lk)
   if lk.is_url or scan.is_url(lk.target) then
     local target = lk.target
     -- A bare "www.x" has no scheme; the browser handler needs one.
-    if not target:match("^%a[%w+.-]*:") then
-      target = "https://" .. target
-    end
+    if not target:match("^%a[%w+.-]*:") then target = "https://" .. target end
     registry.dispatch(c.default_browser, { text = target, is_url = true, is_path = false })
     return
   end

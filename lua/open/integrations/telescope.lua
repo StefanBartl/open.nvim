@@ -15,22 +15,23 @@ local M = {}
 function M.picker(opts)
   local ok_pickers, pickers = pcall(require, "telescope.pickers")
   if not ok_pickers then
-    require("lib.nvim.notify").create("[open.integrations.telescope]").error(
-      "telescope.nvim is not installed/loaded")
+    require("lib.nvim.notify")
+      .create("[open.integrations.telescope]")
+      .error("telescope.nvim is not installed/loaded")
     return
   end
 
-  local finders        = require("telescope.finders")
-  local conf           = require("telescope.config").values
-  local actions        = require("telescope.actions")
-  local action_state    = require("telescope.actions.state")
-  local previewers     = require("telescope.previewers")
+  local finders = require("telescope.finders")
+  local conf = require("telescope.config").values
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+  local previewers = require("telescope.previewers")
 
-  local context  = require("open.context")
+  local context = require("open.context")
   local registry = require("open.registry")
 
   context.with_cache(function()
-    local signals  = context.gather()
+    local signals = context.gather()
     local handlers = registry.list()
 
     ---Best-effort preview of what `key` would open for the current context.
@@ -42,49 +43,52 @@ function M.picker(opts)
       return "(nothing to open in the current context)"
     end
 
-    pickers.new(opts or {}, {
-      prompt_title = "open.nvim handlers",
-      finder = finders.new_table({
-        results = handlers,
-        entry_maker = function(h)
-          return {
-            value   = h,
-            display = string.format("%-14s  %s", h.key, h.desc),
-            ordinal = h.key .. " " .. h.desc,
-          }
-        end,
-      }),
-      sorter = conf.generic_sorter(opts or {}),
-      previewer = previewers.new_buffer_previewer({
-        title = "Would open",
-        define_preview = function(self, entry)
-          local lines = {
-            "Handler: " .. entry.value.key,
-            "",
-            entry.value.desc,
-            "",
-            "Would open: " .. preview_line(entry.value.key),
-          }
-          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-        end,
-      }),
-      attach_mappings = function(prompt_bufnr)
-        actions.select_default:replace(function()
-          local entry = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
-          if not entry then return end
+    pickers
+      .new(opts or {}, {
+        prompt_title = "open.nvim handlers",
+        finder = finders.new_table({
+          results = handlers,
+          entry_maker = function(h)
+            return {
+              value = h,
+              display = string.format("%-14s  %s", h.key, h.desc),
+              ordinal = h.key .. " " .. h.desc,
+            }
+          end,
+        }),
+        sorter = conf.generic_sorter(opts or {}),
+        previewer = previewers.new_buffer_previewer({
+          title = "Would open",
+          define_preview = function(self, entry)
+            local lines = {
+              "Handler: " .. entry.value.key,
+              "",
+              entry.value.desc,
+              "",
+              "Would open: " .. preview_line(entry.value.key),
+            }
+            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+          end,
+        }),
+        attach_mappings = function(prompt_bufnr)
+          actions.select_default:replace(function()
+            local entry = action_state.get_selected_entry()
+            actions.close(prompt_bufnr)
+            if not entry then return end
 
-          local ctx = context.resolve(nil, entry.value.key, signals)
-          if not ctx then
-            require("lib.nvim.notify").create("[open.integrations.telescope]").warn(
-              "Nothing to open for handler '" .. entry.value.key .. "'")
-            return
-          end
-          registry.dispatch(entry.value.key, ctx)
-        end)
-        return true
-      end,
-    }):find()
+            local ctx = context.resolve(nil, entry.value.key, signals)
+            if not ctx then
+              require("lib.nvim.notify")
+                .create("[open.integrations.telescope]")
+                .warn("Nothing to open for handler '" .. entry.value.key .. "'")
+              return
+            end
+            registry.dispatch(entry.value.key, ctx)
+          end)
+          return true
+        end,
+      })
+      :find()
   end)
 end
 

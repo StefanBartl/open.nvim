@@ -32,9 +32,7 @@ function M.register(handler)
     notify.error("handler '" .. handler.key .. "': run must be a function")
     return false
   end
-  if type(handler.desc) ~= "string" then
-    handler.desc = "(no description)"
-  end
+  if type(handler.desc) ~= "string" then handler.desc = "(no description)" end
   if _handlers[handler.key] then
     notify.warn("'" .. handler.key .. "' already registered — overwriting")
   end
@@ -58,7 +56,9 @@ end
 ---@return string[]
 function M.list_keys()
   local keys = {}
-  for k in pairs(_handlers) do keys[#keys + 1] = k end
+  for k in pairs(_handlers) do
+    keys[#keys + 1] = k
+  end
   table.sort(keys)
   return keys
 end
@@ -67,8 +67,12 @@ end
 ---@return OpenNvim.Handler[]
 function M.list()
   local result = {}
-  for _, h in pairs(_handlers) do result[#result + 1] = h end
-  table.sort(result, function(a, b) return a.key < b.key end)
+  for _, h in pairs(_handlers) do
+    result[#result + 1] = h
+  end
+  table.sort(result, function(a, b)
+    return a.key < b.key
+  end)
   return result
 end
 
@@ -82,24 +86,31 @@ end
 function M.dispatch(target, ctx)
   local ok_cfg, cfg = pcall(require, "open.config")
   if ok_cfg and cfg.is_debug() then
-    notify.info(string.format(
-      "dispatch: target=%s text=%q is_url=%s is_path=%s",
-      target, tostring(ctx and ctx.text), tostring(ctx and ctx.is_url), tostring(ctx and ctx.is_path)))
+    notify.info(
+      string.format(
+        "dispatch: target=%s text=%q is_url=%s is_path=%s",
+        target,
+        tostring(ctx and ctx.text),
+        tostring(ctx and ctx.is_url),
+        tostring(ctx and ctx.is_path)
+      )
+    )
   end
 
   local handler = M.get(target)
   if not handler then
     notify.error(
-      string.format("Unknown target: '%s'  (available: %s)",
-        target, table.concat(M.list_keys(), ", "))
+      string.format(
+        "Unknown target: '%s'  (available: %s)",
+        target,
+        table.concat(M.list_keys(), ", ")
+      )
     )
     return
   end
 
   local ok, err = pcall(handler.run, ctx)
-  if not ok then
-    notify.error(string.format("Handler '%s' failed: %s", target, tostring(err)))
-  end
+  if not ok then notify.error(string.format("Handler '%s' failed: %s", target, tostring(err))) end
 end
 
 return M
