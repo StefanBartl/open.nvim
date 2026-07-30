@@ -31,13 +31,6 @@ local function is_file(path)
   return stat ~= nil and stat.type == "file"
 end
 
----@param unix_path string
----@return string|nil
-local function wsl_to_win_path(unix_path)
-  local out = vim.fn.system({ "wslpath", "-w", unix_path }):gsub("\n", "")
-  return (out ~= "" and out) or nil
-end
-
 ---@return string|nil
 local function linux_file_manager()
   return util.find_exec({
@@ -84,7 +77,7 @@ function M.register_all(register_fn)
 
       elseif plat.is_wsl then
         local unix_target = (file and not reveal) and vim.fn.fnamemodify(path, ":h") or path
-        local win_target  = wsl_to_win_path(unix_target)
+        local win_target  = require("lib.nvim.cross.fs.wslpath").to_win(unix_target)
         if not win_target then
           notify.error("wslpath conversion failed for: " .. unix_target)
           return false
