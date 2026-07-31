@@ -160,6 +160,8 @@ function M.check()
   check_platform()
   check_executables()
   check_handlers()
+
+  require("lib.nvim.usercmd.composer").checkhealth("Open")
 end
 
 return M
