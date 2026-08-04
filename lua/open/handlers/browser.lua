@@ -14,6 +14,7 @@ local M = {}
 local SEARCH_BASE = "https://www.google.com/search?q="
 
 ---Normalise context text to a URL.
+---@internal
 ---@param ctx OpenNvim.Context
 ---@return string url
 local function to_url(ctx)
@@ -26,6 +27,8 @@ local function to_url(ctx)
   return SEARCH_BASE .. util.url_encode(text)
 end
 
+---Build the command vector for the system default browser.
+---@internal
 ---@param url  string
 ---@param plat OpenNvim.Platform
 ---@return string[]
@@ -47,6 +50,7 @@ local function default_browser_cmd(url, plat)
 end
 
 ---Build the command vector for a specific browser.
+---@internal
 ---@param url              string
 ---@param plat             OpenNvim.Platform
 ---@param linux_candidates string[]
@@ -75,8 +79,13 @@ local function named_browser_cmd(url, plat, linux_candidates, mac_app, win_token
   end
 end
 
----@param key string  @param desc string
----@param linux_candidates string[]  @param mac_app string  @param win_token string
+---Build a handler for one named browser.
+---@internal
+---@param key string
+---@param desc string
+---@param linux_candidates string[]
+---@param mac_app string
+---@param win_token string
 ---@return OpenNvim.Handler
 local function make_named_handler(key, desc, linux_candidates, mac_app, win_token)
   return {

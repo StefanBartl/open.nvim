@@ -56,6 +56,7 @@ end
 -- ---------------------------------------------------------------------------
 
 ---Log `msg` to :messages when `setup({ debug = true })` is active.
+---@internal
 ---@param msg string
 local function debug_log(msg)
   local ok, cfg = pcall(require, "open.config")
@@ -66,6 +67,7 @@ end
 -- URL heuristic
 -- ---------------------------------------------------------------------------
 
+---@internal
 ---@param text string
 ---@return boolean
 local function looks_like_url(text)
@@ -80,6 +82,7 @@ end
 
 ---Try to resolve `candidate` to an existing path: verbatim first, then
 ---relative to the current buffer's directory.
+---@internal
 ---@param candidate string|nil
 ---@return string|nil
 local function resolve_existing_path(candidate)
@@ -103,6 +106,7 @@ end
 -- ---------------------------------------------------------------------------
 
 ---Resolve the nearest Git root directory (relative to the cwd), if any.
+---@internal
 ---@return string|nil
 local function resolve_git_root()
   local out = vim.fn.system({ "git", "rev-parse", "--show-toplevel" })
@@ -115,6 +119,8 @@ end
 -- Tree-buffer node resolution
 -- ---------------------------------------------------------------------------
 
+---Node path when the current neo-tree buffer has a node under the cursor.
+---@internal
 ---@return string|nil
 local function resolve_neotree_path()
   local ok_m, manager = pcall(require, "neo-tree.sources.manager")
@@ -147,6 +153,8 @@ local function resolve_neotree_path()
   return nil
 end
 
+---Absolute path of the nvim-tree node under the cursor, if any.
+---@internal
 ---@return string|nil
 local function resolve_nvimtree_path()
   local ok, api = pcall(require, "nvim-tree.api")
@@ -160,6 +168,8 @@ local function resolve_nvimtree_path()
   return nil
 end
 
+---Path under the cursor in a netrw directory-listing buffer.
+---@internal
 ---@return string|nil
 local function resolve_netrw_path()
   local buf = vim.api.nvim_get_current_buf()
@@ -175,6 +185,7 @@ local function resolve_netrw_path()
 end
 
 ---Return the node path if the current buffer is a recognised tree buffer.
+---@internal
 ---@return string|nil
 local function resolve_tree_node_path()
   local buf = vim.api.nvim_get_current_buf()

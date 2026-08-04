@@ -3,10 +3,16 @@
 
 local M = {}
 
+---Whether `bin` is an executable on PATH.
+---@internal
+---@param bin string
+---@return boolean
 local function exe(bin)
   return vim.fn.executable(bin) == 1
 end
 
+---Check the Neovim version and vim.system availability.
+---@internal
 local function check_neovim()
   vim.health.start("open: core")
   if vim.fn.has("nvim-0.9") == 1 then
@@ -21,6 +27,8 @@ local function check_neovim()
   end
 end
 
+---Check that lib.nvim and its usercmd.composer module are available.
+---@internal
 local function check_lib_nvim()
   vim.health.start("open: lib.nvim")
   if pcall(require, "lib.nvim.notify") then
@@ -37,6 +45,8 @@ local function check_lib_nvim()
   end
 end
 
+---Report the detected platform.
+---@internal
 local function check_platform()
   vim.health.start("open: platform")
   local ok, platform = pcall(require, "open.platform")
@@ -52,6 +62,8 @@ local function check_platform()
   vim.health.ok("Detected: " .. detected)
 end
 
+---Check for platform-specific and browser executables on PATH.
+---@internal
 local function check_executables()
   vim.health.start("open: executables")
   local ok, platform = pcall(require, "open.platform")
@@ -137,6 +149,8 @@ local function check_executables()
   end
 end
 
+---List every handler registered in `open.registry`.
+---@internal
 local function check_handlers()
   vim.health.start("open: registered handlers")
   local ok, reg = pcall(require, "open.registry")
@@ -154,6 +168,7 @@ local function check_handlers()
   end
 end
 
+---Entry point for `:checkhealth open`.
 function M.check()
   check_neovim()
   check_lib_nvim()

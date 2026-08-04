@@ -36,12 +36,16 @@ local WWW_PATTERN = "www%.[%w%-%_%.%/%?%%=&~#@:+,;!$'*]+"
 
 local FENCE = "^%s*[`~][`~][`~]"
 
+---Trim leading/trailing whitespace.
+---@internal
 ---@param s string
 ---@return string
 local function trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+---Strip a wrapping `<...>` pair, if present.
+---@internal
 ---@param s string
 ---@return string
 local function strip_angle_brackets(s)
@@ -52,6 +56,7 @@ end
 --- Drop trailing punctuation that is almost certainly prose, not part of the
 --- URL. Closing brackets are included because a URL inside `(see https://x)`
 --- is far more common than one genuinely ending in `)`.
+---@internal
 ---@param s string
 ---@return string
 local function strip_trailing_punct(s)
@@ -77,6 +82,8 @@ function M.is_anchor(target)
   return target ~= nil and target:match("^#") ~= nil
 end
 
+---Whether `tok` is already an absolute path (Unix, Windows-drive, or `~`).
+---@internal
 ---@param tok string
 ---@return boolean
 local function is_absolute(tok)
@@ -107,6 +114,7 @@ end
 --- Does `tok` look like a filesystem path, and does it exist?
 --- Existence is required on purpose: without it, every `a/b` in prose and
 --- every `foo.bar` method call would be reported as a path.
+---@internal
 ---@param tok string
 ---@param base_dir string|nil
 ---@return string|nil abs

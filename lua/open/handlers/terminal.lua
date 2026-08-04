@@ -12,6 +12,7 @@ local notify = require("lib.nvim.notify").create("[open.terminal]")
 local M = {}
 
 ---Resolve and validate a directory from the context.
+---@internal
 ---@param ctx OpenNvim.Context
 ---@return string|nil, string|nil
 local function resolve_dir(ctx)

@@ -17,6 +17,7 @@ local util = require("open.util")
 local M = {}
 
 ---Write text to a temp file. Returns (path, nil) or (nil, errmsg).
+---@internal
 ---@param text string
 ---@return string|nil, string|nil
 local function write_temp(text)
@@ -29,6 +30,8 @@ local function write_temp(text)
   return ok and tmpfile or nil, ok and nil or tostring(err)
 end
 
+---First available Linux GUI text editor executable on PATH, if any.
+---@internal
 ---@return string|nil
 local function linux_editor()
   return util.find_exec({
@@ -42,6 +45,8 @@ local function linux_editor()
   })
 end
 
+---Shared run() body for the "notepad" and "editor" handler keys.
+---@internal
 ---@param ctx OpenNvim.Context
 ---@return boolean
 local function run(ctx)

@@ -10,6 +10,7 @@ local notify = require("lib.nvim.notify").create("[open.nvim_internal]")
 local M = {}
 
 ---Resolve and validate a filesystem path from the context.
+---@internal
 ---@param ctx OpenNvim.Context
 ---@return string|nil, string|nil
 local function resolve_file_path(ctx)
@@ -23,6 +24,8 @@ local function resolve_file_path(ctx)
   return expanded, nil
 end
 
+---Build the run() function for one Neovim-internal open handler.
+---@internal
 ---@param cmd_name string  Ex command to use (e.g. "split", "vsplit", "tabedit").
 ---@param label    string  Handler label for messages.
 ---@return fun(ctx: OpenNvim.Context): boolean

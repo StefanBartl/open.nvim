@@ -66,6 +66,8 @@ function M.kinds()
   return out
 end
 
+---Active `viewer` sub-config, or an empty table if config isn't loaded yet.
+---@internal
 ---@return table
 local function cfg()
   local ok, c = pcall(require, "open.config")
@@ -163,6 +165,7 @@ end
 -- ---------------------------------------------------------------------------
 
 --- Shorten `s` to at most `max` display cells, eliding the middle of a path.
+---@internal
 ---@param s string
 ---@param max integer
 ---@return string
@@ -193,6 +196,7 @@ end
 --- cell contains a "…" that is 3 bytes but 1 display cell. Byte-padding such a
 --- row stops short, and the target column then starts two cells left of every
 --- other row.
+---@internal
 ---@param s string
 ---@param w integer
 ---@return string
