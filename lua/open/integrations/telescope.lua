@@ -35,6 +35,7 @@ function M.picker(opts)
     local handlers = registry.list()
 
     ---Best-effort preview of what `key` would open for the current context.
+    ---@internal
     ---@param key string
     ---@return string
     local function preview_line(key)

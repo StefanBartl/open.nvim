@@ -17,11 +17,16 @@ local M = {}
 -- Helpers
 -- ---------------------------------------------------------------------------
 
+---Expand a `~`/env-var path via lib.nvim's cross-platform expander.
+---@internal
+---@param p string
+---@return string
 local function expand(p)
   return require("lib.nvim.cross.fs.expand_path")(p)
 end
 
 ---Run a command synchronously and return trimmed stdout, or nil on failure.
+---@internal
 ---@param argv string[]
 ---@return string|nil
 local function capture(argv)
@@ -33,6 +38,7 @@ local function capture(argv)
 end
 
 ---Return the first path in `candidates` that exists on disk, else last entry.
+---@internal
 ---@param candidates string[]
 ---@return string
 local function first_existing(candidates)
@@ -46,6 +52,9 @@ end
 -- Dynamic resolvers
 -- ---------------------------------------------------------------------------
 
+---Resolve PowerShell's `$PROFILE` path, if pwsh/powershell is on PATH.
+---@internal
+---@return string|nil
 local function resolve_pwsh_profile()
   local exe = vim.fn.executable("pwsh") == 1 and "pwsh"
     or (vim.fn.executable("powershell") == 1 and "powershell")
@@ -54,12 +63,18 @@ local function resolve_pwsh_profile()
   return capture({ exe, "-NoProfile", "-Command", "[Console]::Write($PROFILE)" })
 end
 
+---Resolve `init.lua` or `init.vim`, whichever exists for this platform.
+---@internal
+---@return string|nil
 local function resolve_nvim_init()
   local platform = require("open.platform").get()
   local base = platform.is_win and expand("~/AppData/Local/nvim") or expand("~/.config/nvim")
   return first_existing({ base .. "/init.lua", base .. "/init.vim" })
 end
 
+---Resolve tmux's config path (XDG location preferred over `~/.tmux.conf`).
+---@internal
+---@return string|nil
 local function resolve_tmux_conf()
   return first_existing({
     expand("~/.config/tmux/tmux.conf"),
@@ -67,6 +82,9 @@ local function resolve_tmux_conf()
   })
 end
 
+---Resolve WezTerm's config path.
+---@internal
+---@return string|nil
 local function resolve_wezterm_conf()
   return first_existing({
     expand("~/.config/wezterm/wezterm.lua"),
@@ -74,6 +92,9 @@ local function resolve_wezterm_conf()
   })
 end
 
+---Resolve Alacritty's config path (`.toml` preferred, `.yml` fallback).
+---@internal
+---@return string|nil
 local function resolve_alacritty_conf()
   return first_existing({
     expand("~/.config/alacritty/alacritty.toml"),
@@ -83,6 +104,9 @@ local function resolve_alacritty_conf()
   })
 end
 
+---Resolve the global gitignore path from git config or common fallbacks.
+---@internal
+---@return string|nil
 local function resolve_gitignore_global()
   local from_cfg = capture({ "git", "config", "--global", "core.excludesFile" })
   return from_cfg
@@ -93,11 +117,17 @@ local function resolve_gitignore_global()
     })
 end
 
+---Resolve the git commit-message template path from git config or default.
+---@internal
+---@return string
 local function resolve_gitmessage()
   local from_cfg = capture({ "git", "config", "--global", "commit.template" })
   return from_cfg or expand("~/.gitmessage")
 end
 
+---Resolve pip's config path for the current platform.
+---@internal
+---@return string
 local function resolve_pip_conf()
   local platform = require("open.platform").get()
   if platform.is_win then
@@ -107,12 +137,18 @@ local function resolve_pip_conf()
   return expand("~/.config/pip/pip.conf")
 end
 
+---Resolve the hosts file path for the current platform.
+---@internal
+---@return string
 local function resolve_hosts()
   local platform = require("open.platform").get()
   if platform.is_win then return "C:\\Windows\\System32\\drivers\\etc\\hosts" end
   return "/etc/hosts"
 end
 
+---Resolve Docker's `config.json` path.
+---@internal
+---@return string
 local function resolve_docker_config()
   return expand("~/.docker/config.json")
 end

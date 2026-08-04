@@ -22,6 +22,7 @@ local composer = require("lib.nvim.usercmd.composer")
 local M = {}
 
 ---Resolve and dispatch an :Open invocation.
+---@internal
 ---@param target_raw string|nil
 ---@param scope       string|nil
 local function run_open(target_raw, scope)
@@ -117,6 +118,9 @@ composer.register_type("OPEN_SCOPE", {
 
 local SCOPE_TOKENS = { "%", "cwd", "buffers" }
 
+---Completion candidates shared by the viewer scope arg: literal scope
+---tokens plus ordinary file/directory completion.
+---@internal
 ---@param arg_lead string
 ---@return string[]
 local function complete_scope(arg_lead)
@@ -168,6 +172,7 @@ composer.register_type("VIEWER_KIND", {
 --- case the first positional is unambiguously the scope. For `:Open viewer`
 --- the first positional may be either, so a value that names a known kind is
 --- read as one and everything else falls through to the scope slot.
+---@internal
 ---@param ctx Lib.UserCmd.Composer.Ctx
 ---@param fixed_kind string|nil
 local function run_viewer(ctx, fixed_kind)
@@ -220,6 +225,8 @@ local function run_viewer(ctx, fixed_kind)
   })
 end
 
+---kv-flag spec shared by every viewer route.
+---@internal
 ---@return Lib.UserCmd.Composer.KvSpec[]
 local function viewer_kv()
   return {
@@ -229,6 +236,8 @@ local function viewer_kv()
   }
 end
 
+---Boolean-flag spec shared by every viewer route.
+---@internal
 ---@return Lib.UserCmd.Composer.FlagSpec[]
 local function viewer_flags()
   return {
@@ -240,6 +249,7 @@ local function viewer_flags()
 end
 
 --- Route body for `:Open viewer [kind] [scope]`.
+---@internal
 ---@param path string[]
 ---@return Lib.UserCmd.Composer.Route
 local function viewer_route(path)
@@ -260,6 +270,7 @@ local function viewer_route(path)
 end
 
 --- Route body for a fixed-kind wrapper command (`:UrlView [scope]`).
+---@internal
 ---@param kind string
 ---@return Lib.UserCmd.Composer.Route
 local function viewer_fixed_route(kind)

@@ -17,6 +17,8 @@ local util = require("open.util")
 
 local M = {}
 
+---Expand `text` to a filesystem path.
+---@internal
 ---@param text string
 ---@return string|nil
 local function resolve_path(text)
@@ -24,6 +26,8 @@ local function resolve_path(text)
   return (expanded ~= "" and expanded) or nil
 end
 
+---Whether `path` stats as a regular file.
+---@internal
 ---@param path string
 ---@return boolean
 local function is_file(path)
@@ -31,6 +35,8 @@ local function is_file(path)
   return stat ~= nil and stat.type == "file"
 end
 
+---First available Linux file manager executable on PATH, if any.
+---@internal
 ---@return string|nil
 local function linux_file_manager()
   return util.find_exec({

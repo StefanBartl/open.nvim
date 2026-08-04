@@ -16,6 +16,7 @@ local notify = require("lib.nvim.notify").create("[open.integrations.urlview]")
 local M = {}
 
 ---Normalise a raw urlview match into a URL string with a scheme.
+---@internal
 ---@param raw_url string
 ---@return string|nil
 local function sanitize_url(raw_url)
@@ -26,6 +27,7 @@ local function sanitize_url(raw_url)
 end
 
 ---Open `raw_url` through the configured open.nvim browser handler.
+---@internal
 ---@param raw_url string
 local function open_in_browser(raw_url)
   local url = sanitize_url(raw_url)

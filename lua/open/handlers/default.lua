@@ -14,6 +14,8 @@ local notify = require("lib.nvim.notify").create("[open.default]")
 
 local M = {}
 
+---Shared run() body for the "default" handler key.
+---@internal
 ---@param ctx OpenNvim.Context
 ---@return boolean
 local function run(ctx)
