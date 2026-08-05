@@ -28,6 +28,7 @@ local HANDLER_MODULES = {
   nvim_internal = "open.handlers.nvim_internal",
   default = "open.handlers.default",
   terminal = "open.handlers.terminal",
+  image = "open.handlers.image",
 }
 
 -- ---------------------------------------------------------------------------

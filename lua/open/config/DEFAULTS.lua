@@ -8,7 +8,7 @@ return {
   default_browser = "browser",
   -- Handler module keys to load during setup().
   -- Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" |
-  -- "default" | "terminal"
+  -- "default" | "terminal" | "image"
   handlers = {
     "filemanager",
     "browser",
@@ -16,6 +16,7 @@ return {
     "nvim_internal",
     "default",
     "terminal",
+    "image",
   },
   builtin_keywords = true, -- set false to disable all built-in scope keywords
   keywords = {}, -- user-defined keyword → path overrides / additions
