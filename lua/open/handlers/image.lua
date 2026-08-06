@@ -25,9 +25,7 @@ local function run(ctx)
   local ok, images = pcall(require, "images")
   if ok and type(images.show) == "function" then
     local called, shown = pcall(images.show, ctx.text)
-    if called and shown then
-      return true
-    end
+    if called and shown then return true end
     -- images.nvim reports its own reason (file missing, terminal incapable);
     -- a second message here would only duplicate it.
     return false
@@ -35,9 +33,7 @@ local function run(ctx)
 
   notify.info("images.nvim not installed — opening in the system application")
   local opened, err = require("lib.nvim.cross.open_default")(ctx.text)
-  if not opened then
-    notify.error(err or ("Cannot determine how to open: " .. ctx.text))
-  end
+  if not opened then notify.error(err or ("Cannot determine how to open: " .. ctx.text)) end
   return opened
 end
 
