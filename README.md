@@ -39,6 +39,13 @@ the clipboard, or to a file.
 :Open viewer cwd sort=file out=table     everything, as a table
 ```
 
+## Table of Contents
+
+- [Quickstart](#quickstart)
+- [Documentation](#documentation)
+
+---
+
 ## Quickstart
 
 Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
