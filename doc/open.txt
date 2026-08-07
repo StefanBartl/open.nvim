@@ -171,6 +171,10 @@ packer: >lua
               without selecting). Directories are always navigated into
               regardless of this setting — there is nothing to select for a
               directory target.
+    command   Launcher override: a string ("thunar") or an argv list
+              ({ "dolphin", "--select" }). The resolved path is appended as
+              the last argument and the platform dispatch is skipped.
+              Default nil (detect per platform).
 
 `debug`
   Boolean (default false). When true, logs every `context.gather()`,
@@ -240,6 +244,7 @@ The second argument controls what text is passed to the handler.
 
   "%"           Current buffer's file path.
   "cfile"       `<cfile>` text under the cursor.
+  "cwd"         Neovim's current working directory.
   "git"         Nearest Git root (`git rev-parse --show-toplevel`).
   "path=<path>" Literal path (supports file completion after `path=`).
   <keyword>     Named scope alias — see |open-keywords|.
@@ -287,9 +292,12 @@ filemanager ~
   Windows: `explorer.exe /select,<path>` (reveals the file).
   WSL:     `explorer.exe` via `wslpath` conversion.
   macOS:   `open -R <file>` (Finder reveal) or `open <dir>`.
-  Linux:   `xdg-open` first, then nautilus/thunar/dolphin/nemo/pcmanfm/caja.
+  Linux:   nautilus/nemo/`dolphin --select`/thunar/caja to reveal a file,
+           `xdg-open` for a directory.
   With `filemanager.reveal = false`, a file target navigates to its parent
   directory instead of being revealed/selected there. See |open-config|.
+  The dispatch itself lives in `lib.nvim.cross.reveal_in_fm`, shared with
+  filetree.nvim's `<leader>fm`.
 
 notepad | editor ~
   Write the context text to a temporary `.txt` file and open it in the
@@ -411,7 +419,7 @@ To disable all built-in keywords: >lua
 `:Open` completes context-sensitively: >
 
   :Open <Tab>                      all registered handler names
-  :Open browser <Tab>              %  cfile  git  path=  <keywords>  <files>
+  :Open browser <Tab>              %  cfile  cwd  git  path=  <keywords>  <files>
   :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix match)
   :Open filemanager path=<Tab>     file/directory completion after path=
 <
@@ -565,7 +573,8 @@ After calling `setup()`, the following functions are available:
   Behaves identically to the `:Open` command. Scope may be a keyword.
 
   `target`  String handler key, or nil for the context-aware default.
-  `scope`   Scope token: "%", "cfile", "path=<path>", keyword, or literal.
+  `scope`   Scope token: "%", "cfile", "cwd", "git", "path=<path>", keyword,
+            or literal.
 
   Examples: >lua
     require("open").open()

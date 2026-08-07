@@ -10,10 +10,15 @@
 --- With `filemanager.reveal = false`, a file target navigates to its parent
 --- directory instead of being selected there. Directory targets are always
 --- navigated into, regardless of `reveal`.
+---
+--- The dispatch itself lives in `lib.nvim.cross.reveal_in_fm`, shared with
+--- filetree.nvim's `<leader>fm`; this handler only resolves the path out of
+--- the :Open context and reports the outcome. `filemanager.command` overrides
+--- the launcher (string or argv list) for users whose manager isn't one of
+--- the ones probed on Linux.
 
 local notify = require("lib.nvim.notify").create("[open.filemanager]")
-local platform = require("open.platform")
-local util = require("open.util")
+local reveal_in_fm = require("lib.nvim.cross.reveal_in_fm")
 
 local M = {}
 
@@ -24,30 +29,6 @@ local M = {}
 local function resolve_path(text)
   local expanded = vim.fn.expand(text)
   return (expanded ~= "" and expanded) or nil
-end
-
----Whether `path` stats as a regular file.
----@internal
----@param path string
----@return boolean
-local function is_file(path)
-  local stat = vim.uv.fs_stat(path)
-  return stat ~= nil and stat.type == "file"
-end
-
----First available Linux file manager executable on PATH, if any.
----@internal
----@return string|nil
-local function linux_file_manager()
-  return util.find_exec({
-    "xdg-open",
-    "nautilus",
-    "thunar",
-    "nemo",
-    "dolphin",
-    "pcmanfm",
-    "caja",
-  })
 end
 
 ---@param register_fn fun(h: OpenNvim.Handler): boolean
@@ -67,59 +48,16 @@ function M.register_all(register_fn)
         return false
       end
 
-      local plat = platform.get()
-      local cfg = require("open.config").get()
-      local reveal = cfg.filemanager == nil or cfg.filemanager.reveal ~= false
-      local file = is_file(path)
-      local cmd
+      local fm = require("open.config").get().filemanager or {}
 
-      if plat.is_win then
-        -- explorer.exe is invoked directly (no cmd.exe /c start wrapper):
-        -- the target program is already known, so routing through cmd.exe's
-        -- `start` just exposes the same `&`-truncation bug that
-        -- open.util.cmd_escape_unquoted documents for the browser handler,
-        -- for no benefit.
-        if file and reveal then
-          cmd = { "explorer.exe", "/select," .. path }
-        else
-          local target = file and vim.fn.fnamemodify(path, ":h") or path
-          cmd = { "explorer.exe", target }
-        end
-      elseif plat.is_wsl then
-        local unix_target = (file and not reveal) and vim.fn.fnamemodify(path, ":h") or path
-        local win_target = require("lib.nvim.cross.fs.wslpath").to_win(unix_target)
-        if not win_target then
-          notify.error("wslpath conversion failed for: " .. unix_target)
-          return false
-        end
-        if file and reveal then
-          cmd = { "explorer.exe", "/select," .. win_target }
-        else
-          cmd = { "explorer.exe", win_target }
-        end
-      elseif plat.is_mac then
-        if file and reveal then
-          cmd = { "open", "-R", path }
-        elseif file then
-          cmd = { "open", vim.fn.fnamemodify(path, ":h") }
-        else
-          cmd = { "open", path }
-        end
-      else
-        local mgr = linux_file_manager()
-        if not mgr then
-          notify.error("No file manager found on PATH")
-          return false
-        end
-        local target = (file and not reveal) and vim.fn.fnamemodify(path, ":h") or path
-        cmd = { mgr, target }
-      end
-
-      local ok, err = util.run_detached(cmd, "filemanager")
+      local ok, err = reveal_in_fm(path, {
+        reveal = fm.reveal ~= false,
+        command = fm.command,
+      })
       if ok then
         notify.info(path)
       else
-        notify.error(err)
+        notify.error("Failed to open in file manager: " .. tostring(err))
       end
       return ok
     end,

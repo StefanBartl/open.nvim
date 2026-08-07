@@ -44,6 +44,7 @@
 | *(omitted)* | Heuristic: tree node → cfile → cWORD / buffer path |
 | `%` | Current buffer file path |
 | `cfile` | `<cfile>` under cursor |
+| `cwd` | Neovim's current working directory |
 | `git` | Nearest Git root (`git rev-parse --show-toplevel`) |
 | `path=<path>` | Literal path (supports `<Tab>` file completion) |
 | `<any text>` | Verbatim text |

@@ -13,6 +13,8 @@
 --- Scope resolution (2nd arg):
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> under the cursor
+---   "cwd"         → Neovim's current working directory
+---   "git"         → nearest Git root
 ---   "path=<path>" → literal path given after "path="
 ---   (omitted)     → target-aware heuristic (see open.context)
 ---@see open.context
