@@ -2,10 +2,15 @@
 ---@brief Handler that opens a path in the system file manager.
 ---@description
 --- Platform dispatch (`filemanager.reveal = true`, the default):
----   Windows  → explorer.exe /select,<path>  (reveals file in Explorer)
----   WSL      → explorer.exe via wslpath conversion
+---   Windows  → explorer.exe /select,<path>, then the window is raised
+---   WSL      → the same, via wslpath conversion
 ---   macOS    → open -R <file>  /  open <dir>  (Finder)
 ---   Linux    → xdg-open, then common managers as fallback
+---
+--- The Windows raise is not incidental: explorer.exe spawned from a
+--- terminal Neovim opens its window BEHIND everything, because Windows only
+--- grants SetForegroundWindow to the process owning the foreground window
+--- (the terminal host, not nvim.exe). lib.nvim's reveal_in_fm handles it.
 ---
 --- With `filemanager.reveal = false`, a file target navigates to its parent
 --- directory instead of being selected there. Directory targets are always

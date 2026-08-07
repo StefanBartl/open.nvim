@@ -299,6 +299,16 @@ filemanager ~
   The dispatch itself lives in `lib.nvim.cross.reveal_in_fm`, shared with
   filetree.nvim's `<leader>fm`.
 
+  On Windows the launch also brings the Explorer window to the FRONT, via
+  a short PowerShell helper in lib.nvim. Spawning explorer.exe directly
+  does create the window, but Windows grants SetForegroundWindow only to
+  the process that owns the foreground window — running inside a terminal
+  that is the terminal host, not nvim.exe — so the window was created
+  behind everything and `:Open filemanager` looked like it did nothing.
+  Under a GUI Neovim (Neovide, nvim-qt) nvim.exe IS the foreground process
+  and the same code worked, which is why this looked intermittent. See
+  lib.nvim's `reveal_in_fm/README.md`.
+
 notepad | editor ~
   Write the context text to a temporary `.txt` file and open it in the
   platform GUI text editor:
