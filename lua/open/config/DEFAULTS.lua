@@ -36,6 +36,12 @@ return {
     -- false: navigate to it (open its parent directory without selecting).
     -- Directories are always navigated into, regardless of this setting.
     reveal = true,
+
+    -- Launcher override: a string ("thunar") or an argv list
+    -- ({ "dolphin", "--select" }). The resolved path is appended as the last
+    -- argument and the built-in platform dispatch is skipped entirely.
+    -- nil (default) → detect per platform.
+    command = nil,
   },
 
   -- When true, logs every context-gather and dispatch step to :messages.

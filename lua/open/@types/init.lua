@@ -138,6 +138,7 @@
 
 ---@class OpenNvim.Filemanager.Config
 ---@field reveal boolean  true (default): reveal/select a file; false: navigate to its parent dir
+---@field command (string|string[])|nil  Launcher override, e.g. "thunar" or { "dolphin", "--select" }. The path is appended as the last argument and platform dispatch is skipped (default: nil)
 
 ---Optional keymaps registered by setup(). Unset keys register nothing.
 ---@class OpenNvim.Keymaps

@@ -137,6 +137,7 @@ three fixed targets, map `:Open ...` yourself — see
 | Key | Default | Meaning |
 |---|---|---|
 | `reveal` | `true` | Reveal a file (select it in its parent directory) instead of navigating into that directory. |
+| `command` | `nil` | Launcher override: a string (`"thunar"`) or an argv list (`{ "dolphin", "--select" }`). The resolved path is appended as the last argument and the built-in platform dispatch is skipped. |
 
 ```lua
 require("open").setup({
@@ -145,10 +146,15 @@ require("open").setup({
 ```
 
 Directories are always navigated into, regardless of `reveal` — there is
-nothing to "select" for a directory target. Only Windows Explorer and
-macOS Finder distinguish reveal from navigate at the OS level; on Linux the
-handler passes the file's parent directory to the file manager instead of
-the file itself when `reveal = false`.
+nothing to "select" for a directory target. Windows Explorer, macOS Finder,
+and the select-capable Linux managers (nautilus, nemo, `dolphin --select`,
+thunar, caja) distinguish reveal from navigate; with `reveal = false`, or
+when none of those is installed, the file's parent directory is opened
+instead. `xdg-open` is never handed a file when revealing — it would launch
+that file's default *application* rather than a file manager.
+
+The dispatch lives in `lib.nvim.cross.reveal_in_fm` and is shared with
+filetree.nvim's `<leader>fm`, so platform fixes land in both at once.
 
 ## `debug`
 

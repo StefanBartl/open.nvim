@@ -43,6 +43,7 @@ Two command families, both built via
 | *(omitted)* | Target-aware heuristic (tree node → cfile → buffer path or cWORD) |
 | `%` | Current buffer's file path |
 | `cfile` | `<cfile>` text under the cursor |
+| `cwd` | Neovim's current working directory |
 | `git` | Nearest Git root (`git rev-parse --show-toplevel`) |
 | `path=<path>` | Literal path (supports file completion after `path=`) |
 | `<keyword>` | Named scope keyword (see [docs/keywords.md](keywords.md)) |
@@ -60,14 +61,15 @@ Examples:
 :Open terminal                    open a terminal in the current buffer's directory
 :Open terminal cfile              open a terminal in <cfile>'s parent directory
 :Open filemanager git             open the current Git root in the file manager
+:Open filemanager cwd             open the current working directory in the file manager
 ```
 
 ## Tab completion
 
 ```
 :Open <Tab>                      all registered handler names
-:Open browser <Tab>              %  cfile  git  path=  <keywords>  <file completion>
-:Open split <Tab>                %  cfile  git  path=  <keywords>  <file completion>
+:Open browser <Tab>              %  cfile  cwd  git  path=  <keywords>  <file completion>
+:Open split <Tab>                %  cfile  cwd  git  path=  <keywords>  <file completion>
 :Open filemanager path=<Tab>     file/directory completion after path=
 :Open split zsh<Tab>             → zshrc  zprofile  (keyword prefix filter)
 ```

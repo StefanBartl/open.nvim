@@ -12,6 +12,7 @@
 --- Explicit override tokens for `arg`:
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> text under the cursor
+---   "cwd"         → Neovim's current working directory
 ---   "git"         → nearest Git root (`git rev-parse --show-toplevel`)
 ---   "path=<path>" → literal path given after "path="
 ---   anything else → used verbatim as the resolved text
@@ -314,6 +315,8 @@ function M.resolve(arg, target, signals)
       text = signals.buffer_path
     elseif arg == "cfile" then
       text = signals.cfile
+    elseif arg == "cwd" then
+      text = require("lib.nvim.cross.fs._cwd")()
     elseif arg == "git" then
       text = resolve_git_root()
     elseif arg:sub(1, 5) == "path=" then

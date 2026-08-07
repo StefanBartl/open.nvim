@@ -132,11 +132,13 @@ return function(H)
         return true
       end)
 
-      local util = require("open.util")
-      local orig_run_detached = util.run_detached
+      -- The dispatch moved into lib.nvim.cross.reveal_in_fm, so the spawn to
+      -- intercept is that module's — lib.nvim.cross.run.run_detached.
+      local run = require("lib.nvim.cross.run")
+      local orig_run_detached = run.run_detached
       local seen_cmd
 
-      util.run_detached = function(cmd)
+      run.run_detached = function(cmd)
         seen_cmd = cmd
         return true
       end
@@ -149,7 +151,7 @@ return function(H)
       registered.run({ text = file, is_url = false, is_path = true })
       local navigate_cmd = table.concat(seen_cmd, " ")
 
-      util.run_detached = orig_run_detached
+      run.run_detached = orig_run_detached
 
       H.ok(
         reveal_cmd ~= navigate_cmd,
@@ -324,5 +326,32 @@ return function(H)
       H.ok(ctx.is_path, "git scope resolves to an existing path")
       H.falsy(ctx.is_url, "git scope is not a URL")
     end
+  end
+
+  -- scope = "cwd" -----------------------------------------------------------
+  do
+    require("open").setup({})
+    local context = require("open.context")
+
+    local ctx = context.resolve("cwd", "filemanager", {})
+    H.ok(ctx, "cwd scope resolves to a context")
+    if ctx then
+      H.eq(
+        ctx.text:gsub("\\", "/"):gsub("/$", ""),
+        vim.fn.getcwd():gsub("\\", "/"):gsub("/$", ""),
+        "cwd scope resolves to the current working directory"
+      )
+      H.ok(ctx.is_path, "cwd scope resolves to an existing path")
+    end
+
+    -- A user keyword must not be able to shadow the literal token, matching
+    -- how "%", "cfile" and "git" behave.
+    require("open").setup({ keywords = { cwd = "/definitely/not/the/cwd" } })
+    local ctx2 = context.resolve("cwd", "filemanager", {})
+    H.ok(
+      ctx2 and ctx2.text ~= "/definitely/not/the/cwd",
+      "cwd is a literal scope token, not overridable by a keyword"
+    )
+    require("open").setup({})
   end
 end
