@@ -354,4 +354,50 @@ return function(H)
     )
     require("open").setup({})
   end
+
+  -- office_open: BufReadCmd redirect for MS Office documents ----------------
+  do
+    H.tmpdir(function(dir)
+      local file = dir .. "/report.docx"
+      H.write(file, "not really a docx, just bytes")
+
+      local mod_name = "lib.nvim.cross.open_default"
+      local orig_open_default = package.loaded[mod_name]
+      local seen_targets = {}
+      package.loaded[mod_name] = function(target)
+        seen_targets[#seen_targets + 1] = target
+        return true
+      end
+
+      require("open").setup({ office_open = { enabled = true, extensions = { "docx" } } })
+
+      vim.cmd("edit " .. vim.fn.fnameescape(file))
+      local placeholder_buf = vim.api.nvim_get_current_buf()
+
+      H.eq(#seen_targets, 1, "office_open redirects a .docx read exactly once")
+      H.ok(
+        seen_targets[1] and seen_targets[1]:gsub("\\", "/"):find(file:gsub("\\", "/"), 1, true) ~= nil,
+        "office_open passes the real file path to open_default"
+      )
+
+      -- The placeholder buffer is wiped via vim.schedule; pump the loop for it.
+      vim.wait(200, function() return not vim.api.nvim_buf_is_valid(placeholder_buf) end)
+      H.falsy(
+        vim.api.nvim_buf_is_valid(placeholder_buf),
+        "placeholder buffer is wiped after the redirect"
+      )
+
+      package.loaded[mod_name] = orig_open_default
+
+      -- enabled=false clears the autocmd instead of stacking a disabled copy.
+      require("open").setup({ office_open = { enabled = false } })
+      H.eq(
+        #vim.api.nvim_get_autocmds({ group = "OpenNvimOfficeOpen" }),
+        0,
+        "office_open.enabled=false removes the BufReadCmd autocmd"
+      )
+
+      require("open").setup({})
+    end)
+  end
 end

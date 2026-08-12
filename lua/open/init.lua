@@ -100,6 +100,9 @@ function M.setup(opts)
     registry.register(handler)
   end
 
+  -- Auto-redirect MS Office documents (BufReadCmd), independent of handlers.
+  require("open.office_open").setup(cfg.office_open)
+
   -- Register :Open command
   require("open.bindings.usrcmds").register(cfg)
 

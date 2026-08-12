@@ -10,6 +10,7 @@ CONTENTS                                                        *open-contents*
   2. Requirements ................. |open-requirements|
   3. Installation ................. |open-installation|
   4. Configuration ................ |open-config|
+     4.1 Office document auto-redirect  |open-office-open|
   5. The :Open command ............ |:Open|
      5.1 Target argument .......... |open-target|
      5.2 Scope argument ........... |open-scope|
@@ -98,6 +99,10 @@ packer: >lua
     custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
     keymaps          = {},   -- optional keymaps; none registered by default
     filemanager      = { reveal = true },  -- false: navigate instead of reveal/select
+    office_open = {                        -- redirect MS Office docs to the system app
+      enabled    = true,
+      extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },
+    },
     debug            = false, -- true: log gather/resolve/dispatch steps to :messages
     picker           = { enabled = false }, -- true: vim.ui.select on ambiguous no-target calls
   })
@@ -176,6 +181,14 @@ packer: >lua
               the last argument and the platform dispatch is skipped.
               Default nil (detect per platform).
 
+`office_open`
+  Settings for the office-document auto-redirect (see |open-office-open|).
+  Keys:
+
+    enabled     true (default): install the BufReadCmd redirect.
+    extensions  Bare extensions, no leading dot. Default:
+                {"doc", "docx", "xls", "xlsx", "ppt", "pptx"}
+
 `debug`
   Boolean (default false). When true, logs every `context.gather()`,
   `context.resolve()`, and `registry.dispatch()` step to `:messages`.
@@ -209,6 +222,34 @@ packer: >lua
                     (default "split"). Any registered handler key works.
 
   All of them are overridable per invocation — see |open-viewer-options|.
+
+------------------------------------------------------------------------------
+4.1 Office document auto-redirect                          *open-office-open*
+
+`.doc`/`.docx`, `.xls`/`.xlsx`, `.ppt`/`.pptx` are binary containers — there
+is nothing useful Neovim can show by reading one as text. A `BufReadCmd`
+autocmd (see |open-architecture|, `open/office_open.lua`) intercepts a read
+of any configured extension, hands the path to the same
+`lib.nvim.cross.open_default` dispatch the `default` handler uses (Word,
+Excel, PowerPoint, or whatever the OS has registered), and wipes the empty
+placeholder buffer Neovim created for the read.
+
+Unlike everything else in this plugin, this is NOT something you invoke:
+`BufReadCmd` is Neovim's own read hook, so it fires for `:e`, `gf`, a picker
+result, or a tree plugin's `<CR>` alike — including filetree.nvim,
+nvim-tree, and neo-tree — without that caller needing to know open.nvim
+exists.
+
+Configure via `opts.office_open` (see |open-config|): >lua
+  require("open").setup({
+    office_open = {
+      enabled    = true,
+      extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },
+    },
+  })
+<
+Set `enabled = false`, or `extensions = {}`, to turn this off and get
+Neovim's normal (garbled) text-buffer behavior back for these extensions.
 
 ==============================================================================
 5. THE :Open COMMAND                                                   *:Open*
@@ -676,6 +717,7 @@ Reports:
   lib.nvim      lib.nvim.notify and lib.nvim.usercmd.composer presence.
   platform      Detected OS (Windows / WSL / macOS / Linux).
   executables   Per-platform tool availability.
+  office_open   Auto-redirect status and configured extensions.
   handlers      All registered handlers with descriptions.
 
 ==============================================================================
@@ -692,6 +734,7 @@ Reports:
     util.lua                run_detached(), url_encode(), find_exec()
     keywords.lua            built-in named scope keyword table
     picker.lua              opt-in vim.ui.select handler-choice prompt
+    office_open.lua         BufReadCmd redirect for MS Office documents
     health.lua              :checkhealth open
     @types/init.lua         LuaLS type definitions
     bindings/

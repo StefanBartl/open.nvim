@@ -149,6 +149,34 @@ local function check_executables()
   end
 end
 
+---Report the office_open auto-redirect config.
+---@internal
+local function check_office_open()
+  vim.health.start("open: office document auto-redirect")
+  local ok, cfg_mod = pcall(require, "open.config")
+  if not ok then
+    vim.health.warn("config not available — run setup() first")
+    return
+  end
+  local cfg = cfg_mod.get().office_open or {}
+  if not cfg.enabled then
+    vim.health.info("disabled (office_open.enabled = false)")
+    return
+  end
+  local extensions = cfg.extensions or {}
+  if #extensions == 0 then
+    vim.health.warn("enabled but office_open.extensions is empty — nothing is redirected")
+    return
+  end
+  vim.health.ok(
+    "redirecting to system app on read: "
+      .. table.concat(
+        vim.tbl_map(function(e) return "." .. e end, extensions),
+        ", "
+      )
+  )
+end
+
 ---List every handler registered in `open.registry`.
 ---@internal
 local function check_handlers()
@@ -174,6 +202,7 @@ function M.check()
   check_lib_nvim()
   check_platform()
   check_executables()
+  check_office_open()
   check_handlers()
 
   require("lib.nvim.usercmd.composer").checkhealth("Open")

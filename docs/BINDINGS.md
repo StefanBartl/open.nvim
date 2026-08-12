@@ -75,4 +75,16 @@ vim.keymap.set("n", "<leader>oo", "<Cmd>Open<CR>")
 
 ## Autocmds
 
-None.
+| Event | Pattern | Registered in |
+|---|---|---|
+| `BufReadCmd` | `opts.office_open.extensions`, default `*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx` | [lua/open/office_open.lua](../lua/open/office_open.lua) |
+
+Redirects a read of any matching path to the system default application
+(`lib.nvim.cross.open_default` — the same dispatch as the `default`
+handler) instead of loading it as a text buffer, then wipes the empty
+placeholder buffer Neovim created for the read. Fires for `:e`, `gf`, a
+picker result, or a tree plugin's `<CR>` alike — `BufReadCmd` is Neovim's
+own read hook, not something any one caller opts into.
+
+Set `office_open.enabled = false`, or `office_open.extensions = {}`, to
+disable it. See [docs/configuration.md](configuration.md#office_open).

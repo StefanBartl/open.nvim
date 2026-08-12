@@ -3,6 +3,7 @@
 ## Table of content
 
   - [All registered handlers](#all-registered-handlers)
+  - [Office document auto-redirect](#office-document-auto-redirect)
   - [Scope tokens (2nd argument)](#scope-tokens-2nd-argument)
   - [Common command examples](#common-command-examples)
   - [Platform dispatch summary](#platform-dispatch-summary)
@@ -36,6 +37,18 @@
 | Nvim vsplit | `vsplit` | File path → vertical split in Neovim | all |
 | Nvim tab | `tab` | File path → new tab in Neovim | all |
 | Terminal | `terminal` | Path → terminal split in that directory (file → its parent dir) | all |
+
+## Office document auto-redirect
+
+Not a handler — a `BufReadCmd` autocmd. Reading `.doc`/`.docx`/`.xls`/
+`.xlsx`/`.ppt`/`.pptx` (via `:e`, `gf`, a picker, or a tree `<CR>`) opens the
+system app (Word/Excel/PowerPoint/…) instead of loading garbled text.
+
+```lua
+require("open").setup({
+  office_open = { enabled = true, extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" } },
+})
+```
 
 ## Scope tokens (2nd argument)
 

@@ -10,4 +10,5 @@ Reports:
   command is built on the composer)
 - Detected platform (Windows / WSL / macOS / Linux)
 - Per-platform tool availability (explorer.exe, xdg-open, wslview, …)
+- `office_open` auto-redirect status and its configured extensions
 - All registered handlers and their descriptions
