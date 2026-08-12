@@ -133,14 +133,31 @@ return function(H)
       end)
 
       -- The dispatch moved into lib.nvim.cross.reveal_in_fm, so the spawn to
-      -- intercept is that module's — lib.nvim.cross.run.run_detached.
+      -- intercept is that module's. It has two exits, chosen at runtime: when
+      -- PowerShell + win_reveal.ps1 are available (true on Windows CI), it
+      -- calls its own local spawn_helper(), which invokes vim.system()
+      -- directly and never touches lib.nvim.cross.run.run_detached — see
+      -- spawn_helper's doc comment for why. Elsewhere (no helper, macOS,
+      -- Linux, an explicit filemanager.command override) it does go through
+      -- run.run_detached. Patch both so the test captures the command
+      -- whichever exit fires.
       local run = require("lib.nvim.cross.run")
       local orig_run_detached = run.run_detached
+      local orig_vim_system = vim.system
       local seen_cmd
 
       run.run_detached = function(cmd)
         seen_cmd = cmd
         return true
+      end
+
+      vim.system = function(cmd, _opts, on_exit)
+        seen_cmd = cmd
+        local result = { code = 0, signal = 0, stdout = "", stderr = "" }
+        if on_exit then
+          on_exit(result)
+        end
+        return { wait = function() return result end }
       end
 
       require("open").setup({ filemanager = { reveal = true } })
@@ -152,6 +169,7 @@ return function(H)
       local navigate_cmd = table.concat(seen_cmd, " ")
 
       run.run_detached = orig_run_detached
+      vim.system = orig_vim_system
 
       H.ok(
         reveal_cmd ~= navigate_cmd,
