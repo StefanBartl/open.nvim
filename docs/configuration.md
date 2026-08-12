@@ -60,6 +60,14 @@ require("open").setup({
     reveal = true, -- false: navigate to a file's parent dir instead of selecting it
   },
 
+  -- Redirect MS Office documents to the system default app on read (BufReadCmd),
+  -- instead of loading them as a text buffer. Fires for :e, gf, pickers, and
+  -- tree plugins alike — not just `:Open default`.
+  office_open = {
+    enabled    = true,
+    extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },
+  },
+
   -- When true, logs every context-gather and dispatch step to :messages.
   debug = false,
 
@@ -155,6 +163,30 @@ that file's default *application* rather than a file manager.
 
 The dispatch lives in `lib.nvim.cross.reveal_in_fm` and is shared with
 filetree.nvim's `<leader>fm`, so platform fixes land in both at once.
+
+## `office_open`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `true` | Install the `BufReadCmd` redirect. |
+| `extensions` | `{"doc","docx","xls","xlsx","ppt","pptx"}` | Bare extensions (no dot) to redirect. |
+
+```lua
+require("open").setup({
+  office_open = {
+    enabled    = true,
+    -- Add ODF formats too, for example:
+    extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp" },
+  },
+})
+```
+
+Reading a matching path — via `:e`, `gf`, a picker, or a tree plugin's
+`<CR>` — hands it to the system default application (the same dispatch as
+the `default` handler) instead of loading it as text, then wipes the empty
+placeholder buffer Neovim created for the read. Set `enabled = false` to
+turn this off entirely and get Neovim's normal (garbled) text-buffer
+behavior back for these extensions.
 
 ## `debug`
 

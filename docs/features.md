@@ -52,6 +52,23 @@ duplicated in this plugin.
 - **Module:** `open/handlers/default.lua`
 - **Usercmds:** `:Open default`
 
+## Office document auto-redirect
+
+`.docx`, `.xlsx`, `.pptx` (and their legacy/Open-Document counterparts) are
+binary containers — Neovim reading one as text just shows garbage. A
+`BufReadCmd` autocmd intercepts a read of any configured extension, hands the
+path to the same `lib.nvim.cross.open_default` dispatch the `default`
+handler uses, and wipes the placeholder buffer Neovim created for the read.
+
+Unlike every other feature in this file, this one is **not** something you
+invoke — `BufReadCmd` is Neovim's own read hook, so it fires for `:e`, `gf`,
+a picker result, or a tree plugin's `<CR>` alike, without that caller having
+to know or care about open.nvim.
+
+- **Module:** `open/office_open.lua`
+- **Autocmds:** `../BINDINGS.md#autocmds`
+- **Config:** `opts.office_open.enabled` (default `true`), `opts.office_open.extensions` (default `{"doc","docx","xls","xlsx","ppt","pptx"}`)
+
 ## Browser handlers
 
 `:Open browser` opens the target in the system default browser; plain text
