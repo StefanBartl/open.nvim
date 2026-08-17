@@ -3,9 +3,6 @@
 This folder is the machine-readable catalog behind `documentation.nvim`'s
 Features tab, following the shape documented in
 [`FEATURES_FORMAT.md`](https://github.com/StefanBartl/documentation.nvim/blob/main/docs/FEATURES_FORMAT.md).
-For prose written for a human reading top-to-bottom, see
-[`docs/features.md`](../features.md) instead — this folder is the same
-material regrouped into `## Feature` cards.
 
 Three themes:
 
