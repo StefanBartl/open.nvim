@@ -21,10 +21,14 @@
 open.nvim gives you a single `:Open [target] [scope]` command that routes the
 thing under your cursor — path, URL, or plain text — to the right
 destination: system file manager, browser (with named-browser support), GUI
-text editor, or a Neovim split/tab. It is context-aware: it knows when you
-are in a Neo-tree, nvim-tree, or netrw buffer and opens the node under the
-cursor directly. Built on [lib.nvim](https://github.com/StefanBartl/lib.nvim)
-as a deliberate shared dependency.
+text editor, terminal split rooted in the target's directory, inline image
+viewer (via images.nvim, with fallback), or a Neovim split/tab. It is
+context-aware: it knows when you are in a Neo-tree, nvim-tree, or netrw
+buffer and opens the node under the cursor directly, and it transparently
+redirects reads of `.docx`/`.xlsx`/`.pptx` (and legacy/OpenDocument
+counterparts) to their system app instead of showing garbage in a buffer.
+Built on [lib.nvim](https://github.com/StefanBartl/lib.nvim) as a deliberate
+shared dependency.
 
 It also goes the other way: `:Open viewer` — with `:UrlView` and
 `:MDLinksView` as shortcuts — lists the links in a buffer, a selection, a
@@ -68,10 +72,11 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 
 ## Documentation
 
-- [Features](docs/features.md) — handler table and smart context resolution.
+- [Features](docs/FEATURES/README.md) — handler catalog and smart context resolution.
 - [Installation](docs/installation.md) — requirements and setup for lazy.nvim, packer, and others.
 - [Configuration](docs/configuration.md) — all `setup()` options and their defaults.
 - [Command Reference](docs/commands.md) — full `:Open` and `:Open viewer` commands, scope tokens, and tab-completion.
+- [Workflow](docs/WORKFLOW.md) — day-to-day usage: scope/target resolution in practice, `:Open viewer` vs a direct handler, and other traps.
 - [Built-in Keywords](docs/keywords.md) — named scope shortcuts for shell, editor, git, SSH, and more config files.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
 - [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`) and an opt-in telescope.nvim source.
