@@ -25,16 +25,40 @@ local function expand(p)
   return require("lib.nvim.cross.fs.expand_path")(p)
 end
 
+---@internal
+---Memo cache for `capture`, keyed by the joined argv.
+---@type table<string, string|false>
+local capture_cache = {}
+
 ---Run a command synchronously and return trimmed stdout, or nil on failure.
+---
+---Stays synchronous: the resolvers below are stored as functions and called
+---lazily by `:Open <keyword>`, which needs the resolved path as a return value.
+---
+---Memoised instead, because the answers do not change within a session and one
+---of them is expensive: `resolve_pwsh_profile` starts PowerShell just to read
+---`$PROFILE`, and a PowerShell start alone costs several hundred milliseconds.
+---Repeat use of the same keyword is free now. `false` is cached for failures so
+---a missing tool is not retried on every invocation either.
 ---@internal
 ---@param argv string[]
 ---@return string|nil
 local function capture(argv)
   if not vim.system then return nil end
+
+  local key = table.concat(argv, "\31")
+  local hit = capture_cache[key]
+  if hit ~= nil then return hit or nil end
+
   local res = vim.system(argv, { text = true }):wait()
-  if res.code ~= 0 then return nil end
+  if res.code ~= 0 then
+    capture_cache[key] = false
+    return nil
+  end
   local out = (res.stdout or ""):gsub("\n", ""):gsub("\r", "")
-  return out ~= "" and out or nil
+  out = out ~= "" and out or nil
+  capture_cache[key] = out or false
+  return out
 end
 
 ---Return the first path in `candidates` that exists on disk, else last entry.
