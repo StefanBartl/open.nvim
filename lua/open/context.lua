@@ -110,10 +110,14 @@ end
 ---@internal
 ---@return string|nil
 local function resolve_git_root()
-  local out = vim.fn.system({ "git", "rev-parse", "--show-toplevel" })
-  if vim.v.shell_error ~= 0 then return nil end
-  out = out:gsub("[\r\n]+$", "")
-  return out ~= "" and out or nil
+  -- Pure filesystem walk instead of spawning `git rev-parse --show-toplevel`.
+  -- The subprocess blocked the UI thread on every :Open resolution; vim.fs.find
+  -- only issues stat() calls. `.git` matches both the directory and the gitfile
+  -- form used by worktrees and submodules.
+  local found = vim.fs.find(".git", { path = vim.fn.getcwd(), upward = true, limit = 1 })
+  if not (found and found[1]) then return nil end
+  local dir = vim.fs.dirname(found[1])
+  return (dir and dir ~= "") and dir or nil
 end
 
 -- ---------------------------------------------------------------------------
