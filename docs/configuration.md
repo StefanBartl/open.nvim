@@ -47,12 +47,15 @@ require("open").setup({
   },
 
   -- Optional keymaps for common invocations. Empty by default (no default
-  -- keymaps are registered). Valid keys: open_default, open_browser,
-  -- open_manager. Values are the {lhs} passed to vim.keymap.set().
+  -- keymaps are registered). Keys are open_default (bare `:Open`) and
+  -- open_<handler key> for any registered handler, plus the historical alias
+  -- open_manager (= open_filemanager). Values are the {lhs}.
   keymaps = {
-    -- open_default = "<leader>oo",  -- :Open
-    -- open_browser = "<leader>ob",  -- :Open browser
-    -- open_manager = "<leader>of",  -- :Open filemanager
+    -- open_default  = "<leader>oo",  -- :Open
+    -- open_browser  = "<leader>ob",  -- :Open browser
+    -- open_manager  = "<leader>of",  -- :Open filemanager
+    -- open_split    = "<leader>os",  -- :Open split
+    -- open_terminal = "<leader>ot",  -- :Open terminal
   },
 
   -- `filemanager` handler settings.
@@ -128,21 +131,31 @@ normal-mode mapping for that fixed invocation:
 | Key | Triggers |
 |---|---|
 | `open_default` | `:Open` (context-aware default) |
-| `open_browser` | `:Open browser` |
-| `open_manager` | `:Open filemanager` |
+| `open_<handler key>` | `:Open <handler key>` — every registered handler |
+| `open_manager` | `:Open filemanager` (historical alias of `open_filemanager`) |
+
+With the default handler set that means `open_browser`, `open_filemanager`,
+`open_split`, `open_vsplit`, `open_tab`, `open_terminal`, `open_image`,
+`open_notepad`, and the named browsers (`open_firefox`, `open_chrome`,
+`open_edge`, …). A handler registered through `custom_handlers` gets its
+keymap key for free; one switched off via `opts.handlers` is rejected.
 
 ```lua
 require("open").setup({
   keymaps = {
-    open_default = "<leader>oo",
-    open_browser = "<leader>ob",
-    open_manager = "<leader>of",
+    open_default  = "<leader>oo",
+    open_browser  = "<leader>ob",
+    open_manager  = "<leader>of",
+    open_split    = "<leader>os",
+    open_terminal = "<leader>ot",
   },
 })
 ```
 
-An unrecognized key warns and is ignored. For anything not covered by these
-three fixed targets, map `:Open ...` yourself — see
+An unrecognized key warns, names the accepted keys, and is ignored. The
+mapping's `desc` is the command it runs (`open.nvim: :Open split`). These are
+still *fixed* invocations — a keymap for `:Open split zshrc` specifically
+needs a plain `vim.keymap.set` — see
 [docs/BINDINGS.md](BINDINGS.md#keymaps).
 
 ## `filemanager`

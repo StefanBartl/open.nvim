@@ -85,13 +85,33 @@ silently).
 
 ## Keymap config
 
-`setup()` accepts an optional `keymaps` table with exactly three recognized
-keys — `open_default`, `open_browser`, `open_manager` — that register a
-normal-mode keymap for a fixed `:Open` / `:Open browser` / `:Open
-filemanager` invocation. No default keymaps are registered; an unrecognized
-key warns and registers nothing.
+`setup()` accepts an optional `keymaps` table registering a normal-mode
+keymap for a fixed `:Open [target]` invocation. No default keymaps are
+registered; an unrecognized key warns, names the accepted keys, and registers
+nothing.
 
-- **Module:** `open/bindings/keymaps.lua` (`M.register`)
+**The accepted keys come from the handler registry, not a list in
+`keymaps.lua`** (changed 2026-08-24, closing the flag/option audit's entry
+about `:Open split` and `:Open terminal` having no keymap option). Before
+this it was a hardcoded three — `open_default`, `open_browser`,
+`open_manager` — which is exactly why six perfectly ordinary targets had no
+option: the list had not grown with the handlers. Now `open_<handler key>`
+works for every registered handler, a `custom_handlers` one included.
+
+Reading the live registry rather than a static list also means a target
+switched off via `opts.handlers` is rejected here, instead of being mapped to
+a command that would fail at press time. `open_manager` stays as a historical
+alias of `open_filemanager`; `open_default` keeps meaning the bare `:Open`
+even though the registry has its own `default` handler, since both end up at
+the same context-aware handler anyway.
+
+Registration goes through `lib.nvim.map` rather than `vim.keymap.set`
+directly, so a bad lhs is reported against the real call site. The `desc` is
+now the command itself (`open.nvim: :Open split`) instead of the config key
+name.
+
+- **Module:** `open/bindings/keymaps.lua` (`M.register`, `resolve_target`,
+  `accepted_names`)
 - **Config:** `opts.keymaps` (default `{}`)
 - **Keymaps:** [`../BINDINGS.md#keymaps`](../BINDINGS.md#keymaps)
 

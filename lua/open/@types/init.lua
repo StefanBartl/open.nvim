@@ -154,9 +154,22 @@
 ---@field command (string|string[])|nil  Launcher override, e.g. "thunar" or { "dolphin", "--select" }. The path is appended as the last argument and platform dispatch is skipped (default: nil)
 
 ---Optional keymaps registered by setup(). Unset keys register nothing.
+---
+---Accepted keys are derived from the live handler registry, not from this
+---list: `open_<handler key>` works for every registered handler, including
+---one added through `custom_handlers`. The fields below are the built-in
+---handlers, spelled out so completion and hover have something to offer.
+---A target switched off via `cfg.handlers` is rejected with a warning.
 ---@class OpenNvim.Keymaps
 ---@field open_default string|nil  lhs for `:Open` (context-aware default)
 ---@field open_browser string|nil  lhs for `:Open browser`
----@field open_manager string|nil  lhs for `:Open filemanager`
+---@field open_filemanager string|nil  lhs for `:Open filemanager`
+---@field open_manager string|nil  lhs for `:Open filemanager` (historical alias of open_filemanager)
+---@field open_split string|nil  lhs for `:Open split`
+---@field open_vsplit string|nil  lhs for `:Open vsplit`
+---@field open_tab string|nil  lhs for `:Open tab`
+---@field open_terminal string|nil  lhs for `:Open terminal`
+---@field open_image string|nil  lhs for `:Open image`
+---@field open_notepad string|nil  lhs for `:Open notepad`
 
 return {}

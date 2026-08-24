@@ -26,8 +26,11 @@ return {
   custom_handlers = {},
 
   -- Optional keymaps for common invocations. Empty by default — open.nvim
-  -- ships with no default keymaps. Valid keys: "open_default" | "open_browser"
-  -- | "open_manager". Values are the {lhs} passed to vim.keymap.set().
+  -- ships with no default keymaps. Keys are "open_default" (bare `:Open`),
+  -- "open_<handler key>" for any registered handler — open_browser,
+  -- open_filemanager, open_split, open_vsplit, open_tab, open_terminal,
+  -- open_image, open_notepad — plus the historical alias "open_manager"
+  -- (= open_filemanager). Values are the {lhs}.
   keymaps = {},
 
   -- `filemanager` handler settings.

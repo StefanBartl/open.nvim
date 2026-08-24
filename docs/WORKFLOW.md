@@ -195,10 +195,10 @@ If you find yourself typing the same `:Open <target> <scope>` combination
 repeatedly, two config surfaces exist specifically so you don't have to
 retype it:
 
-- `opts.keymaps` for a *fixed* invocation (`open_default`, `open_browser`,
-  `open_manager` only — no per-scope keymap generation, so a keymap for
-  `:Open split zshrc` specifically still needs a plain `vim.keymap.set`
-  yourself).
+- `opts.keymaps` for a *fixed* invocation (`open_default` plus
+  `open_<handler key>` for any registered handler — no per-scope keymap
+  generation, so a keymap for `:Open split zshrc` specifically still needs a
+  plain `vim.keymap.set` yourself).
 - `opts.keywords` for a scope you use across *multiple* targets — a keyword
   defined once works as the scope argument to `browser`, `filemanager`,
   `split`, `terminal`, anything, rather than hardcoding the path into one

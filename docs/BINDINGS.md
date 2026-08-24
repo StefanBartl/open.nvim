@@ -58,15 +58,26 @@ fixed, common invocations without writing `vim.keymap.set` yourself:
 ```lua
 require("open").setup({
   keymaps = {
-    open_default = "<leader>oo",  -- :Open
-    open_browser = "<leader>ob",  -- :Open browser
-    open_manager = "<leader>of",  -- :Open filemanager
+    open_default  = "<leader>oo",  -- :Open
+    open_browser  = "<leader>ob",  -- :Open browser
+    open_manager  = "<leader>of",  -- :Open filemanager
+    open_split    = "<leader>os",  -- :Open split
+    open_terminal = "<leader>ot",  -- :Open terminal
   },
 })
 ```
 
+**The accepted keys come from the handler registry**, so `open_<handler key>`
+works for every registered handler — `split`, `vsplit`, `tab`, `terminal`,
+`image`, `notepad`, `filemanager`, `browser`, the named browsers
+(`open_firefox`, `open_chrome`, …), and any handler you added through
+`custom_handlers`. `open_manager` is kept as a historical alias of
+`open_filemanager`.
+
 Registered in [lua/open/bindings/keymaps.lua](../lua/open/bindings/keymaps.lua).
-An unrecognized key in `keymaps` warns and registers nothing. You can still
+An unrecognized key warns, names the accepted ones, and registers nothing. A
+handler you switched off via `opts.handlers` is rejected the same way, rather
+than being mapped to a command that would fail when pressed. You can still
 map `:Open` (or any other invocation) yourself instead:
 
 ```lua
