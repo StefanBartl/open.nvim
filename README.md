@@ -46,6 +46,7 @@ the clipboard, or to a file.
 ## Table of Contents
 
 - [Quickstart](#quickstart)
+- [Context Menu (optional)](#context-menu-optional)
 - [Documentation](#documentation)
 
 ---
@@ -69,6 +70,17 @@ Requires Neovim 0.9+ and [lib.nvim](https://github.com/StefanBartl/lib.nvim).
 :Open browser %      open current file in the browser (file:// URL)
 :Open split cfile    open <cfile> path under the cursor in a split
 ```
+
+## Context Menu (optional)
+
+`open.integrations.menu` contributes context-aware entries — Open, Open in
+Browser, Reveal in File Manager, Open in Terminal, List Links Here — in the
+shape [nvzone/menu](https://github.com/nvzone/menu) expects. open.nvim has
+**no** dependency on `menu` and never opens a context menu itself; a host
+(typically your own `<RightMouse>` dispatcher) has to compose these entries
+into its own menu for them to ever be shown. See
+[docs/integrations.md](docs/integrations.md#nvzonemenu-context-menu) for the
+wiring and how entries self-gate to the resolved cursor context.
 
 ## Documentation
 

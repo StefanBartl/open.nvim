@@ -133,9 +133,15 @@
 ---@field debug               boolean   Log every context-gather/resolve/dispatch step to :messages (default false)
 ---@field picker              OpenNvim.Picker.Config  Handler-choice picker for ambiguous no-target invocations
 ---@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
+---@field menu                OpenNvim.Menu.Config  `open.integrations.menu` (nvzone/menu) opt-out
 
 ---@class OpenNvim.Picker.Config
 ---@field enabled boolean  When true, an ambiguous no-target `:Open` shows a vim.ui.select picker (default false)
+
+---Opt-out for `open.integrations.menu`. open.nvim never opens nvzone/menu
+---itself; this only gates whether `M.items()`/`M.submenu()` return entries.
+---@class OpenNvim.Menu.Config
+---@field enable boolean  Set false to make `open.integrations.menu` always return no entries (default true)
 
 ---Redirects reads of matching extensions to the system default app via a
 ---BufReadCmd autocmd, so `.docx`/`.xlsx`/`.pptx` never load as garbled text.

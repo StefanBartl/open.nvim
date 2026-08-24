@@ -75,3 +75,26 @@ Each row shows the handler's key and description; the previewer shows what
 that handler would actually open (path or URL) for the buffer you called it
 from — so you can tell `notepad` and `filemanager` apart before committing.
 `<CR>` dispatches the handler exactly like `:Open <key>` would.
+
+## nvzone/menu (context menu)
+
+`open.integrations.menu` contributes context-aware entries in the shape
+[nvzone/menu](https://github.com/nvzone/menu) expects — it does **not**
+depend on `menu` and never opens it itself. A host, typically your own
+`<RightMouse>` dispatcher, composes the entries into its own menu:
+
+```lua
+local items = require("open.integrations.menu").items()
+-- prepend/append `items` to your own menu table, then menu.open(composed)
+
+-- or a single fly-out entry:
+local sub = require("open.integrations.menu").submenu()  -- { name = "  Open", items = {…} } | nil
+```
+
+Since open.nvim acts on any buffer — including a focused Neo-tree / nvim-tree
+/ netrw buffer — entries self-gate against the same `open.context`
+resolution `:Open` itself uses: "Open in Browser" only appears when the
+resolved target is a URL, "Reveal in File Manager" / "Open in Terminal" only
+when it resolves to an existing path. "List Links Here" (`:Open viewer %`) is
+always offered. Opt out entirely with `menu = { enable = false }` in
+`setup()` — see [docs/configuration.md](configuration.md#menu).

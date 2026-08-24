@@ -61,6 +61,13 @@ return {
   -- instead of silently picking one. Off by default (unchanged behavior).
   picker = { enabled = false },
 
+  -- nvzone/menu integration (opt-in on the host side; entries provided by
+  -- open.integrations.menu). open.nvim never opens nvzone/menu itself — this
+  -- only gates whether M.items()/M.submenu() return entries at all.
+  menu = {
+    enable = true,
+  },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

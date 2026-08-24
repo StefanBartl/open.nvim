@@ -74,6 +74,11 @@ require("open").setup({
   -- Handler-choice picker for ambiguous no-target invocations. Off by default.
   picker = { enabled = false },
 
+  -- Opt-out for open.integrations.menu (nvzone/menu entries). open.nvim
+  -- never opens nvzone/menu itself; this only gates whether that module's
+  -- M.items()/M.submenu() return entries.
+  menu = { enable = true },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. false = do not register.
@@ -225,6 +230,24 @@ Candidates by context:
 
 An explicit target (`:Open browser`, `open.open("browser")`) always bypasses
 the picker, same as before this option existed.
+
+## `menu`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enable` | `true` | Set `false` to make `open.integrations.menu` always return no entries. |
+
+```lua
+require("open").setup({
+  menu = { enable = false },
+})
+```
+
+open.nvim has no `nvzone/menu` dependency and never opens a context menu
+itself — `open.integrations.menu` only *contributes* entries for a host
+(typically your own `<RightMouse>` dispatcher) to compose into its own menu.
+This option is the single opt-out for that; see
+[docs/integrations.md](integrations.md#nvzonemenu-context-menu).
 
 ## `viewer`
 
