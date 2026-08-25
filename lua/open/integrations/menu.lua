@@ -27,10 +27,9 @@ local M = {}
 --- Returns an empty list when the integration is disabled, or nothing in the
 --- current context resolves to anything, so a host can safely
 --- `vim.list_extend` it unconditionally.
----@param opts? table  reserved for future use
+---@param _opts? table  reserved for future use
 ---@return table[]  nvzone/menu entry list (possibly empty)
-function M.items(opts)
-  opts = opts or {}
+function M.items(_opts)
   local cfg = require("open.config").get()
   local mcfg = cfg.menu or {}
   if mcfg.enable == false then return {} end
