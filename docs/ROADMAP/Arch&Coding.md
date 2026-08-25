@@ -1,8 +1,14 @@
 # Architektur- & Codierungsrichtlinien — applied to open.nvim
 
 Audit against
-[`Arch&Coding-Regeln.md`](E:/repos/Notes/MyNotes/Checklists/Lua/Arch&Coding-Regeln.md).
+[`regeln/PRINCIPLES.md`](../../../WKDBooks/Development/wkdbook-Lua/Checklists/regeln/PRINCIPLES.md).
 ✅ good · 🟡 partial · ❌ gap · ➖ N/A (no matching surface area).
+
+> The source checklists (`Arch&Coding-Regeln.md`, `Checklist.md`,
+> `Zentrale-Prinzipien.md`) were retired: they were absorbed into the rule
+> collection under `WKDBooks/Development/wkdbook-Lua/Checklists/`, which is
+> now the canonical one. The links above point there.
+
 
 open.nvim is a ~600-line plugin: one user command (`:Open`), no keymaps, no
 autocmds, no async watchers, no persisted state. Several checklist sections

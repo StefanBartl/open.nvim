@@ -1,8 +1,14 @@
 # Zentrale Prinzipien — applied to open.nvim
 
 Audit of open.nvim against
-[`Zentrale-Prinzipien.md`](E:/repos/Notes/MyNotes/Checklists/Lua/Zentrale-Prinzipien.md).
+[`regeln/PRINCIPLES.md`](../../../WKDBooks/Development/wkdbook-Lua/Checklists/regeln/PRINCIPLES.md).
 Status: ✅ good · 🟡 partial / improvable · ❌ gap (action item).
+
+> The source checklists (`Arch&Coding-Regeln.md`, `Checklist.md`,
+> `Zentrale-Prinzipien.md`) were retired: they were absorbed into the rule
+> collection under `WKDBooks/Development/wkdbook-Lua/Checklists/`, which is
+> now the canonical one. The links above point there.
+
 
 open.nvim is a single-command dispatch plugin (`:Open [target] [scope]`) with
 no keymaps, no autocommands, and no persistent runtime state. Many principles

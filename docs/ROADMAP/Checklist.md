@@ -1,8 +1,14 @@
 # Lua/Neovim Checklist — applied to open.nvim
 
 Audit against
-[`Checklist.md`](E:/repos/Notes/MyNotes/Checklists/Lua/Checklist.md).
+[`regeln/`](../../../WKDBooks/Development/wkdbook-Lua/Checklists/regeln/).
 ✅ good · 🟡 partial · ❌ gap · ➖ N/A for this plugin.
+
+> The source checklists (`Arch&Coding-Regeln.md`, `Checklist.md`,
+> `Zentrale-Prinzipien.md`) were retired: they were absorbed into the rule
+> collection under `WKDBooks/Development/wkdbook-Lua/Checklists/`, which is
+> now the canonical one. The links above point there.
+
 
 open.nvim is a small, single-purpose dispatcher: `:Open [target] [scope]`
 resolves a path/URL/text from editor context and hands it to a registered
