@@ -154,10 +154,12 @@ return function(H)
       vim.system = function(cmd, _opts, on_exit)
         seen_cmd = cmd
         local result = { code = 0, signal = 0, stdout = "", stderr = "" }
-        if on_exit then
-          on_exit(result)
-        end
-        return { wait = function() return result end }
+        if on_exit then on_exit(result) end
+        return {
+          wait = function()
+            return result
+          end,
+        }
       end
 
       require("open").setup({ filemanager = { reveal = true } })
@@ -394,12 +396,15 @@ return function(H)
 
       H.eq(#seen_targets, 1, "office_open redirects a .docx read exactly once")
       H.ok(
-        seen_targets[1] and seen_targets[1]:gsub("\\", "/"):find(file:gsub("\\", "/"), 1, true) ~= nil,
+        seen_targets[1]
+          and seen_targets[1]:gsub("\\", "/"):find(file:gsub("\\", "/"), 1, true) ~= nil,
         "office_open passes the real file path to open_default"
       )
 
       -- The placeholder buffer is wiped via vim.schedule; pump the loop for it.
-      vim.wait(200, function() return not vim.api.nvim_buf_is_valid(placeholder_buf) end)
+      vim.wait(200, function()
+        return not vim.api.nvim_buf_is_valid(placeholder_buf)
+      end)
       H.falsy(
         vim.api.nvim_buf_is_valid(placeholder_buf),
         "placeholder buffer is wiped after the redirect"

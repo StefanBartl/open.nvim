@@ -168,13 +168,12 @@ local function check_office_open()
     vim.health.warn("enabled but office_open.extensions is empty — nothing is redirected")
     return
   end
-  vim.health.ok(
-    "redirecting to system app on read: "
-      .. table.concat(
-        vim.tbl_map(function(e) return "." .. e end, extensions),
-        ", "
-      )
-  )
+  vim.health.ok("redirecting to system app on read: " .. table.concat(
+    vim.tbl_map(function(e)
+      return "." .. e
+    end, extensions),
+    ", "
+  ))
 end
 
 ---List every handler registered in `open.registry`.
