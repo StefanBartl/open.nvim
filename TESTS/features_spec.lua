@@ -173,10 +173,38 @@ return function(H)
       run.run_detached = orig_run_detached
       vim.system = orig_vim_system
 
-      H.ok(
-        reveal_cmd ~= navigate_cmd,
-        "filemanager.reveal=true and reveal=false build different commands for a file target"
-      )
+      -- Whether the two settings can differ at all is a property of the host.
+      -- Windows (explorer /select,<file> vs. explorer <dir>) and macOS
+      -- (`open -R <file>` vs. `open <dir>`) always differ. Linux only differs
+      -- when a select-capable file manager is installed: with nothing but
+      -- xdg-open on PATH -- the normal state of a CI runner -- reveal = true
+      -- degrades to opening the parent directory by design (see
+      -- lib.nvim.cross.reveal_in_fm's LINUX_MANAGERS table), which is exactly
+      -- what reveal = false does. Asserting a difference there would be
+      -- asserting that the runner has a desktop installed.
+      local can_select = true
+      if vim.fn.has("unix") == 1 and vim.fn.has("mac") == 0 then
+        can_select = false
+        for _, mgr in ipairs({ "nautilus", "nemo", "dolphin", "thunar", "caja" }) do
+          if vim.fn.executable(mgr) == 1 then
+            can_select = true
+            break
+          end
+        end
+      end
+
+      if can_select then
+        H.ok(
+          reveal_cmd ~= navigate_cmd,
+          "filemanager.reveal=true and reveal=false build different commands for a file target"
+        )
+      else
+        H.eq(
+          reveal_cmd,
+          navigate_cmd,
+          "without a select-capable file manager, reveal=true degrades to reveal=false"
+        )
+      end
     end)
   end
 
