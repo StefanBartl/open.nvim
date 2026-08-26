@@ -22,7 +22,7 @@
 --- target the user switched off via `cfg.handlers` is correctly rejected here
 --- too, instead of mapping a key to a command that would fail at press time.
 
-local map = require("lib.nvim.map")
+local map = require("lib.nvim.bindings.keymap")
 local notify = require("lib.nvim.notify").create("[open.keymaps]")
 local registry = require("open.registry")
 

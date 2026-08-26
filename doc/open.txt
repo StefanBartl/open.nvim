@@ -258,7 +258,7 @@ Neovim's normal (garbled) text-buffer behavior back for these extensions.
   :Open [target] [scope]
 <
 
-Built via lib.nvim.usercmd.composer (single flat `path = {}` root route —
+Built via lib.nvim.bindings.usercmd.composer (single flat `path = {}` root route —
 no subcommand tree), which is also what drives |open-completion|.
 
 With no arguments, `:Open` uses a context-aware heuristic:
@@ -714,7 +714,7 @@ and previewable first. Not loaded by `open.setup()`. >lua
 Reports:
 
   core          Neovim version, vim.system availability.
-  lib.nvim      lib.nvim.notify and lib.nvim.usercmd.composer presence.
+  lib.nvim      lib.nvim.notify and lib.nvim.bindings.usercmd.composer presence.
   platform      Detected OS (Windows / WSL / macOS / Linux).
   executables   Per-platform tool availability.
   office_open   Auto-redirect status and configured extensions.
@@ -738,7 +738,7 @@ Reports:
     health.lua              :checkhealth open
     @types/init.lua         LuaLS type definitions
     bindings/
-      usrcmds.lua           :Open — built on lib.nvim.usercmd.composer
+      usrcmds.lua           :Open — built on lib.nvim.bindings.usercmd.composer
       keymaps.lua           optional keymaps declared via cfg.keymaps
     handlers/
       filemanager.lua       Explorer / Finder / xdg-open

@@ -182,7 +182,7 @@ weak-table memoization, GC tuning) has anything to attach to at this scale.
    (`.github/workflows/ci.yml`) alongside stylua and luacheck.
 2. ~~**Adopt `lib.usercmd` for the one `:Open` registration**~~ — ✅ done,
    also stale as written: `bindings/usrcmds.lua` builds every command
-   through `lib.nvim.usercmd.composer`, including two custom completion
+   through `lib.nvim.bindings.usercmd.composer`, including two custom completion
    types (`OPEN_TARGET`, `OPEN_SCOPE`) and the `:UrlView`/`:MDLinksView`
    wrapper verbs.
 3. **Consider a `safe_call`-style wrapper** — still open, still not urgent.

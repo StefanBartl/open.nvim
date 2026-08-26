@@ -1,5 +1,5 @@
 ---@module 'open.bindings.usrcmds'
----@brief Registers the :Open (and :UrlView) user commands via lib.nvim.usercmd.composer.
+---@brief Registers the :Open (and :UrlView) user commands via lib.nvim.bindings.usercmd.composer.
 ---@description
 --- `:Open [target] [scope]` is a flat, no-subcommand grammar, so it uses
 --- composer's `path = {}` root-route trick rather than a subcommand tree.
@@ -17,7 +17,7 @@
 --- `:UrlView` / `:MDLinksView` are shallow standalone wrappers that pin the
 --- kind filter, following replacer.nvim's `:Replace` / `:Replacer` precedent.
 
-local composer = require("lib.nvim.usercmd.composer")
+local composer = require("lib.nvim.bindings.usercmd.composer")
 
 local M = {}
 

@@ -1,7 +1,7 @@
 # open.nvim — Command Reference
 
 Two command families, both built via
-[`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim) with
+[`lib.nvim.bindings.usercmd.composer`](https://github.com/StefanBartl/lib.nvim) with
 `<Tab>` completion:
 
 - `:Open [target] [scope]` — route one thing to a handler

@@ -14,7 +14,7 @@ source.
 
 ## Usrcmds
 
-Built via [`lib.nvim.usercmd.composer`](https://github.com/StefanBartl/lib.nvim)
+Built via [`lib.nvim.bindings.usercmd.composer`](https://github.com/StefanBartl/lib.nvim)
 with `<Tab>` completion, defined in
 [lua/open/bindings/usrcmds.lua](../lua/open/bindings/usrcmds.lua).
 

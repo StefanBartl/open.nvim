@@ -105,7 +105,7 @@ alias of `open_filemanager`; `open_default` keeps meaning the bare `:Open`
 even though the registry has its own `default` handler, since both end up at
 the same context-aware handler anyway.
 
-Registration goes through `lib.nvim.map` rather than `vim.keymap.set`
+Registration goes through `lib.nvim.bindings.keymap` rather than `vim.keymap.set`
 directly, so a bad lhs is reported against the real call site. The `desc` is
 now the command itself (`open.nvim: :Open split`) instead of the config key
 name.
@@ -150,7 +150,7 @@ its own menu.
 
 `:checkhealth open` reports the Neovim version, `vim.system` availability,
 `lib.nvim` presence (`:Open` itself is built on
-`lib.nvim.usercmd.composer`), detected platform, per-platform tool
+`lib.nvim.bindings.usercmd.composer`), detected platform, per-platform tool
 availability, and the full list of currently registered handlers with their
 descriptions.
 

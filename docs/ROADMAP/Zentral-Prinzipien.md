@@ -22,7 +22,7 @@ padded with invented action items.
 |---|---|---|
 | `lib.notify` | ✅ | Every handler and `registry.lua`/`init.lua` creates a scoped notifier via `require("lib.nvim.notify").create("[open.*]")` — no raw `vim.notify()`/`print()` anywhere. |
 | `lib.map` | N/A | open.nvim registers zero keymaps by design (`docs/BINDINGS.md` shows a *suggested* user keymap, not one the plugin creates). Nothing to migrate. |
-| `lib.usercmd` | ❌ | `bindings/usrcmds.lua:9` calls `vim.api.nvim_create_user_command` directly. `lib.nvim.usercmd.create()` (`E:/repos/lib.nvim/lua/lib/nvim/usercmd/init.lua`) already wraps this with a `pcall`-guarded callback and notify-on-error — exactly the pattern `registry.dispatch` re-implements by hand at `registry.lua:92-95`. Small, one-call migration. |
+| `lib.usercmd` | ❌ | `bindings/usrcmds.lua:9` calls `vim.api.nvim_create_user_command` directly. `lib.nvim.bindings.usercmd.create()` (`E:/repos/lib.nvim/lua/lib/nvim/bindings/usercmd/init.lua`) already wraps this with a `pcall`-guarded callback and notify-on-error — exactly the pattern `registry.dispatch` re-implements by hand at `registry.lua:92-95`. Small, one-call migration. |
 | `lib.autocmd` / `lib.augroup` | N/A | open.nvim creates no autocommands at all (confirmed via repo-wide grep — the only `vim.g.loaded_open` guard in `plugin/open.lua` isn't an autocmd). |
 | `lib.cross` | ❌ | `platform.lua` hand-rolls `is_win`/`is_mac`/`is_wsl`/`is_linux` detection and caches it locally. `lib.nvim.cross.platform.is` (`E:/repos/lib.nvim/lua/lib/nvim/cross/platform/is.lua`) already provides the same cached, uname-based detection (`is_windows`, `is_wsl`, `is_macos`, `is_linux` sub-modules). This is a genuine duplication, not a stylistic choice — see action item below. |
 | `lib.hover_select` | N/A | open.nvim never prompts the user to pick from a list (`:Open` takes explicit args or resolves automatically); there is no `vim.ui.select` call to replace. |
@@ -32,7 +32,7 @@ padded with invented action items.
 **Action:** the concrete lib-adoption item is replacing `platform.lua`'s
 hand-rolled OS detection with `lib.nvim.cross.platform.is` (or its
 `is_windows`/`is_wsl`/`is_macos` sub-functions), and routing `:Open`'s
-registration through `lib.nvim.usercmd.create`. Both are small, isolated
+registration through `lib.nvim.bindings.usercmd.create`. Both are small, isolated
 changes — no other module needs to change alongside them.
 
 ## The 10 principles
@@ -122,6 +122,6 @@ real, concentrated action items are both **lib.nvim adoption**, not design
 flaws: (1) replace `platform.lua`'s hand-rolled Windows/WSL/macOS/Linux
 detection with `lib.nvim.cross.platform.is` (a genuine duplication of
 existing, already-cached logic), and (2) route `:Open`'s registration through
-`lib.nvim.usercmd.create` instead of a raw `nvim_create_user_command` call.
+`lib.nvim.bindings.usercmd.create` instead of a raw `nvim_create_user_command` call.
 Everything else — caching, debuggability, event/command choice — is already
 adequate for a plugin of this scope.
