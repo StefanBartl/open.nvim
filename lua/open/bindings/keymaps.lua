@@ -22,7 +22,7 @@
 --- target the user switched off via `cfg.handlers` is correctly rejected here
 --- too, instead of mapping a key to a command that would fail at press time.
 
-local map = require("lib.nvim.bindings.keymap")
+local keymap = require("lib.nvim.bindings.keymap")
 local notify = require("lib.nvim.notify").create("[open.keymaps]")
 local registry = require("open.registry")
 
@@ -42,23 +42,6 @@ local DEFAULT_NAME = "open_default"
 ---renaming it would silently break every existing config that sets it.
 ---@type table<string, string>
 local ALIASES = { open_manager = "filemanager" }
-
----Resolve `keymaps.<name>` to the `:Open` target it stands for.
----@internal
----@param name string
----@return string|nil target  # nil for the bare command, or when unknown
----@return boolean ok
-local function resolve_target(name)
-  if name == DEFAULT_NAME then return nil, true end
-
-  local aliased = ALIASES[name]
-  if aliased then return aliased, registry.get(aliased) ~= nil end
-
-  local key = name:match("^open_(.+)$")
-  if key and registry.get(key) then return key, true end
-
-  return nil, false
-end
 
 ---Every `keymaps.<name>` this setup would accept, for an error message that
 ---names the alternatives instead of only rejecting.
@@ -88,28 +71,61 @@ local function accepted_names()
   return table.concat(names, ", ")
 end
 
----Register keymaps declared in `cfg.keymaps`.
+---Declare and bind the keymaps from `cfg.keymaps`.
 ---
 --- Runs after handler registration in `setup()`, which is what lets it read
 --- the registry rather than duplicate it.
+---
+--- Declared through `lib.nvim.bindings.keymap`'s registry, with one departure:
+--- unknown names are still rejected *here*, not by the registry. This name
+--- space is generated from the live handler set, so naming every accepted
+--- alternative is worth more than the registry's nearest-match guess -- and a
+--- name is filtered out before it reaches the registry, so nothing warns
+--- twice.
 ---@param cfg OpenNvim.Config
+---@return Lib.Keymap.Registered[]|nil
 function M.register(cfg)
   local keymaps = cfg.keymaps
   if type(keymaps) ~= "table" then return end
 
+  ---@type table<string, Lib.Keymap.Action>
+  local actions = {}
+  ---@type string[]
+  local order = {}
+
+  ---@param name string
+  ---@param target string|nil
+  local function declare(name, target)
+    if actions[name] then return end
+    local cmd = target and (cfg.command .. " " .. target) or cfg.command
+    actions[name] = { rhs = ("<Cmd>%s<CR>"):format(cmd), desc = ":" .. cmd }
+    order[#order + 1] = name
+  end
+
+  -- The bare `:Open` first, so the registry's own `default` handler cannot
+  -- claim `open_default` and change what that historical key means.
+  declare(DEFAULT_NAME, nil)
+  for _, key in ipairs(registry.list_keys()) do
+    if key ~= "default" then declare("open_" .. key, key) end
+  end
+  for alias, target in pairs(ALIASES) do
+    if registry.get(target) then declare(alias, target) end
+  end
+  table.sort(order)
+
+  ---@type table<string, string|false>
+  local user = {}
   for name, lhs in pairs(keymaps) do
-    if lhs and lhs ~= "" then
-      local target, ok = resolve_target(name)
-      if not ok then
-        notify.warn(
-          ("Unknown keymaps.%s — ignoring. Accepted: %s"):format(tostring(name), accepted_names())
-        )
-      else
-        local cmd = target and (cfg.command .. " " .. target) or cfg.command
-        map("n", lhs, ("<Cmd>%s<CR>"):format(cmd), {}, "open.nvim: :" .. cmd)
-      end
+    if actions[name] then
+      user[name] = lhs
+    else
+      notify.warn(
+        ("Unknown keymaps.%s — ignoring. Accepted: %s"):format(tostring(name), accepted_names())
+      )
     end
   end
+
+  return keymap.register("open.nvim", { order = order, actions = actions }, user)
 end
 
 return M
