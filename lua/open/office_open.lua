@@ -61,17 +61,20 @@ end
 ---instead of stacking duplicate autocmds.
 ---@param cfg OpenNvim.OfficeOpen.Config|nil
 function M.setup(cfg)
-  vim.api.nvim_create_augroup(AUGROUP, { clear = true })
+  local autocmd = require("lib.nvim.bindings.autocmd")
+  -- Clearing goes through lib as well, not just the creation: it drops the
+  -- old records along with the old autocmds, so a re-run does not leave
+  -- stale rows in the generated `bindings/autocmd` docs.
+  local group = autocmd.group(AUGROUP, true)
 
   if not cfg or not cfg.enabled then return end
   local extensions = cfg.extensions or {}
   if #extensions == 0 then return end
 
-  vim.api.nvim_create_autocmd("BufReadCmd", {
-    group = AUGROUP,
+  autocmd.create("BufReadCmd", on_read, {
+    group = group,
     pattern = build_pattern(extensions),
     desc = "open.nvim: redirect MS Office documents to the system app",
-    callback = on_read,
   })
 end
 
