@@ -120,20 +120,20 @@
 -- ---------------------------------------------------------------------------
 
 ---@class OpenNvim.Config
----@field command             string    User command name (default "Open")
----@field default_filemanager string    Handler key for path-default (default "filemanager")
----@field default_browser     string    Handler key for URL-default (default "browser")
----@field handlers            string[]  Handler module keys to load
----@field builtin_keywords    boolean   Load built-in scope keywords (default true)
----@field keywords            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
----@field custom_handlers     OpenNvim.Handler[]  User-defined handlers, registered alongside `handlers`
----@field keymaps             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
----@field filemanager         OpenNvim.Filemanager.Config  `filemanager` handler settings
----@field office_open         OpenNvim.OfficeOpen.Config  Auto-redirect MS Office documents to the system app on read
----@field debug               boolean   Log every context-gather/resolve/dispatch step to :messages (default false)
----@field picker              OpenNvim.Picker.Config  Handler-choice picker for ambiguous no-target invocations
----@field viewer              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
----@field menu                OpenNvim.Menu.Config  `open.integrations.menu` (nvzone/menu) opt-out
+---@field command?             string    User command name (default "Open")
+---@field default_filemanager? string    Handler key for path-default (default "filemanager")
+---@field default_browser?     string    Handler key for URL-default (default "browser")
+---@field handlers?            string[]  Handler module keys to load
+---@field builtin_keywords?    boolean   Load built-in scope keywords (default true)
+---@field keywords?            table<string, string|fun(): string|nil>  Named scope aliases: keyword → path or resolver
+---@field custom_handlers?     OpenNvim.Handler[]  User-defined handlers, registered alongside `handlers`
+---@field keymaps?             OpenNvim.Keymaps  Optional keymaps for common invocations (default: none)
+---@field filemanager?         OpenNvim.Filemanager.Config  `filemanager` handler settings
+---@field office_open?         OpenNvim.OfficeOpen.Config  Auto-redirect MS Office documents to the system app on read
+---@field debug?               boolean   Log every context-gather/resolve/dispatch step to :messages (default false)
+---@field picker?              OpenNvim.Picker.Config  Handler-choice picker for ambiguous no-target invocations
+---@field viewer?              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
+---@field menu?                OpenNvim.Menu.Config  `open.integrations.menu` (nvzone/menu) opt-out
 
 ---@class OpenNvim.Picker.Config
 ---@field enabled boolean  When true, an ambiguous no-target `:Open` shows a vim.ui.select picker (default false)
@@ -146,8 +146,8 @@
 ---Redirects reads of matching extensions to the system default app via a
 ---BufReadCmd autocmd, so `.docx`/`.xlsx`/`.pptx` never load as garbled text.
 ---@class OpenNvim.OfficeOpen.Config
----@field enabled boolean  Install the BufReadCmd redirect (default true)
----@field extensions string[]  Bare extensions, no leading dot (default {"doc","docx","xls","xlsx","ppt","pptx"})
+---@field enabled? boolean  Install the BufReadCmd redirect (default true)
+---@field extensions? string[]  Bare extensions, no leading dot (default {"doc","docx","xls","xlsx","ppt","pptx"})
 
 ---@class OpenNvim.Filemanager.Config
 ---@field reveal boolean  true (default): reveal/select a file; false: navigate to its parent dir
