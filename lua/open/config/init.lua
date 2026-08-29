@@ -3,10 +3,10 @@
 
 local M = {}
 
----@type OpenNvim.Config
+---@type OpenNvim.Config.Resolved
 local defaults = require("open.config.DEFAULTS")
 
----@type OpenNvim.Config
+---@type OpenNvim.Config.Resolved
 local current = vim.deepcopy(defaults)
 
 ---Merge user options into the defaults.
@@ -42,7 +42,7 @@ function M.setup(opts)
 end
 
 ---Return the active config.
----@return OpenNvim.Config
+---@return OpenNvim.Config.Resolved
 function M.get()
   return current
 end

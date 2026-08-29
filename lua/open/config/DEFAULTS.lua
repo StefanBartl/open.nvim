@@ -1,7 +1,7 @@
 ---@module 'open.config.DEFAULTS'
 ---@brief Default configuration values for open.nvim.
 
----@type OpenNvim.Config
+---@type OpenNvim.Config.Resolved
 return {
   command = "Open",
   default_filemanager = "filemanager",

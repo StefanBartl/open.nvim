@@ -119,6 +119,21 @@
 -- Config
 -- ---------------------------------------------------------------------------
 
+--- The resolved configuration: `OpenNvim.Config` after the merge over
+--- `config/DEFAULTS.lua`, where the fields that have a default are guaranteed.
+--- `config.get()` returns this; `setup()` takes the optional-everything form
+--- above. Consumers that read `cfg.default_browser` and hand it straight to a
+--- function wanting a string need the difference.
+---@class OpenNvim.Config.Resolved : OpenNvim.Config
+---@field command             string
+---@field default_filemanager string
+---@field default_browser     string
+---@field handlers            string[]
+---@field builtin_keywords    boolean
+---@field keywords            table<string, string|fun(): string|nil>
+---@field custom_handlers     OpenNvim.Handler[]
+---@field keymaps             OpenNvim.Keymaps
+
 ---@class OpenNvim.Config
 ---@field command?             string    User command name (default "Open")
 ---@field default_filemanager? string    Handler key for path-default (default "filemanager")
