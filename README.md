@@ -1,13 +1,15 @@
 > **Active development.** This repository is in its development phase — breaking changes are to be expected at any time. Pin a commit or tag if you depend on it.
 
-<pre>
+# open.nvim
+
+```
    ___                _  _         _
   / _ \ _ __   ___ _ \| |__  _  _(_)_ __
  | (_) | '_ \ / -_) ' \ '_ \ | | | | '  \
   \___/| .__/\___|_||_|_.__/ \_,_|_|_|_|_|
        |_|
         open files, URLs, and paths from anywhere in Neovim
-</pre>
+```
 
 [![CI](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml)
 ![Neovim](https://img.shields.io/badge/Neovim-0.9%2B-57A143?logo=neovim&logoColor=white)
