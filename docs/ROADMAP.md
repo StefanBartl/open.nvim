@@ -43,7 +43,6 @@ way it is.
 | [`Arch&Coding.md`](ROADMAP/Arch&Coding.md) | Architecture and coding rules, applied to this plugin. |
 | [`Checklist.md`](ROADMAP/Checklist.md) | The Lua/Neovim checklist, applied to this plugin. |
 | [`Zentral-Prinzipien.md`](ROADMAP/Zentral-Prinzipien.md) | The central principles, applied to this plugin. |
-| [`NEOTREE_FEATURES.md`](ROADMAP/NEOTREE_FEATURES.md) | Whether this plugin's tree-buffer handling has anything worth porting into filetree.nvim. |
 
 The audits share a convention: **✅ good · 🟡 partial · ❌ gap**.
 Findings that were acted on are removed rather than ticked, so what is left
