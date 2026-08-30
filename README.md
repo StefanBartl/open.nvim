@@ -98,3 +98,7 @@ wiring and how entries self-gate to the resolved cursor context.
 - [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`) and an opt-in telescope.nvim source.
 - [Health Check](docs/health-check.md) — what `:checkhealth open` reports.
 - [Bindings](docs/BINDINGS.md) — full inventory of user commands, keymaps, and autocmds.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
