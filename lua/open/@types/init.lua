@@ -103,6 +103,39 @@
 ---@field file       string|nil             Absolute source path, when known
 ---@field bufnr      integer|nil            Source buffer, when it came from one
 
+--- What `:Open viewer` (and its wrapper commands) hand to `viewer.run`, and
+--- what `bindings/usrcmds.lua` builds out of the parsed command line.
+---
+--- Declared because `M.run` took a bare `table`, which says nothing about the
+--- twelve keys it actually reads -- and left every one of them undefined to a
+--- caller, a reader, and the spec that asserts on them.
+---@class OpenNvim.Viewer.RunOpts
+---@field kind?      OpenNvim.Viewer.Filter  Which links to keep (default "all").
+---@field scope?     string   Scope token: a buffer, "cwd", a path, ... (default: the current buffer).
+---@field sort?      string   "none"|"file"|"kind"|"alpha"; falls back to `viewer.sort`.
+---@field out?       string   "picker"|"table"|"clipboard"|"mdlinks"|"csv"|"echo"|"file:<path>"; falls back to `viewer.output`.
+---@field match?     string   Lua pattern the target must match.
+---@field paths?     boolean  Also recognize bare filesystem paths (`--paths`).
+---@field anchors?   boolean  Keep bare in-document anchors (`--anchors`).
+---@field unique?    boolean  De-duplicate by target; `--dupes` turns it off (default true).
+---@field recursive? boolean  Descend into subdirectories for a directory scope; `--flat` turns it off (default true).
+---@field range?     boolean  A range was actually typed. False means `line1`/`line2` are nvim's cursor-line default and must be ignored.
+---@field line1?     integer  First line of the typed range.
+---@field line2?     integer  Last line of the typed range.
+
+--- The subset `M.collect` takes, plus the range it applies. `M.run` builds one
+--- of these out of the above.
+---@class OpenNvim.Viewer.CollectOpts
+---@field kind?      OpenNvim.Viewer.Filter
+---@field paths?     boolean
+---@field unique?    boolean
+---@field recursive? boolean
+---@field match?     string
+---@field anchors?   boolean
+---@field range?     boolean
+---@field line1?     integer
+---@field line2?     integer
+
 ---@class OpenNvim.Viewer.Commands
 ---@field urls    string|false|nil  Command listing URL targets (default "UrlView")
 ---@field mdlinks string|false|nil  Command listing markdown links (default "MDLinksView")

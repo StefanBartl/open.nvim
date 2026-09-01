@@ -103,7 +103,7 @@ local function make_named_handler(key, desc, linux_candidates, mac_app, win_toke
       if ok then
         notify.info("[" .. key .. "] " .. url)
       else
-        notify.error(run_err)
+        notify.error(run_err or ("[" .. key .. "] could not launch the browser"))
       end
       return ok
     end,
@@ -124,7 +124,7 @@ function M.register_all(register_fn)
       if ok then
         notify.info(url)
       else
-        notify.error(err)
+        notify.error(err or "could not launch the default browser")
       end
       return ok
     end,
@@ -197,7 +197,7 @@ function M.register_all(register_fn)
       if ok then
         notify.info(url)
       else
-        notify.error(err)
+        notify.error(err or "could not launch Safari")
       end
       return ok
     end,

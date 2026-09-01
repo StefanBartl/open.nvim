@@ -86,7 +86,7 @@ local function run(ctx)
   if ok then
     notify.info("Opened temp file: " .. tmpfile)
   else
-    notify.error(spawn_err)
+    notify.error(spawn_err or "could not launch notepad")
   end
   return ok
 end

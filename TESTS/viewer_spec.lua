@@ -1,7 +1,10 @@
 -- Test code: when something here comes back nil -- a `pcall(require, ...)`,
 -- a fixture read, a uv handle -- this file must crash and name it. The nil
 -- guards LuaLS asks for below would hide the very failure it exists to report.
----@diagnostic disable: need-check-nil
+---@diagnostic disable: need-check-nil, duplicate-set-field
+--
+-- The stdlib and module fields replaced below are test doubles: each one is
+-- swapped for the length of a single case and restored right after.
 -- TESTS/viewer_spec.lua — collect / sort / render / dispatch behavior.
 
 return function(H)
@@ -251,7 +254,13 @@ return function(H)
     H.write(dir .. "/doc.md", "# Title\n\nbody\n")
     local registry = require("open.registry")
     local orig = registry.dispatch
-    local seen_handler, seen
+    local seen_handler
+    -- Cleared and refilled through the double below. The `assert` after a
+    -- clear turns "nothing was dispatched" into a named failure, and is what
+    -- lets the field reads resolve: `seen = nil` narrows the local to nil for
+    -- everything after it.
+    ---@type OpenNvim.Context|nil
+    local seen
     registry.dispatch = function(handler, ctx)
       seen_handler, seen = handler, ctx
       return true
@@ -266,6 +275,7 @@ return function(H)
     -- path is handed over, or the dispatch would name a nonexistent file.
     seen = nil
     viewer.open(link({ target = dir .. "/doc.md#title", kind = "mdlink", text = "t" }))
+    seen = assert(seen, "an anchored target did not reach registry.dispatch")
     H.eq(seen.text, dir .. "/doc.md", "trailing #anchor stripped from the dispatched path")
 
     -- A target that does not exist must warn, not dispatch a bogus path.

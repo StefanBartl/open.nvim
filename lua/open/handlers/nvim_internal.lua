@@ -36,7 +36,9 @@ local function make_nvim_open_fn(cmd_name, label)
       notify.error("[" .. label .. "] " .. (err or "unknown error"))
       return false
     end
-    local ok, run_err = pcall(vim.cmd, cmd_name .. " " .. vim.fn.fnameescape(path))
+    local ok, run_err = pcall(function()
+      vim.cmd(cmd_name .. " " .. vim.fn.fnameescape(path))
+    end)
     if not ok then
       notify.error("[" .. label .. "] Failed: " .. tostring(run_err))
       return false

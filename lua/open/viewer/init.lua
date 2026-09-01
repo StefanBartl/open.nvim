@@ -80,8 +80,9 @@ end
 
 --- Gather links for a scope.
 ---@param scope_token string|nil
----@param opts table|nil
----@return OpenNvim.Viewer.Link[] links, string|nil err
+---@param opts OpenNvim.Viewer.CollectOpts|nil
+---@return OpenNvim.Viewer.Link[] links
+---@return string|nil err
 function M.collect(scope_token, opts)
   opts = opts or {}
   local harvest = require("lib.nvim.harvest")
@@ -348,7 +349,7 @@ end
 -- ---------------------------------------------------------------------------
 
 --- Entry point for the user commands.
----@param opts table
+---@param opts OpenNvim.Viewer.RunOpts|nil
 function M.run(opts)
   opts = opts or {}
   local conf = cfg()

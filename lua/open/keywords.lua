@@ -55,8 +55,8 @@ local function capture(argv)
     capture_cache[key] = false
     return nil
   end
-  local out = (res.stdout or ""):gsub("\n", ""):gsub("\r", "")
-  out = out ~= "" and out or nil
+  local trimmed = (res.stdout or ""):gsub("\n", ""):gsub("\r", "")
+  local out = trimmed ~= "" and trimmed or nil
   capture_cache[key] = out or false
   return out
 end

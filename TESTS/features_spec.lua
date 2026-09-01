@@ -1,7 +1,13 @@
 -- Test code: when something here comes back nil -- a `pcall(require, ...)`,
 -- a fixture read, a uv handle -- this file must crash and name it. The nil
 -- guards LuaLS asks for below would hide the very failure it exists to report.
----@diagnostic disable: need-check-nil
+---@diagnostic disable: need-check-nil, duplicate-set-field, redundant-parameter
+--
+-- The stdlib and module fields replaced below are test doubles: each one is
+-- swapped for the length of a single case and restored right after.
+-- The `redundant-parameter` is the same thing seen from the other side:
+-- `vim.system` takes three arguments at runtime (verified) and the shipped
+-- meta declares two, so a faithful double reads as one too many.
 -- TESTS/features_spec.lua — roadmap features added after the initial
 -- usrcmds/viewer suite: custom_handlers, git scope, filemanager reveal,
 -- context cache.
