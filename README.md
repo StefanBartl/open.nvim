@@ -98,6 +98,7 @@ wiring and how entries self-gate to the resolved cursor context.
 - [Lua API](docs/api.md) — calling open.nvim directly from Lua.
 - [Integrations](docs/integrations.md) — urlview.nvim (superseded by the built-in `:UrlView`) and an opt-in telescope.nvim source.
 - [Health Check](docs/health-check.md) — what `:checkhealth open` reports.
+- [Declared external tools](docs/install.json) — the optional CLI tools (`wslview`, for handing URLs to the Windows browser intact from WSL) with why each matters. `:Lib deps show open.nvim` reports what's missing here, `:Lib deps install open.nvim` offers to install it — via [lib.nvim.deps](https://github.com/StefanBartl/lib.nvim/blob/main/lua/lib/nvim/deps/README.md), which asks before it installs anything. A popup shows this once, the first time `setup()` runs after installing. Turn it off with `vim.g.lib_nvim_deps_disable_first_run = true` (every plugin) or `vim.g.lib_nvim_deps_disabled_plugins = { "open.nvim" }` (just this one).
 - [Bindings](docs/BINDINGS.md) — full inventory of user commands, keymaps, and autocmds.
 
 ## License

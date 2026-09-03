@@ -1,0 +1,13 @@
+{
+  "tools": [
+    {
+      "bin": "wslview",
+      "required": false,
+      "why": "Under WSL, hands a URL to the Windows browser through wslu rather than through `cmd.exe /C start`, which re-tokenizes its argument and silently truncates URLs containing `&`. Without it open.nvim still opens links (via explorer.exe, then cmd.exe) — this is about the ones that arrive intact.",
+      "pkg": {
+        "apt": "wslu",
+        "dnf": "wslu"
+      }
+    }
+  ]
+}
