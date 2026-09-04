@@ -27,7 +27,7 @@ with `<Tab>` completion, defined in
 
 `:Open` tab-completion:
 - 1st arg (`target`) → all registered handler keys (see `:Open` in the
-  [README](../README.md#command-reference)).
+  [commands.md](commands.md)).
 - 2nd arg (`scope`) → `%`, `cfile`, `path=<file completion>`, all named scope
   keywords, then general file completion.
 
