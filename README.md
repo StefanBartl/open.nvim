@@ -89,6 +89,10 @@ wiring and how entries self-gate to the resolved cursor context.
 
 ## Documentation
 
+Start at [docs/README.md](docs/README.md), which says what is where and which
+question each page answers.
+
+- [Cheatsheet](docs/cheatsheet.md) — everything on one screen: every handler, the scope tokens, the platform dispatch, and common examples.
 - [Features](docs/FEATURES/README.md) — handler catalog and smart context resolution.
 - [Installation](docs/installation.md) — requirements and setup for lazy.nvim, packer, and others.
 - [Configuration](docs/configuration.md) — all `setup()` options and their defaults.
