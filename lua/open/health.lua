@@ -155,7 +155,7 @@ local function check_office_open()
   vim.health.start("open: office document auto-redirect")
   local ok, cfg_mod = pcall(require, "open.config")
   if not ok then
-    vim.health.warn("config not available — run setup() first")
+    vim.health.info("config not available (run setup() first)")
     return
   end
   local cfg = cfg_mod.get().office_open or {}
@@ -182,12 +182,12 @@ local function check_handlers()
   vim.health.start("open: registered handlers")
   local ok, reg = pcall(require, "open.registry")
   if not ok then
-    vim.health.warn("registry not available — run setup() first")
+    vim.health.info("registry not available (run setup() first)")
     return
   end
   local keys = reg.list_keys()
   if #keys == 0 then
-    vim.health.warn("no handlers registered — call require('open').setup()")
+    vim.health.info("no handlers registered (call require('open').setup())")
     return
   end
   for _, h in ipairs(reg.list()) do
