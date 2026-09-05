@@ -18,7 +18,7 @@ local function check_neovim()
   if vim.fn.has("nvim-0.9") == 1 then
     vim.health.ok("Neovim >= 0.9")
   else
-    vim.health.error("Neovim 0.9+ required")
+    vim.health.error("Neovim 0.9+ required", { "Upgrade Neovim to 0.9+" })
   end
   if vim.system then
     vim.health.ok("vim.system available (Neovim 0.10+ — clean detach on Unix)")
@@ -34,14 +34,17 @@ local function check_lib_nvim()
   if pcall(require, "lib.nvim.notify") then
     vim.health.ok("lib.nvim.notify available")
   else
-    vim.health.error("lib.nvim.notify not found — install StefanBartl/lib.nvim")
+    vim.health.error("lib.nvim.notify not found", { 'Install "StefanBartl/lib.nvim"' })
   end
 
   -- The :Open command itself is built on lib.nvim.bindings.usercmd.composer.
   if pcall(require, "lib.nvim.bindings.usercmd.composer") then
     vim.health.ok("lib.nvim.bindings.usercmd.composer available")
   else
-    vim.health.error("lib.nvim.bindings.usercmd.composer not found — :Open will fail to register")
+    vim.health.error(
+      "lib.nvim.bindings.usercmd.composer not found — :Open will fail to register",
+      { 'Install "StefanBartl/lib.nvim"' }
+    )
   end
 end
 
@@ -109,7 +112,7 @@ local function check_executables()
     if exe("xdg-open") then
       vim.health.ok("xdg-open available (filemanager + browser fallback)")
     else
-      vim.health.warn("xdg-open not found — install xdg-utils")
+      vim.health.warn("xdg-open not found", { "install xdg-utils" })
     end
     for _, mgr in ipairs({ "nautilus", "thunar", "dolphin", "nemo", "pcmanfm", "caja" }) do
       if exe(mgr) then
@@ -165,7 +168,10 @@ local function check_office_open()
   end
   local extensions = cfg.extensions or {}
   if #extensions == 0 then
-    vim.health.warn("enabled but office_open.extensions is empty — nothing is redirected")
+    vim.health.warn(
+      "enabled but office_open.extensions is empty — nothing is redirected",
+      { "Set office_open.extensions in setup()" }
+    )
     return
   end
   vim.health.ok("redirecting to system app on read: " .. table.concat(
