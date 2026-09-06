@@ -17,9 +17,8 @@
 --- `CursorLine:KitSelection`, horizontal motions are mapped to <Nop> so the
 --- cursor only ever moves between rows, and <CR> submits.
 ---
---- Opening is kind-aware: a URL goes to the browser handler, while a local
---- file goes to a Neovim split rather than the system file manager — chasing
---- a markdown link should land you in a buffer you can read and edit.
+--- Opening is kind-aware (see `M.open`): a URL goes to the browser handler, a
+--- local file into a Neovim split.
 ---@see open.viewer.scan
 ---@see lib.nvim.harvest
 

@@ -1,7 +1,8 @@
 ---@module 'open.handlers.browser'
 ---@brief Handlers that open a URL or text in various browsers.
 ---@description
---- Registered handlers: browser, chrome, chromium, firefox, edge, safari.
+--- Registered handlers: browser, chrome, chromium, firefox, edge, brave,
+--- opera, safari.
 --- Non-URL text is treated as a Google search query automatically.
 --- Local file paths are opened with the file:// scheme.
 

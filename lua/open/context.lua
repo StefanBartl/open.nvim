@@ -13,7 +13,7 @@
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> text under the cursor
 ---   "cwd"         → Neovim's current working directory
----   "git"         → nearest Git root (`git rev-parse --show-toplevel`)
+---   "git"         → nearest Git root (walks up from the cwd for a `.git` marker)
 ---   "path=<path>" → literal path given after "path="
 ---   anything else → used verbatim as the resolved text
 ---

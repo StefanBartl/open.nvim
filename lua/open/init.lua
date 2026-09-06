@@ -14,7 +14,7 @@
 ---   "%"           → current buffer path
 ---   "cfile"       → <cfile> under the cursor
 ---   "cwd"         → Neovim's current working directory
----   "git"         → nearest Git root
+---   "git"         → nearest Git root (walks up from the cwd for a `.git` marker)
 ---   "path=<path>" → literal path given after "path="
 ---   (omitted)     → target-aware heuristic (see open.context)
 ---@see open.context

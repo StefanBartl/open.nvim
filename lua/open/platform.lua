@@ -5,9 +5,8 @@
 --- All sub-modules consume this instead of calling vim.fn.has() repeatedly.
 ---
 --- Detection itself is delegated to lib.nvim.cross.platform (uname + env-var
---- + /proc fallback chain, more robust than this module's previous single
---- /proc/version check for WSL) — lib.nvim caches each detector internally
---- too, so this module's own _cache exists to keep returning the same
+--- + /proc fallback chain) — lib.nvim caches each detector internally too, so
+--- this module's own _cache exists to keep returning the same
 --- OpenNvim.Platform table shape, not to avoid repeated syscalls.
 
 local is_windows = require("lib.nvim.cross.platform.is_windows")

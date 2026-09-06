@@ -11,12 +11,10 @@
 ---   open_terminal = "<leader>ot"  -- :Open terminal
 ---
 --- **The accepted names come from the handler registry, not from a list kept
---- here.** They used to be a hardcoded three, which is why `split`, `vsplit`,
---- `tab`, `terminal`, `image` and `notepad` had no keymap option despite being
---- perfectly ordinary `:Open <target>` values -- the list simply had not grown
---- with the handlers. Now every registered handler `key` is available as
---- `open_<key>`, and adding a handler (including a `custom_handlers` one)
---- brings its keymap option along for free.
+--- here.** Every registered handler `key` is available as `open_<key>` —
+--- `split`, `vsplit`, `tab`, `terminal`, `image`, `notepad`, the named
+--- browsers, and any `custom_handlers` one — and adding a handler brings its
+--- keymap option along for free.
 ---
 --- Because the source is the *live* registry rather than a static list, a
 --- target the user switched off via `cfg.handlers` is correctly rejected here
