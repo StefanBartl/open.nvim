@@ -22,10 +22,10 @@ whether the candidate text looks like a URL.
 
 An explicit 2nd argument to `:Open` bypasses the context heuristic entirely:
 `%` (buffer path), `cfile` (text under the cursor), `cwd` (Neovim's working
-directory), `git` (nearest Git root via `git rev-parse --show-toplevel`),
-`path=<path>` (literal path), or a named scope keyword. `git` is resolved
-with its own shell-out and returns `nil` (nothing to open) outside a Git
-repo rather than falling back to a guess.
+directory), `git` (nearest Git root — the nearest ancestor of the cwd that
+contains a `.git`), `path=<path>` (literal path), or a named scope keyword.
+`git` returns `nil` (nothing to open) outside a Git repo rather than falling
+back to a guess.
 
 - **Module:** `open/context.lua` (`M.resolve`, `resolve_git_root`)
 - **Docs:** [`docs/commands.md`](../commands.md#scope-2nd-argument)

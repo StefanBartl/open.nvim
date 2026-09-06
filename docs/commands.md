@@ -44,7 +44,7 @@ Two command families, both built via
 | `%` | Current buffer's file path |
 | `cfile` | `<cfile>` text under the cursor |
 | `cwd` | Neovim's current working directory |
-| `git` | Nearest Git root (`git rev-parse --show-toplevel`) |
+| `git` | Nearest Git root (nearest ancestor of the cwd with a `.git`) |
 | `path=<path>` | Literal path (supports file completion after `path=`) |
 | `<keyword>` | Named scope keyword (see [docs/keywords.md](keywords.md)) |
 | `<text>` | Any other text is used verbatim |

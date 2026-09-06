@@ -58,7 +58,7 @@ require("open").setup({
 | `%` | Current buffer file path |
 | `cfile` | `<cfile>` under cursor |
 | `cwd` | Neovim's current working directory |
-| `git` | Nearest Git root (`git rev-parse --show-toplevel`) |
+| `git` | Nearest Git root (nearest ancestor of the cwd with a `.git`) |
 | `path=<path>` | Literal path (supports `<Tab>` file completion) |
 | `<any text>` | Verbatim text |
 

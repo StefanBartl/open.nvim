@@ -50,9 +50,9 @@ signals. Practical reasons to reach for it instead of trusting context:
 | You want a config file by name, from anywhere | `:Open split zshrc`, `:Open tab pwsh_profile` |
 | You know the exact path already | `:Open browser path=/tmp/report.md` |
 
-`git` deliberately does not fall back to a guess outside a repo — it shells
-out to `git rev-parse --show-toplevel` and resolves to nothing if that
-fails, so `:Open filemanager git` in a non-repo buffer is a clean no-op
+`git` deliberately does not fall back to a guess outside a repo — it walks
+up from the cwd for a `.git` marker and resolves to nothing if there is
+none, so `:Open filemanager git` in a non-repo buffer is a clean no-op
 ("Nothing to open"), not a wrong directory.
 
 Keywords (`zshrc`, `nvim_init`, `pwsh_profile`, …) work as the scope

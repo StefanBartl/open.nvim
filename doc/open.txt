@@ -104,7 +104,7 @@ packer: >lua
       extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },
     },
     debug            = false, -- true: log gather/resolve/dispatch steps to :messages
-    picker           = { enabled = false }, -- true: vim.ui.select on ambiguous no-target calls
+    picker           = { enabled = false }, -- true: show a picker on ambiguous no-target calls
   })
 <
 
@@ -195,8 +195,9 @@ packer: >lua
 
 `picker`
   `enabled` (default false). When true, a no-target `:Open`/`open.open()`
-  call whose context has more than one meaningful handler shows a
-  `vim.ui.select` prompt instead of picking one automatically. Candidates:
+  call whose context has more than one meaningful handler shows a picker
+  (`lib.nvim.ui.kit.select`, honoring any `vim.ui.select` override) instead
+  of picking one automatically. Candidates:
 
     tree-buffer node          default_filemanager only (no prompt)
     looks like a URL          default_browser, notepad
@@ -286,7 +287,7 @@ The second argument controls what text is passed to the handler.
   "%"           Current buffer's file path.
   "cfile"       `<cfile>` text under the cursor.
   "cwd"         Neovim's current working directory.
-  "git"         Nearest Git root (`git rev-parse --show-toplevel`).
+  "git"         Nearest Git root (nearest ancestor of the cwd with a `.git`).
   "path=<path>" Literal path (supports file completion after `path=`).
   <keyword>     Named scope alias — see |open-keywords|.
   <anything>    Any other text is used verbatim as the resolved path/URL.
@@ -733,7 +734,7 @@ Reports:
     platform.lua            OS detection, cached per session
     util.lua                run_detached(), url_encode(), find_exec()
     keywords.lua            built-in named scope keyword table
-    picker.lua              opt-in vim.ui.select handler-choice prompt
+    picker.lua              opt-in handler-choice picker (lib.nvim.ui.kit)
     office_open.lua         BufReadCmd redirect for MS Office documents
     health.lua              :checkhealth open
     @types/init.lua         LuaLS type definitions
