@@ -413,6 +413,29 @@ return function(H)
     require("open").setup({})
   end
 
+  -- keyword resolver returning nil ------------------------------------------
+  do
+    -- A function-valued keyword that reports "not available" (returns nil,
+    -- e.g. the built-in pwsh_profile when neither pwsh nor powershell is on
+    -- PATH) must leave the scope unresolved, not fall through to
+    -- expand_path(tostring(the_function_itself)) — see context.lua's
+    -- `if type(kw) == "function" then ... else ... end` (previously a single
+    -- `type(kw) == "function" and kw() or expand_path(...)` expression, which
+    -- silently produces a garbage "function: 0x..." path whenever kw()
+    -- itself returns nil).
+    require("open").setup({
+      keywords = {
+        nope_kw = function()
+          return nil
+        end,
+      },
+    })
+    local context = require("open.context")
+    local ctx = context.resolve("nope_kw", "filemanager", {})
+    H.falsy(ctx, "a keyword resolver function returning nil leaves the scope unresolved")
+    require("open").setup({})
+  end
+
   -- office_open: BufReadCmd redirect for MS Office documents ----------------
   do
     H.tmpdir(function(dir)

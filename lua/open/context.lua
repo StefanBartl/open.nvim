@@ -330,8 +330,16 @@ function M.resolve(arg, target, signals)
       local ok_cfg, cfg = pcall(require, "open.config")
       local kw = ok_cfg and cfg.get().keywords and cfg.get().keywords[arg]
       if kw then
-        text = type(kw) == "function" and kw()
-          or require("lib.nvim.cross.fs.expand_path")(tostring(kw))
+        -- Not `type(kw) == "function" and kw() or expand_path(tostring(kw))`:
+        -- when kw() itself returns nil (e.g. pwsh_profile with neither pwsh
+        -- nor powershell on PATH), that `and/or` idiom falls through to the
+        -- `or` branch and expand_path()s the *stringified function value*
+        -- ("function: 0x...") instead of leaving text unresolved.
+        if type(kw) == "function" then
+          text = kw()
+        else
+          text = require("lib.nvim.cross.fs.expand_path")(tostring(kw))
+        end
       else
         text = arg
       end
