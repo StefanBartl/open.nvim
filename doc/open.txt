@@ -37,8 +37,9 @@ CONTENTS                                                        *open-contents*
 
 open.nvim provides a single `:Open [target] [scope]` command that routes the
 thing under your cursor — path, URL, or plain text — to the right destination:
-system file manager, browser (with named-browser support), GUI text editor, or
-a Neovim split/tab.
+system file manager, browser (with named-browser support), GUI text editor,
+terminal split rooted in the target's directory, inline image viewer (via
+images.nvim, with fallback), or a Neovim split/tab.
 
 Context-aware: knows when you are in a Neo-tree, nvim-tree, or netrw buffer
 and opens the node under the cursor automatically.
@@ -93,6 +94,7 @@ packer: >lua
       "nvim_internal",
       "default",
       "terminal",
+      "image",
     },
     builtin_keywords = true, -- set false to disable all built-in keywords
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
@@ -121,7 +123,7 @@ packer: >lua
   List of handler module keys to load during `setup()`. Removing a key
   prevents those handlers from registering, hiding them from tab-completion.
   Valid values: "filemanager" | "browser" | "notepad" | "nvim_internal" |
-  "default" | "terminal"
+  "default" | "terminal" | "image"
 
 `builtin_keywords`
   Boolean (default true). When false, none of the built-in scope keywords
@@ -152,18 +154,24 @@ packer: >lua
 
 `keymaps`
   Optional keymaps for common invocations. None registered by default.
-  Valid keys and what they trigger:
+  Accepted keys come from the live handler registry, not a fixed list:
+  `open_default` (bare `:Open`) plus `open_<handler key>` for every
+  registered handler — `open_browser`, `open_filemanager`, `open_split`,
+  `open_vsplit`, `open_tab`, `open_terminal`, `open_image`, `open_notepad`,
+  the named browsers (`open_firefox`, `open_chrome`, ...), and any handler
+  added via `custom_handlers` — plus the historical alias `open_manager`
+  (= `open_filemanager`).
 
-    open_default    lhs for `:Open` (context-aware default)
-    open_browser    lhs for `:Open browser`
-    open_manager    lhs for `:Open filemanager`
-
-  An unrecognized key warns and registers nothing. Example: >lua
+  An unrecognized key warns, names the accepted keys, and registers
+  nothing. A handler switched off via `opts.handlers` is rejected the same
+  way. Example: >lua
     require("open").setup({
       keymaps = {
-        open_default = "<leader>oo",
-        open_browser = "<leader>ob",
-        open_manager = "<leader>of",
+        open_default  = "<leader>oo",
+        open_browser  = "<leader>ob",
+        open_manager  = "<leader>of",
+        open_split    = "<leader>os",
+        open_terminal = "<leader>ot",
       },
     })
 <
@@ -509,7 +517,7 @@ Recognized links: bare URLs (`https://...`, `ftp://...`, `www....`), markdown
 inline links (reported by target, with the label kept), and — with
 `--paths` — filesystem paths that exist on disk. Links inside fenced code
 blocks are skipped, a URL already inside a markdown link is not reported
-twice, and bare in-document anchors (`[Kontext](#kontext)`) are dropped
+twice, and bare in-document anchors (`[Context](#context)`) are dropped
 unless `--anchors` is given.
 
 Relative markdown targets are resolved against the directory of the file
@@ -727,7 +735,9 @@ Reports:
   plugin/open.lua           Load guard (vim.g.loaded_open)
   lua/open/
     init.lua                setup() — config, handler loading, :Open command
-    config.lua              defaults + merged active config
+    config/
+      DEFAULTS.lua          default configuration values
+      init.lua              setup() merge + M.get() / M.is_debug()
     registry.lua            handler register / get / list
     context.lua             gather() + resolve() — two-stage resolution;
                             with_cache() memoizes gather() per invocation
@@ -742,17 +752,20 @@ Reports:
       usrcmds.lua           :Open — built on lib.nvim.bindings.usercmd.composer
       keymaps.lua           optional keymaps declared via cfg.keymaps
     handlers/
+      default.lua           system default application (like a double-click)
       filemanager.lua       Explorer / Finder / xdg-open
       browser.lua           browser + chrome/chromium/firefox/edge/safari
       notepad.lua           notepad/editor (temp-file → GUI editor)
       nvim_internal.lua     split / vsplit / tab
       terminal.lua          terminal split in the target's directory
+      image.lua             inline image render (images.nvim, with fallback)
     viewer/
       init.lua              :Open viewer — filter/sort/format/open
       scan.lua              link extraction (URLs, md links, paths)
     integrations/
       urlview.lua           urlview.nvim "open_in_browser" action (opt-in)
       telescope.lua         telescope.nvim handler-picker source (opt-in)
+      menu.lua              nvzone/menu context-aware entries (opt-in)
 
 Each leaf module exposes only plain functions or a `register_all(fn)` entry
 point; `init.lua` is the only place that registers a user command.

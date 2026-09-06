@@ -110,8 +110,7 @@ directly, so a bad lhs is reported against the real call site. The `desc` is
 now the command itself (`open.nvim: :Open split`) instead of the config key
 name.
 
-- **Module:** `open/bindings/keymaps.lua` (`M.register`, `resolve_target`,
-  `accepted_names`)
+- **Module:** `open/bindings/keymaps.lua` (`M.register`, `accepted_names`)
 - **Config:** `opts.keymaps` (default `{}`)
 - **Keymaps:** [`../BINDINGS.md#keymaps`](../BINDINGS.md#keymaps)
 

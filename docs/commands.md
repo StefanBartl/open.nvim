@@ -136,7 +136,7 @@ lib.nvim's shared ignore list, and skip binary or oversized files.
 | `out=file:<path>` | Write the rendered table to a file. |
 | `match=<lua pattern>` | Only scan files whose basename matches, e.g. `match=%.md$`. |
 | `--paths` | Also report filesystem paths, not just URLs (only ones that exist). |
-| `--anchors` | Include bare in-document anchors (`[Kontext](#kontext)`), which are dropped by default. |
+| `--anchors` | Include bare in-document anchors (`[Context](#context)`), which are dropped by default. |
 | `--dupes` | Keep duplicate targets (the default de-duplicates). |
 | `--flat` | Do not recurse into subdirectories. |
 

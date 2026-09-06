@@ -17,6 +17,7 @@ require("open").setup({
     "nvim_internal",
     "default",
     "terminal",
+    "image",
   },
 
   -- Built-in named scope keywords (shell profiles, git, SSH, …).
