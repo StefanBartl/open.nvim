@@ -29,6 +29,12 @@ is the short version of all of it.
 | [FEATURES/](FEATURES/README.md) | One page per area — the core, the handlers, and the viewer — each about the decision rather than the feature list |
 | [integrations.md](integrations.md) | Which other plugins this reaches, which it supersedes, and what changes when one is absent |
 
+## Working on it
+
+| Page | Answers |
+| --- | --- |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Ground rules, project layout, and how to add a handler or a keyword |
+
 ## Here, but not prose
 
 **`install.json`** declares the external tools this plugin can use,
