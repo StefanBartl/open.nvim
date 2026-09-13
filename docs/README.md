@@ -7,7 +7,8 @@ is the short version of all of it.
 
 | Page | Answers |
 | --- | --- |
-| [installation.md](installation.md) | What has to be there first, and a spec per plugin manager |
+| [installation.md](installation.md) | Requirements, and a spec per plugin manager |
+| [quickstart.md](quickstart.md) | The first thing to run after installing |
 | [configuration.md](configuration.md) | Every option, with the full defaults printed out |
 | [health-check.md](health-check.md) | What `:checkhealth` reports and how to read it |
 

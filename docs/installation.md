@@ -7,10 +7,32 @@
 
 ## Requirements
 
-- Neovim 0.9+
-- [lib.nvim](https://github.com/StefanBartl/lib.nvim)
-- Platform tools are optional but needed per handler (see `:checkhealth open`,
-  documented in [docs/health-check.md](health-check.md))
+| | |
+| --- | --- |
+| Neovim | **0.9+** |
+| [lib.nvim](https://github.com/StefanBartl/lib.nvim) | required — the `:Open` command layer, with completion over both arguments |
+
+Everything else is resolved from the platform at runtime — Explorer, Finder or
+`xdg-open`, whichever browser is installed, the system default application.
+Optional, each degrading to nothing when absent:
+
+| | |
+| --- | --- |
+| `wslview` | Hands URLs to the Windows browser intact from inside WSL |
+| [images.nvim](https://github.com/StefanBartl/images.nvim) | An inline image viewer instead of the system one |
+| telescope.nvim | An opt-in picker source for the link viewer |
+| [nvzone/menu](https://github.com/nvzone/menu) | A host for the context-menu entries — see [integrations.md](integrations.md) |
+
+`wslview` is declared in [install.json](install.json) and read by lib.nvim's
+[deps module](https://github.com/StefanBartl/lib.nvim/blob/main/lua/lib/nvim/deps/README.md).
+A popup says what is missing the first time `setup()` runs after installing;
+`:Lib deps show open.nvim` repeats it, `:Lib deps install open.nvim` offers to
+install it and asks first. Turn the popup off with
+`vim.g.lib_nvim_deps_disable_first_run = true`, or for this plugin only with
+`vim.g.lib_nvim_deps_disabled_plugins = { "open.nvim" }`.
+
+See `:checkhealth open`, documented in [health-check.md](health-check.md), for
+which platform tools resolved.
 
 ## Installing
 
