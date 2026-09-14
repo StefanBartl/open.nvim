@@ -204,7 +204,7 @@ packer: >lua
 `picker`
   `enabled` (default false). When true, a no-target `:Open`/`open.open()`
   call whose context has more than one meaningful handler shows a picker
-  (`lib.nvim.ui.kit.select`, honoring any `vim.ui.select` override) instead
+  (`ui.kit.select`, honoring any `vim.ui.select` override) instead
   of picking one automatically. Candidates:
 
     tree-buffer node          default_filemanager only (no prompt)
@@ -578,7 +578,7 @@ positional arguments.
 ------------------------------------------------------------------------------
 8.4 The picker                                           *open-viewer-picker*
 
-The results list is lib.nvim's `ui.kit.chooser`, which means:
+The results list is ui.nvim's `ui.kit.chooser`, which means:
 
   - the WHOLE current line is highlighted (CursorLine:KitSelection)
   - the cursor moves only up and down — j/k and the arrow keys; h, l, 0,
@@ -744,7 +744,7 @@ Reports:
     platform.lua            OS detection, cached per session
     util.lua                run_detached(), url_encode(), find_exec()
     keywords.lua            built-in named scope keyword table
-    picker.lua              opt-in handler-choice picker (lib.nvim.ui.kit)
+    picker.lua              opt-in handler-choice picker (ui.kit)
     office_open.lua         BufReadCmd redirect for MS Office documents
     health.lua              :checkhealth open
     @types/init.lua         LuaLS type definitions

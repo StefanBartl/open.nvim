@@ -59,6 +59,38 @@ if not add_lib_nvim() then
   os.exit(1)
 end
 
+-- The picker test drives open.picker's require("ui.kit").select() for real
+-- (respect_override only decides whether ui.kit.select delegates to
+-- vim.ui.select, it does not remove the require("ui.kit") itself), so
+-- ui.nvim needs to be on the runtimepath too. Same candidate order as
+-- add_lib_nvim() above.
+local function add_ui_nvim()
+  local candidates = {}
+  if vim.env.UI_NVIM_PATH then candidates[#candidates + 1] = vim.env.UI_NVIM_PATH end
+  candidates[#candidates + 1] = repo .. "/../ui.nvim"
+  candidates[#candidates + 1] = vim.fn.stdpath("data") .. "/lazy/ui.nvim"
+
+  for _, path in ipairs(candidates) do
+    local norm = vim.fs.normalize(path)
+    if vim.fn.isdirectory(norm .. "/lua/ui") == 1 then
+      vim.opt.rtp:append(norm)
+      package.path = table.concat({
+        norm .. "/lua/?.lua",
+        norm .. "/lua/?/init.lua",
+        package.path,
+      }, ";")
+      return norm
+    end
+  end
+  return nil
+end
+
+if not add_ui_nvim() then
+  print("FAIL  cannot locate ui.nvim (a runtime dependency of open.nvim).")
+  print("      Set $UI_NVIM_PATH, or check it out next to this repo.")
+  os.exit(1)
+end
+
 local specs = {
   "harvest_scope_spec.lua",
   "harvest_render_spec.lua",

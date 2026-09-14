@@ -184,7 +184,7 @@
 ---@field menu?                OpenNvim.Menu.Config  `open.integrations.menu` (nvzone/menu) opt-out
 
 ---@class OpenNvim.Picker.Config
----@field enabled boolean  When true, an ambiguous no-target `:Open` shows a picker (`lib.nvim.ui.kit.select`, honoring any `vim.ui.select` override) (default false)
+---@field enabled boolean  When true, an ambiguous no-target `:Open` shows a picker (`ui.kit.select`, honoring any `vim.ui.select` override) (default false)
 
 ---Opt-out for `open.integrations.menu`. open.nvim never opens nvzone/menu
 ---itself; this only gates whether `M.items()`/`M.submenu()` return entries.

@@ -62,7 +62,7 @@ browser or notepad; cursor on an existing file path: file manager, split,
 vsplit, tab). Off by default, so `:Open` with no picker configured keeps
 always picking a single handler deterministically. Any `vim.ui.select`
 override (telescope-ui-select, fzf-lua, dressing.nvim) is picked up
-automatically through `respect_override = true`; `lib.nvim.ui.kit`'s own
+automatically through `respect_override = true`; `ui.kit`'s own
 themed chooser is used otherwise. An explicit target (`:Open browser`,
 `open.open("browser")`) always bypasses the picker.
 

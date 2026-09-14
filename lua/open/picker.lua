@@ -3,7 +3,7 @@
 ---@description
 --- Used by both `open.open()` and `:Open` when `cfg.picker.enabled == true`
 --- and `open.context.candidate_targets()` returns more than one candidate
---- for the current context. Routes through `lib.nvim.ui.kit.select` with
+--- for the current context. Routes through `ui.kit.select` with
 --- `respect_override = true`: any `vim.ui.select` override (telescope-ui-
 --- select, fzf-lua, dressing.nvim) is still picked up automatically, but
 --- kit's own themed chooser is used when nothing has overridden it, instead
@@ -19,7 +19,7 @@ function M.select(candidates, scope, signals)
   local context = require("open.context")
   local registry = require("open.registry")
 
-  require("lib.nvim.ui.kit").select({
+  require("ui.kit").select({
     items = candidates,
     title = "Open with:",
     respect_override = true,

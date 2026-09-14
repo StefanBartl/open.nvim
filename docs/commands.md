@@ -145,8 +145,8 @@ positional arguments.
 
 ### The picker
 
-The results list is lib.nvim's
-[`ui.kit.chooser`](https://github.com/StefanBartl/lib.nvim), which means:
+The results list is ui.nvim's
+[`ui.kit.chooser`](https://github.com/StefanBartl/ui.nvim), which means:
 
 - the **whole current line** is highlighted (`CursorLine:KitSelection`)
 - the cursor moves **only up and down** — `j`/`k` and the arrow keys; `h`,

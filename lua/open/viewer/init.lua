@@ -11,7 +11,7 @@
 ---   sort   (here)                   → ordering
 ---   sink   (lib.nvim.harvest.sink)  → picker / table / clipboard / file
 ---
---- The picker is lib.nvim's `ui.kit.chooser` (reached via
+--- The picker is ui.nvim's `ui.kit.chooser` (reached via
 --- `harvest.sink.select`), which already provides the interaction model this
 --- needs: the whole current line is highlighted through
 --- `CursorLine:KitSelection`, horizontal motions are mapped to <Nop> so the

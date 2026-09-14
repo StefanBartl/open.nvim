@@ -3,7 +3,7 @@
 ---@description
 --- open.nvim does not depend on a menu plugin. It *provides* a list of
 --- entries in the shape nvzone/menu expects, built with
---- `lib.nvim.contextmenu`'s helpers, and a host — typically the user's own
+--- `ui.contextmenu`'s helpers, and a host — typically the user's own
 --- RightMouse dispatcher — composes them into its own menu for the current
 --- buffer, e.g.:
 --- >
@@ -19,7 +19,7 @@
 --- when it resolves to an existing path. Opt out entirely via
 --- `config.menu.enable = false`.
 
-local contextmenu = require("lib.nvim.contextmenu")
+local contextmenu = require("ui.contextmenu")
 
 local M = {}
 

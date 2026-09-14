@@ -25,7 +25,7 @@ scans only those lines. Links inside fenced code blocks are skipped, and a
 URL already consumed by a markdown link is not reported a second time as a
 bare URL.
 
-Default output is an interactive picker (`lib.nvim.ui.kit.chooser`) whose
+Default output is an interactive picker (`ui.kit.chooser`) whose
 `<CR>` is kind-aware: a URL goes to the configured browser handler, a local
 file opens through the handler named by `opts.viewer.open_file`
 (`"split"` by default), and a directory goes to the file manager. A

@@ -61,7 +61,7 @@ return {
 
   -- When called with no explicit target and more than one handler is a
   -- meaningful choice for the current context, show a picker
-  -- (`lib.nvim.ui.kit.select`, honoring any `vim.ui.select` override) instead
+  -- (`ui.kit.select`, honoring any `vim.ui.select` override) instead
   -- of silently picking one. Off by default (unchanged behavior).
   picker = { enabled = false },
 
