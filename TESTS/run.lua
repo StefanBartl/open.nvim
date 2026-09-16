@@ -98,6 +98,15 @@ local specs = {
   "viewer_spec.lua",
   "usrcmds_spec.lua",
   "features_spec.lua",
+  "config_spec.lua",
+  "util_platform_spec.lua",
+  "registry_spec.lua",
+  "keywords_spec.lua",
+  "context_spec.lua",
+  "bindings_keymaps_spec.lua",
+  "handlers_spec.lua",
+  "integrations_spec.lua",
+  "picker_spec.lua",
 }
 
 local failed = 0
