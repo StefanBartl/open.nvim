@@ -107,6 +107,7 @@ local specs = {
   "handlers_spec.lua",
   "integrations_spec.lua",
   "picker_spec.lua",
+  "health_spec.lua",
 }
 
 local failed = 0

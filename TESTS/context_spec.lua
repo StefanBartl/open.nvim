@@ -173,6 +173,57 @@ return function(H)
     H.falsy(signals.tree_path, "tree_path stays nil when the tree plugin is absent")
   end
 
+  -- gather(): BUG -- the visual signal can never be the selection the user
+  -- is actually making, only ever nil or a stale, unrelated one. It reads
+  -- the `'<`/`'>` marks, which Neovim commits only once Visual mode is
+  -- *left*, guarded by a check that mode() is *still* "v"/"V"/CTRL-V (i.e.
+  -- Visual mode has not been left). Those two conditions cannot both hold
+  -- for the same selection:
+  --   1. `:'<,'>Open` from the command line -- the only way :Open itself is
+  --      invoked -- auto-leaves Visual mode and sets the marks *before* the
+  --      command callback runs, so by the time gather() would run, mode()
+  --      already reads "n" and the whole branch is skipped, real fresh
+  --      selection or not.
+  --   2. The one path where mode() == "v" really does hold during the
+  --      callback -- a user's own Visual-mode keymap calling
+  --      require("open").open() directly -- is exactly the path where the
+  --      current selection is *not finished yet*, so `'<`/`'>` still name
+  --      whatever selection was last left (or {0,0,0,0} if there has not
+  --      been one this session), never the one in progress.
+  -- Pinned as-is on both fronts: fixing it (read `getpos("v")`, the live
+  -- selection's anchor, plus the cursor, instead of `'<`/`'>`) is a
+  -- deliberate change to what "visual" means here, not a side effect of a
+  -- coverage pass.
+  do
+    H.scratch({ "hello world", "second line here" })
+
+    -- 1) The command-line path: mode() is already "n" by the time a command
+    --    would run, even for a real, just-finished selection.
+    vim.api.nvim_win_set_cursor(0, { 1, 0 })
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v4l<Esc>", true, false, true), "x", false)
+    H.eq(vim.fn.mode(), "n", "Visual mode is already gone by the time a command would run")
+    H.falsy(
+      context.gather().visual,
+      "BUG: a real, just-finished selection is invisible from the only path :Open is actually invoked from"
+    )
+
+    -- 2) The Visual-mode-keymap path: mode() == "v" holds, but '</'> still
+    --    name the *previous* (here: the one from part 1) selection, not the
+    --    one being made right now.
+    local seen
+    vim.keymap.set("v", "<F2>", function()
+      seen = context.gather().visual
+    end, { buffer = 0 })
+
+    vim.api.nvim_win_set_cursor(0, { 2, 0 })
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v6l<F2>", true, false, true), "x", false)
+    H.eq(
+      seen,
+      "hello",
+      "BUG: mid-selection, gather() returns the previous selection's stale text ('hello'), not the current one ('second')"
+    )
+  end
+
   -- with_cache(): the cache is cleared even when the wrapped fn errors -------
   do
     H.scratch({ "x" })

@@ -219,7 +219,12 @@ function M.check()
     deps_health.report_for("open.nvim")
   end
 
-  require("lib.nvim.bindings.usercmd.composer").checkhealth("Open")
+  -- Guarded for the same reason the lib.nvim check above exists: without
+  -- lib.nvim this require throws, and `:checkhealth` would abort right here —
+  -- on exactly the machine whose report says the dependency is missing, so
+  -- the user would never get to read the diagnosis they came for.
+  local ok_composer, composer = pcall(require, "lib.nvim.bindings.usercmd.composer")
+  if ok_composer then composer.checkhealth("Open") end
 end
 
 return M
