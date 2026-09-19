@@ -285,4 +285,35 @@ return function(H)
 
     registry.dispatch = orig
   end)
+
+  -- open(): the post-open heading jump escapes the anchor literally, so a
+  -- Vim-regex metacharacter in the anchor does not jump to an earlier,
+  -- unrelated heading that only a loose regex would also match (SEC-30) -----
+  H.tmpdir(function(dir)
+    H.write(dir .. "/doc.md", "# Title\n\n# aXbY\n\nbody\n\n# a.*b\n")
+    local registry = require("open.registry")
+    local orig = registry.dispatch
+    -- The real "split" handler is not under test here; the buffer it would
+    -- open is simulated below instead, since M.open's heading jump runs
+    -- against whatever buffer is current.
+    registry.dispatch = function()
+      return true
+    end
+
+    H.scratch({ "# Title", "", "# aXbY", "", "body", "", "# a.*b" })
+    vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+    -- "# aXbY" (line 3) satisfies the unescaped Vim pattern "a.*b" (`.`
+    -- matches any char, `*` makes it zero-or-more) and sits earlier in the
+    -- buffer than the real "# a.*b" heading (line 7) the anchor names.
+    viewer.open(link({ target = dir .. "/doc.md#a.*b", kind = "mdlink", text = "t" }))
+
+    H.eq(
+      vim.api.nvim_win_get_cursor(0)[1],
+      7,
+      "jumped to the literal '# a.*b' heading, not the earlier 'aXbY' decoy"
+    )
+
+    registry.dispatch = orig
+  end)
 end

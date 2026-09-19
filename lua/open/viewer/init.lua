@@ -299,6 +299,16 @@ end
 -- Open
 -- ---------------------------------------------------------------------------
 
+--- Escape Vim 'magic'-mode regex metacharacters so `s` matches literally.
+---@internal
+---@param s string
+---@return string
+local function escape_vim_pattern(s)
+  return (s:gsub("[%.%*%[%]%^%$~\\]", function(c)
+    return "\\" .. c
+  end))
+end
+
 --- Open one link through the appropriate handler.
 ---
 --- URLs go to the browser. Anything else is a local file and follows into a
@@ -338,7 +348,11 @@ function M.open(lk)
 
   if frag then
     -- Best-effort heading jump; a missing anchor just leaves the cursor put.
-    local slug = frag:sub(2):gsub("%-", "[- ]")
+    -- The anchor text comes from a link scraped out of a buffer or a file on
+    -- disk, so it is escaped literally before reaching the regex engine
+    -- (SEC-30) -- every metacharacter except the deliberate `-`-to-space
+    -- class, which markdown's heading-to-slug convention needs.
+    local slug = escape_vim_pattern(frag:sub(2)):gsub("%-", "[- ]")
     pcall(vim.fn.search, "\\c^#\\+\\s*.*" .. slug, "w")
   end
 end
