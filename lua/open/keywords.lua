@@ -155,7 +155,10 @@ end
 local function resolve_pip_conf()
   local platform = require("open.platform").get()
   if platform.is_win then
-    local appdata = vim.fn.getenv("APPDATA") or ""
+    -- vim.env.APPDATA, not vim.fn.getenv("APPDATA"): getenv() returns
+    -- vim.NIL (userdata) for an unset variable, not Lua nil, so `or ""`
+    -- never fires and the concatenation below throws.
+    local appdata = vim.env.APPDATA or ""
     return appdata .. "\\pip\\pip.ini"
   end
   return expand("~/.config/pip/pip.conf")

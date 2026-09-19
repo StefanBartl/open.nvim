@@ -112,6 +112,27 @@ return function(H)
     vim.system = orig_system
   end
 
+  -- resolve_pip_conf (Windows): an unset APPDATA does not throw (LUA-16) -----
+  -- vim.fn.getenv() returns vim.NIL (userdata) for an unset variable, not
+  -- Lua nil, so a bare `or ""` guard on it never fires.
+  if platform.is_win then
+    local orig_appdata = vim.env.APPDATA
+    vim.env.APPDATA = nil
+
+    local ok, result = pcall(function()
+      return keywords.builtin().pip_conf()
+    end)
+
+    vim.env.APPDATA = orig_appdata
+
+    H.ok(ok, "pip_conf does not throw when APPDATA is unset: " .. tostring(result))
+    H.eq(
+      result,
+      "\\pip\\pip.ini",
+      "falls back to a bare relative path, not vim.NIL concatenated in"
+    )
+  end
+
   -- setup() wires builtin() into config.get().keywords ------------------------
   do
     require("open").setup({})
