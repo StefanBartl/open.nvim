@@ -89,7 +89,12 @@ end
 local function resolve_existing_path(candidate)
   if type(candidate) ~= "string" or candidate == "" then return nil end
 
-  local expanded = vim.fn.expand(candidate)
+  -- lib.nvim.cross.fs.expand_path, not vim.fn.expand(): `candidate` is
+  -- buffer/user text (<cfile>, the literal `:Open` scope argument, ...), and
+  -- vim.fn.expand() runs a backtick span through &shell as command
+  -- substitution besides treating `%`/`#`/`<cfile>` as Vim specials
+  -- (SEC-34). expand_path only expands `~` and environment variables.
+  local expanded = require("lib.nvim.cross.fs.expand_path")(candidate)
   if expanded ~= "" and vim.uv.fs_stat(expanded) then return expanded end
 
   local bufdir = vim.fn.expand("%:p:h")
@@ -337,8 +342,30 @@ function M.resolve(arg, target, signals)
         -- nor powershell on PATH), that `and/or` idiom falls through to the
         -- `or` branch and expand_path()s the *stringified function value*
         -- ("function: 0x...") instead of leaving text unresolved.
+        --
+        -- A function keyword's result is routed through expand_path too
+        -- (same as a plain string keyword just below): a resolver like
+        -- resolve_gitignore_global reads a path straight out of `git
+        -- config`, which may itself be a literal "~/..." that only
+        -- expand_path, not a raw string, turns into a real path.
         if type(kw) == "function" then
-          text = kw()
+          -- pcall'd (ERR-01): a resolver may shell out (capture() runs
+          -- vim.system():wait()), touch the filesystem, or read the
+          -- environment, and a config-supplied one is arbitrary user code.
+          -- A throw here degrades to "unresolved", same as the resolver
+          -- returning nil, instead of aborting the whole :Open invocation.
+          local ok_kw, resolved = pcall(kw)
+          if not ok_kw then
+            debug_log(
+              string.format("resolve: keyword '%s' resolver failed: %s", arg, tostring(resolved))
+            )
+            resolved = nil
+          end
+          if resolved then
+            text = require("lib.nvim.cross.fs.expand_path")(resolved)
+          else
+            text = nil
+          end
         else
           text = require("lib.nvim.cross.fs.expand_path")(tostring(kw))
         end

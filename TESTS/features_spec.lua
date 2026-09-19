@@ -436,6 +436,68 @@ return function(H)
     require("open").setup({})
   end
 
+  -- keyword resolver: a throw degrades to "unresolved" instead of aborting
+  -- the whole :Open invocation (ERR-01) --------------------------------------
+  do
+    require("open").setup({
+      keywords = {
+        throws_kw = function()
+          error("simulated resolver failure")
+        end,
+      },
+    })
+    local context = require("open.context")
+    local ok, ctx = pcall(context.resolve, "throws_kw", "filemanager", {})
+    H.ok(ok, "a throwing keyword resolver does not abort context.resolve() itself")
+    H.falsy(ctx, "a throwing keyword resolver leaves the scope unresolved, same as returning nil")
+    require("open").setup({})
+  end
+
+  -- keyword resolver: a function keyword's result is expand_path()ed, same
+  -- as a plain string keyword, so a literal "~/..." from e.g. `git config`
+  -- still resolves to a real path -------------------------------------------
+  do
+    require("open").setup({
+      keywords = {
+        tilde_kw = function()
+          return "~/from-resolver"
+        end,
+      },
+    })
+    local context = require("open.context")
+    local ctx = context.resolve("tilde_kw", "filemanager", {})
+    H.ok(ctx, "a function keyword returning a tilde path resolves to a context")
+    H.falsy(ctx.text:find("~", 1, true), "the '~' was expanded, not passed through literally")
+    require("open").setup({})
+  end
+
+  -- resolve(): SEC-34 -- the is_path classification never runs vim.fn.expand()
+  -- on foreign (buffer/user) text; a backtick span must not risk a &shell
+  -- command substitution as a side effect of merely computing is_path -------
+  do
+    require("open").setup({})
+    local context = require("open.context")
+
+    local payload = "`echo sec34`"
+    local orig_expand = vim.fn.expand
+    local seen_candidate = false
+    vim.fn.expand = function(x, ...)
+      if x == payload then seen_candidate = true end
+      return orig_expand(x, ...)
+    end
+
+    local ctx = context.resolve(payload, "browser", {})
+
+    vim.fn.expand = orig_expand
+
+    H.ok(ctx, "a literal scope argument still resolves to a context")
+    H.eq(ctx.text, payload, "the resolved text is the literal argument, unchanged")
+    H.falsy(
+      seen_candidate,
+      "vim.fn.expand() is never called with the raw candidate text (would run &shell on a backtick span)"
+    )
+  end
+
   -- office_open: BufReadCmd redirect for MS Office documents ----------------
   do
     H.tmpdir(function(dir)
