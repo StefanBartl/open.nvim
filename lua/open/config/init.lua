@@ -30,28 +30,45 @@ end
 ---  * `"string"`/`"boolean"` — exact Lua type; a mismatch degrades to the
 ---    default (ERR-22) instead of aborting the rest of `setup()`.
 ---  * `"list"` — must be array-shaped (see `is_list`); a mismatch degrades
----    the same way. This is what `open.init`'s handler-loading loop
----    `ipairs`s and what `office_open.extensions` builds an autocmd pattern
----    from — both used to throw straight out of `setup()` on a wrong-typed
----    value.
+---    the same way. This is what `custom_handlers` is `ipairs`d as — each
+---    entry is itself validated (type, `.key`, `.run`) by
+---    `open.registry.register`, so an element of the wrong shape is rejected
+---    one handler at a time instead of needing a type check here.
+---  * `"string_list"` — array-shaped *and* every element a string; a
+---    mismatch degrades the same way. `handlers` (`open.init`'s
+---    handler-loading loop `ipairs`s it and concatenates each key into a
+---    warning for an unrecognized one) and `office_open.extensions`
+---    (`table.concat`d into a `BufReadCmd` autocmd pattern) both used to
+---    throw straight out of `setup()` on a non-string element — `"list"`
+---    alone only catches the whole value being the wrong shape, not one
+---    element inside an otherwise list-shaped table.
+---  * `"cmdspec"` — a non-empty string, or a non-empty array of strings;
+---    a mismatch degrades the same way. This is `filemanager.command`
+---    (documented as "a string ... or an argv list"): an empty list degrades
+---    exactly like an empty string already does one layer down in
+---    `lib.nvim.cross.reveal_in_fm` (`command and command ~= ""` treats `""`
+---    as "no override") instead of surviving validation and then being
+---    handed to `run_detached` as a 0-element argv, which silently shifts
+---    the resolved *path* into argv[1] and crashes the dispatch with a raw
+---    `E475: ... is not executable` the next time the handler runs.
 ---  * a nested table — one more level of `{ subkey = type }`, checked the
 ---    same way; an unrecognized sub-key is flagged (did-you-mean) but its
 ---    valid sibling values are still merged.
 ---  * `true` — accepted unchecked: `keywords` (`string|fun(): string|nil`
 ---    values) and `keymaps`/`viewer.commands` (dynamic, handler-derived
 ---    keys that this schema has no closed list for).
----@type table<string, "string"|"boolean"|"list"|true|table<string, "string"|"boolean"|"list"|true>>
+---@type table<string, "string"|"boolean"|"list"|"string_list"|"cmdspec"|true|table<string, "string"|"boolean"|"list"|"string_list"|"cmdspec"|true>>
 local KNOWN = {
   command = "string",
   default_filemanager = "string",
   default_browser = "string",
-  handlers = "list",
+  handlers = "string_list",
   builtin_keywords = "boolean",
   keywords = true,
   custom_handlers = "list",
   keymaps = true,
-  filemanager = { reveal = "boolean", command = true },
-  office_open = { enabled = "boolean", extensions = "list" },
+  filemanager = { reveal = "boolean", command = "cmdspec" },
+  office_open = { enabled = "boolean", extensions = "string_list" },
   debug = "boolean",
   picker = { enabled = "boolean" },
   viewer = {
@@ -92,13 +109,46 @@ local function describe_unknown(key, known, prefix)
   return ("unknown option '%s%s'"):format(prefix, name)
 end
 
----Check `value` against a `"string"`/`"boolean"`/`"list"` expected shape.
+---Human-facing name for an expected shape, used in "must be a %s" messages.
 ---@internal
----@param expected "string"|"boolean"|"list"
+---@type table<string, string>
+local TYPE_LABEL = {
+  list = "list",
+  string_list = "list of strings",
+  cmdspec = "string or non-empty list of strings",
+}
+
+---Whether every element of array-shaped `t` is a string.
+---@internal
+---@param t table
+---@return boolean
+local function is_string_list(t)
+  for _, v in ipairs(t) do
+    if type(v) ~= "string" then return false end
+  end
+  return true
+end
+
+---Check `value` against a `"string"`/`"boolean"`/`"list"`/`"string_list"`/
+---`"cmdspec"` expected shape.
+---@internal
+---@param expected "string"|"boolean"|"list"|"string_list"|"cmdspec"
 ---@param value any
 ---@return boolean
 local function fits(expected, value)
   if expected == "list" then return type(value) == "table" and is_list(value) end
+  if expected == "string_list" then
+    return type(value) == "table" and is_list(value) and is_string_list(value)
+  end
+  if expected == "cmdspec" then
+    if type(value) == "string" then return value ~= "" end
+    -- An empty argv is not "no override" the way an empty string is (see
+    -- `reveal_in_fm`'s `command and command ~= ""`) -- left as-is it would
+    -- reach `run_detached` as a 0-element argv, which shifts the resolved
+    -- path into argv[1] and crashes the dispatch with a raw
+    -- "E475: ... is not executable" instead of using the platform default.
+    return type(value) == "table" and is_list(value) and #value > 0 and is_string_list(value)
+  end
   return type(value) == expected
 end
 
@@ -128,13 +178,19 @@ local function validate(opts)
       found_issues[#found_issues + 1] = describe_unknown(key, KNOWN, "")
     elseif known == true then
       clean[key] = value
-    elseif known == "string" or known == "boolean" or known == "list" then
+    elseif
+      known == "string"
+      or known == "boolean"
+      or known == "list"
+      or known == "string_list"
+      or known == "cmdspec"
+    then
       if fits(known, value) then
         clean[key] = value
       else
         found_issues[#found_issues + 1] = ("option '%s' must be a %s, got %s -- using the default"):format(
           key,
-          known,
+          TYPE_LABEL[known] or known,
           type(value)
         )
       end
@@ -156,7 +212,7 @@ local function validate(opts)
             found_issues[#found_issues + 1] = ("option '%s.%s' must be a %s, got %s -- using the default"):format(
               key,
               sub_key,
-              sub_known,
+              TYPE_LABEL[sub_known] or sub_known,
               type(sub_value)
             )
           end

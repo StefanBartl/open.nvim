@@ -148,7 +148,10 @@ return function(H)
       vim.tbl_contains(config.get().handlers, "browser"),
       "handlers fell back to its default list"
     )
-    H.contains(table.concat(config.issues(), "\n"), "option 'handlers' must be a list, got string")
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'handlers' must be a list of strings, got string"
+    )
     config.setup({})
   end
 
@@ -177,8 +180,91 @@ return function(H)
     )
     H.contains(
       table.concat(config.issues(), "\n"),
-      "option 'office_open.extensions' must be a list, got string"
+      "option 'office_open.extensions' must be a list of strings, got string"
     )
+    config.setup({})
+  end
+
+  -- ERR-22: a list-shaped value with a wrong-typed ELEMENT also degrades,
+  -- not just a wrong-shaped whole value. `handlers` used to reach
+  -- `open.init`'s `"Unknown handler module key: '" .. key .. "'"` and
+  -- `office_open.extensions` used to reach `office_open`'s
+  -- `"*." .. ext` pattern-builder with the offending element still in
+  -- place, and Lua's `..` throws on a non-string/non-number operand --
+  -- crashing straight out of setup() instead of degrading. -----------------
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ handlers = { true, "browser" } })
+    H.ok(
+      vim.tbl_contains(config.get().handlers, "browser"),
+      "handlers fell back to its default list on a non-string element"
+    )
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'handlers' must be a list of strings, got table"
+    )
+    config.setup({})
+  end
+
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ office_open = { extensions = { 42, "docx" } } })
+    H.eq(
+      #config.get().office_open.extensions,
+      6,
+      "office_open.extensions fell back to its default list on a non-string element"
+    )
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'office_open.extensions' must be a list of strings, got table"
+    )
+    config.setup({})
+  end
+
+  -- ERR-22: filemanager.command ("a string ... or an argv list") degrades on
+  -- any other shape, including a boolean/number and an EMPTY list -- an
+  -- empty argv is not "no override" the way an empty string already is one
+  -- layer down in lib.nvim's reveal_in_fm, and used to reach run_detached as
+  -- a 0-element argv (shifting the resolved path into argv[1] and crashing
+  -- the dispatch with a raw "E475: ... is not executable" the next time the
+  -- handler ran) instead of falling back to nil (platform auto-detect). ----
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ filemanager = { command = true } })
+    H.eq(config.get().filemanager.command, nil, "filemanager.command (boolean) fell back to nil")
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'filemanager.command' must be a string or non-empty list of strings, got boolean"
+    )
+    config.setup({})
+  end
+
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ filemanager = { command = {} } })
+    H.eq(config.get().filemanager.command, nil, "filemanager.command (empty list) fell back to nil")
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'filemanager.command' must be a string or non-empty list of strings, got table"
+    )
+    config.setup({})
+  end
+
+  do
+    config.setup({ filemanager = { command = "thunar" } })
+    H.eq(config.get().filemanager.command, "thunar", "a valid string command is kept as-is")
+    H.eq(#config.issues(), 0, "a valid filemanager.command raises no issue")
+    config.setup({})
+  end
+
+  do
+    config.setup({ filemanager = { command = { "dolphin", "--select" } } })
+    H.eq(
+      table.concat(config.get().filemanager.command, ","),
+      "dolphin,--select",
+      "a valid argv-list command is kept as-is"
+    )
+    H.eq(#config.issues(), 0, "a valid filemanager.command raises no issue")
     config.setup({})
   end
 
