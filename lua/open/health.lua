@@ -152,6 +152,27 @@ local function check_executables()
   end
 end
 
+---Report what the last `setup()` call rejected or flagged (ERR-22/ERR-50):
+---unrecognized keys and values that did not fit their option, each of which
+---already fell back to its default rather than breaking `setup()`.
+---@internal
+local function check_config()
+  vim.health.start("open: setup() options")
+  local ok, cfg_mod = pcall(require, "open.config")
+  if not ok or type(cfg_mod.issues) ~= "function" then
+    vim.health.info("config not available (run setup() first)")
+    return
+  end
+  local setup_issues = cfg_mod.issues()
+  if #setup_issues == 0 then
+    vim.health.ok("no unknown keys, nothing invalid")
+    return
+  end
+  for _, msg in ipairs(setup_issues) do
+    vim.health.warn(msg)
+  end
+end
+
 ---Report the office_open auto-redirect config.
 ---@internal
 local function check_office_open()
@@ -207,6 +228,7 @@ function M.check()
   check_lib_nvim()
   check_platform()
   check_executables()
+  check_config()
   check_office_open()
   check_handlers()
 

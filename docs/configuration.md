@@ -99,6 +99,13 @@ require("open").setup({
 })
 ```
 
+Every option above is validated before it is merged over the defaults: an
+unrecognized key is reported with a "did you mean" hint, and a value whose
+shape does not fit its option (e.g. `handlers = "browser"` instead of a list)
+falls back to the default for that option rather than breaking `setup()`.
+Both kinds of issue are warned once at `setup()` and stay visible afterwards
+in `:checkhealth open` (see [docs/health-check.md](health-check.md)).
+
 See [docs/keywords.md](keywords.md) for the full list of built-in keywords and
 how to define your own.
 

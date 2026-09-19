@@ -115,4 +115,85 @@ return function(H)
       "nested default (filemanager.reveal) not corrupted by an earlier override"
     )
   end
+
+  -- ERR-51 / ERR-54: mutating what config.get() returns must not poison a
+  -- later read, or the module-level DEFAULTS table, for the rest of the
+  -- session (config.get() used to hand out DEFAULTS' own sub-tables by
+  -- reference after a bare setup({})) --------------------------------------
+  do
+    local DEFAULTS = require("open.config.DEFAULTS")
+    config.setup({})
+    local got = config.get()
+    got.viewer.sort = "mutated"
+    got.filemanager.reveal = "mutated"
+
+    H.eq(
+      config.get().viewer.sort,
+      "none",
+      "a later config.get() is unaffected by an earlier mutation"
+    )
+    H.eq(DEFAULTS.viewer.sort, "none", "DEFAULTS itself was never touched")
+    H.eq(DEFAULTS.filemanager.reveal, true, "DEFAULTS itself was never touched (nested boolean)")
+
+    config.setup({})
+    H.eq(config.get().viewer.sort, "none", "setup({}) still restores the real default afterwards")
+  end
+
+  -- ERR-22: a wrong-typed value degrades to its default instead of aborting
+  -- setup() -------------------------------------------------------------
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ handlers = "browser" })
+    H.ok(
+      vim.tbl_contains(config.get().handlers, "browser"),
+      "handlers fell back to its default list"
+    )
+    H.contains(table.concat(config.issues(), "\n"), "option 'handlers' must be a list, got string")
+    config.setup({})
+  end
+
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ command = 42 })
+    H.eq(config.get().command, "Open", "command fell back to its default")
+    H.contains(table.concat(config.issues(), "\n"), "option 'command' must be a string, got number")
+    config.setup({})
+  end
+
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ custom_handlers = "not-a-list" })
+    H.eq(#config.get().custom_handlers, 0, "custom_handlers fell back to its default empty list")
+    config.setup({})
+  end
+
+  do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ office_open = { extensions = "docx" } })
+    H.eq(
+      #config.get().office_open.extensions,
+      6,
+      "office_open.extensions fell back to its default list"
+    )
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'office_open.extensions' must be a list, got string"
+    )
+    config.setup({})
+  end
+
+  -- ERR-50: an unrecognized key is flagged with a did-you-mean hint, dropped
+  -- rather than merged in, and the issue list is cleared by a later
+  -- well-formed setup() ------------------------------------------------
+  do
+    config.setup({ hanlders = { "browser" } })
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "unknown option 'hanlders' (did you mean 'handlers'?)"
+    )
+    H.eq(config.get().hanlders, nil, "the unrecognized key was not merged in")
+
+    config.setup({})
+    H.eq(#config.issues(), 0, "a later well-formed setup() clears the issue list")
+  end
 end
