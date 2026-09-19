@@ -9,6 +9,7 @@
 local notify = require("lib.nvim.notify").create("[open.browser]")
 local platform = require("open.platform")
 local util = require("open.util")
+local expand_path = require("lib.nvim.cross.fs.expand_path")
 
 local M = {}
 
@@ -23,7 +24,9 @@ local function to_url(ctx)
 
   if ctx.is_url then return text:match("^www%.") and ("https://" .. text) or text end
 
-  if ctx.is_path then return "file://" .. vim.fn.expand(text) end
+  -- expand_path, not vim.fn.expand: `text` is context text (SEC-34), same
+  -- as every other handler's path resolution.
+  if ctx.is_path then return "file://" .. expand_path(text) end
 
   return SEARCH_BASE .. util.url_encode(text)
 end

@@ -130,6 +130,24 @@ return function(H)
     handlers.browser.run({ text = "/tmp/doc.html", is_url = false, is_path = true })
     H.contains(seen_cmd[#seen_cmd], "file://", "a path context is opened via file://")
 
+    -- to_url(): the is_path branch never runs vim.fn.expand() on context
+    -- text -- a backtick span there must not risk a &shell command
+    -- substitution (SEC-34) ---------------------------------------------------
+    do
+      local payload = "`echo sec34`"
+      local orig_expand = vim.fn.expand
+      local seen_candidate = false
+      vim.fn.expand = function(x, ...)
+        if x == payload then seen_candidate = true end
+        return orig_expand(x, ...)
+      end
+
+      handlers.browser.run({ text = payload, is_url = false, is_path = true })
+
+      vim.fn.expand = orig_expand
+      H.falsy(seen_candidate, "vim.fn.expand() is never called with the raw context text")
+    end
+
     -- default_browser_cmd(): platform dispatch --------------------------------
     platform.get = function()
       return { is_win = true, is_wsl = false, is_mac = false, is_linux = false }

@@ -8,17 +8,23 @@
 --- parent directory; a directory context is used as-is.
 
 local notify = require("lib.nvim.notify").create("[open.terminal]")
+local expand_path = require("lib.nvim.cross.fs.expand_path")
 
 local M = {}
 
 ---Resolve and validate a directory from the context.
+---
+---expand_path, not vim.fn.expand: `ctx.text` is context text (a visual
+---selection, <cWORD>, or the verbatim `:Open` scope argument), and
+---vim.fn.expand() runs a backtick span through &shell as command
+---substitution besides treating `%`/`#`/`<cfile>` as Vim specials (SEC-34).
 ---@internal
 ---@param ctx OpenNvim.Context
 ---@return string|nil, string|nil
 local function resolve_dir(ctx)
   if ctx.is_url then return nil, "Text looks like a URL, not a local path" end
 
-  local expanded = vim.fn.expand(ctx.text)
+  local expanded = expand_path(ctx.text)
   if expanded == "" then return nil, "Cannot expand path: " .. ctx.text end
 
   local stat = vim.uv.fs_stat(expanded)

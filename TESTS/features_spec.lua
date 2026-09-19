@@ -65,6 +65,43 @@ return function(H)
     end)
   end
 
+  -- filemanager / nvim_internal (split) / terminal: none of them run
+  -- vim.fn.expand() on context text -- a backtick span there must not risk
+  -- a &shell command substitution (SEC-34) -----------------------------------
+  do
+    local payload = "`echo sec34`"
+    local orig_expand = vim.fn.expand
+    local seen = 0
+    vim.fn.expand = function(x, ...)
+      if x == payload then seen = seen + 1 end
+      return orig_expand(x, ...)
+    end
+
+    local fm_h
+    require("open.handlers.filemanager").register_all(function(h)
+      fm_h = h
+      return true
+    end)
+    fm_h.run({ text = payload, is_url = false, is_path = false })
+
+    local split_h
+    require("open.handlers.nvim_internal").register_all(function(h)
+      if h.key == "split" then split_h = h end
+      return true
+    end)
+    split_h.run({ text = payload, is_url = false, is_path = false })
+
+    local term_h
+    require("open.handlers.terminal").register_all(function(h)
+      term_h = h
+      return true
+    end)
+    term_h.run({ text = payload, is_url = false, is_path = false })
+
+    vim.fn.expand = orig_expand
+    H.eq(seen, 0, "no handler ever calls vim.fn.expand() with the raw context text")
+  end
+
   -- keymaps -------------------------------------------------------------
   do
     require("open").setup({

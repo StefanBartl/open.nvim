@@ -24,15 +24,21 @@
 
 local notify = require("lib.nvim.notify").create("[open.filemanager]")
 local reveal_in_fm = require("lib.nvim.cross.reveal_in_fm")
+local expand_path = require("lib.nvim.cross.fs.expand_path")
 
 local M = {}
 
 ---Expand `text` to a filesystem path.
+---
+---expand_path, not vim.fn.expand: `text` is context text (a visual
+---selection, <cWORD>, or the verbatim `:Open` scope argument), and
+---vim.fn.expand() runs a backtick span through &shell as command
+---substitution besides treating `%`/`#`/`<cfile>` as Vim specials (SEC-34).
 ---@internal
 ---@param text string
 ---@return string|nil
 local function resolve_path(text)
-  local expanded = vim.fn.expand(text)
+  local expanded = expand_path(text)
   return (expanded ~= "" and expanded) or nil
 end
 
