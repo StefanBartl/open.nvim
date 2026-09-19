@@ -32,9 +32,10 @@ place.
 
 `setup(opts)` registers the `open_in_browser` action, then calls
 `urlview.setup(opts)` with `default_action = "open_in_browser"` (and
-`default_picker` set to telescope/fzf-lua if available) unless you already
-set those yourself. Pass `false` instead of a table to only register the
-action without calling `urlview.setup()`.
+`default_picker` set to telescope/fzf-lua when one of them is already
+loaded — this never triggers a lazy-loaded picker's own load just to probe
+for it) unless you already set those yourself. Pass `false` instead of a
+table to only register the action without calling `urlview.setup()`.
 
 ### Migrating off it
 

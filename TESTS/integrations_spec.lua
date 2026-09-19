@@ -82,6 +82,43 @@ return function(H)
     package.loaded["urlview.actions"] = nil
   end
 
+  -- open.integrations.urlview: default_picker only reads package.loaded,
+  -- never require()s telescope/fzf-lua just to probe for them (LUA-92) ------
+  do
+    local urlview_integration = require("open.integrations.urlview")
+    package.loaded["urlview.actions"] = {}
+    local captured_opts
+    local orig_urlview = package.loaded["urlview"]
+    package.loaded["urlview"] = {
+      setup = function(o)
+        captured_opts = o
+      end,
+    }
+
+    local orig_telescope = package.loaded["telescope"]
+    local orig_fzf = package.loaded["fzf-lua"]
+    package.loaded["telescope"] = nil
+    package.loaded["fzf-lua"] = nil
+    -- A preload stub that errors proves setup() never require()s telescope:
+    -- if it did, this test would blow up instead of merely asserting.
+    package.preload["telescope"] = function()
+      error("setup() must not require() telescope just to probe for it")
+    end
+
+    urlview_integration.setup({})
+    package.preload["telescope"] = nil
+    H.falsy(captured_opts.default_picker, "neither picker loaded -> default_picker left unset")
+
+    package.loaded["telescope"] = { some = "module" }
+    urlview_integration.setup({})
+    H.eq(captured_opts.default_picker, "telescope", "an already-loaded telescope is picked up")
+
+    package.loaded["telescope"] = orig_telescope
+    package.loaded["fzf-lua"] = orig_fzf
+    package.loaded["urlview"] = orig_urlview
+    package.loaded["urlview.actions"] = nil
+  end
+
   -- open.integrations.menu ----------------------------------------------------
   do
     local menu_integration = require("open.integrations.menu")

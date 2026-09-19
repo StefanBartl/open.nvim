@@ -71,10 +71,14 @@ function M.setup(opts)
 
   opts = opts or {}
   if opts.default_action == nil then opts.default_action = "open_in_browser" end
-  if opts.default_picker == nil and pcall(require, "telescope") then
+  -- package.loaded, not require(): under a lazy manager, require() IS the
+  -- load trigger and would pull telescope/fzf-lua into this setup() call
+  -- just to probe for them, defeating whichever cmd/keys/ft trigger their
+  -- own specs declare. Only already-loaded pickers are picked up.
+  if opts.default_picker == nil and package.loaded["telescope"] then
     opts.default_picker = "telescope"
   end
-  if opts.default_picker == nil and pcall(require, "fzf-lua") then
+  if opts.default_picker == nil and package.loaded["fzf-lua"] then
     opts.default_picker = "fzf-lua"
   end
 
