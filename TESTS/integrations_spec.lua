@@ -121,6 +121,29 @@ return function(H)
     H.ok(sub, "submenu() returns a wrapper when there are items")
     H.eq(type(sub.items), "table", "submenu()'s wrapper carries the item list")
 
+    -- Without ui.nvim (ui.contextmenu), items()/submenu() degrade to no
+    -- entries instead of throwing (LUA-01) -------------------------------
+    local orig_loaded = package.loaded["ui.contextmenu"]
+    local orig_preload = package.preload["ui.contextmenu"]
+    package.loaded["ui.contextmenu"] = nil
+    package.preload["ui.contextmenu"] = function()
+      error("simulated: ui.nvim not installed")
+    end
+
+    local ok_items, items_or_err = pcall(menu_integration.items)
+    local ok_submenu, submenu_or_err = pcall(menu_integration.submenu)
+
+    package.preload["ui.contextmenu"] = orig_preload
+    package.loaded["ui.contextmenu"] = orig_loaded
+
+    H.ok(ok_items, "items() does not throw when ui.nvim is unavailable: " .. tostring(items_or_err))
+    H.eq(#items_or_err, 0, "items() returns no entries when ui.nvim is unavailable")
+    H.ok(
+      ok_submenu,
+      "submenu() does not throw when ui.nvim is unavailable: " .. tostring(submenu_or_err)
+    )
+    H.falsy(submenu_or_err, "submenu() returns nil when ui.nvim is unavailable")
+
     require("open").setup({})
   end
 end

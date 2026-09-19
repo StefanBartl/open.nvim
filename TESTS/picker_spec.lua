@@ -92,4 +92,34 @@ return function(H)
       "format_item falls back to the bare key when the handler is not registered"
     )
   end)
+
+  -- select(): falls back to vim.ui.select directly when ui.nvim (ui.kit) is
+  -- not installed, instead of throwing (LUA-01) ------------------------------
+  with_stubs(function()
+    local orig_loaded = package.loaded["ui.kit"]
+    local orig_preload = package.preload["ui.kit"]
+    package.loaded["ui.kit"] = nil
+    package.preload["ui.kit"] = function()
+      error("simulated: ui.nvim not installed")
+    end
+
+    local used_vim_ui_select = false
+    vim.ui.select = function(items, _opts, on_choice)
+      used_vim_ui_select = true
+      on_choice(items[1])
+    end
+    local dispatched_target
+    registry.dispatch = function(target)
+      dispatched_target = target
+    end
+
+    local ok, err = pcall(picker.select, { "browser" }, nil, { cword = "https://example.com" })
+
+    package.preload["ui.kit"] = orig_preload
+    package.loaded["ui.kit"] = orig_loaded
+
+    H.ok(ok, "select() does not throw when ui.kit is unavailable: " .. tostring(err))
+    H.ok(used_vim_ui_select, "falls back to vim.ui.select directly")
+    H.eq(dispatched_target, "browser", "the fallback path still dispatches the chosen handler")
+  end)
 end
