@@ -25,9 +25,13 @@ local M = {}
 ---@internal
 ---@param target_raw string|nil
 ---@param scope       string|nil
+---@return boolean|nil ok   see open.M.open's @return for the nil case
+---@return string|nil err
 local function run_open(target_raw, scope)
   local context = require("open.context")
   local registry = require("open.registry")
+
+  local ok, err
 
   context.with_cache(function()
     local signals = context.gather()
@@ -46,11 +50,14 @@ local function run_open(target_raw, scope)
 
     if not ctx then
       require("lib.nvim.notify").create("[open]").warn("Nothing to open")
+      ok, err = false, "Nothing to open"
       return
     end
 
-    registry.dispatch(target, ctx)
+    ok, err = registry.dispatch(target, ctx)
   end)
+
+  return ok, err
 end
 
 -- 1st positional: handler key. Validation stays soft (registry.dispatch

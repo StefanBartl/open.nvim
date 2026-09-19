@@ -83,6 +83,8 @@ end
 ---Look up and invoke the handler registered for `target`.
 ---@param target string
 ---@param ctx    OpenNvim.Context
+---@return boolean ok
+---@return string|nil err
 function M.dispatch(target, ctx)
   local ok_cfg, cfg = pcall(require, "open.config")
   if ok_cfg and cfg.is_debug() then
@@ -99,18 +101,25 @@ function M.dispatch(target, ctx)
 
   local handler = M.get(target)
   if not handler then
-    notify.error(
-      string.format(
-        "Unknown target: '%s'  (available: %s)",
-        target,
-        table.concat(M.list_keys(), ", ")
-      )
+    local err = string.format(
+      "Unknown target: '%s'  (available: %s)",
+      target,
+      table.concat(M.list_keys(), ", ")
     )
-    return
+    notify.error(err)
+    return false, err
   end
 
-  local ok, err = pcall(handler.run, ctx)
-  if not ok then notify.error(string.format("Handler '%s' failed: %s", target, tostring(err))) end
+  local ok, result = pcall(handler.run, ctx)
+  if not ok then
+    local err = string.format("Handler '%s' failed: %s", target, tostring(result))
+    notify.error(err)
+    return false, err
+  end
+
+  if result == false then return false, string.format("Handler '%s' reported failure", target) end
+
+  return true, nil
 end
 
 return M

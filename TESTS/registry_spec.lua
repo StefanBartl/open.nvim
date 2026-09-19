@@ -117,11 +117,14 @@ return function(H)
 
   -- dispatch(): unknown target reports the available keys --------------------
   do
+    local ok, err
     local msgs = capture_notify(function()
-      registry.dispatch("zzreg_totally_unknown", { text = "x" })
+      ok, err = registry.dispatch("zzreg_totally_unknown", { text = "x" })
     end)
     H.contains(msgs[1].msg, "Unknown target", "dispatching an unknown key warns")
     H.contains(msgs[1].msg, "zzreg_a", "the message lists an available key")
+    H.falsy(ok, "dispatch() returns ok=false for an unknown target (ERR-03)")
+    H.contains(err, "Unknown target", "dispatch() returns the same message as err")
   end
 
   -- dispatch(): a handler that errors is caught, not propagated --------------
@@ -132,13 +135,41 @@ return function(H)
         error("kaboom")
       end,
     })
+    local ok, err
     local msgs = capture_notify(function()
       -- Must not raise past dispatch() — a broken handler must not take
       -- down the caller (a user command, a keymap, another handler).
-      registry.dispatch("zzreg_throws", { text = "x" })
+      ok, err = registry.dispatch("zzreg_throws", { text = "x" })
     end)
     H.contains(msgs[1].msg, "kaboom", "the caught error is reported")
     H.contains(msgs[1].msg, "zzreg_throws", "the report names the failing handler")
+    H.falsy(ok, "dispatch() returns ok=false when the handler throws (ERR-03)")
+    H.contains(err, "kaboom", "dispatch() returns the caught error as err")
+  end
+
+  -- dispatch(): the handler's own true/false return is no longer discarded --
+  -- (ERR-03: `local ok, err = pcall(handler.run, ctx)` used to bind `err` to
+  -- the handler's own return value on success, and the caller never saw it)
+  do
+    registry.register({
+      key = "zzreg_succeeds",
+      run = function()
+        return true
+      end,
+    })
+    local ok, err = registry.dispatch("zzreg_succeeds", { text = "x" })
+    H.ok(ok, "dispatch() returns ok=true when the handler succeeds")
+    H.falsy(err, "no err on success")
+
+    registry.register({
+      key = "zzreg_reports_failure",
+      run = function()
+        return false
+      end,
+    })
+    local ok2, err2 = registry.dispatch("zzreg_reports_failure", { text = "x" })
+    H.falsy(ok2, "dispatch() returns ok=false when the handler itself returns false")
+    H.ok(err2, "an err is reported even though the handler already notified on its own")
   end
 
   -- dispatch(): debug=true logs the dispatch parameters -----------------------

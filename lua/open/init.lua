@@ -40,9 +40,16 @@ local HANDLER_MODULES = {
 ---Open a target programmatically.
 ---@param target string|nil  Handler key; nil → context-aware default.
 ---@param scope  string|nil  Scope token: "%", "cfile", "path=…", or literal.
+---@return boolean|nil ok   true/false once a handler ran synchronously;
+---                         nil when the opt-in picker deferred the choice
+---                         (dispatch then happens later, inside its own
+---                         on_select callback).
+---@return string|nil err
 function M.open(target, scope)
   local context = require("open.context")
   local registry = require("open.registry")
+
+  local ok, err
 
   context.with_cache(function()
     local signals = context.gather()
@@ -61,11 +68,14 @@ function M.open(target, scope)
 
     if not ctx then
       require("lib.nvim.notify").create("[open]").warn("Nothing to open")
+      ok, err = false, "Nothing to open"
       return
     end
 
-    registry.dispatch(t, ctx)
+    ok, err = registry.dispatch(t, ctx)
   end)
+
+  return ok, err
 end
 
 -- ---------------------------------------------------------------------------

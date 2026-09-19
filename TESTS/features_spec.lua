@@ -415,6 +415,46 @@ return function(H)
       H.falsy(prompted, "vim.ui.select is not invoked when picker.enabled is false")
     end
 
+    -- open()'s own return propagates registry.dispatch()'s (ok, err), which
+    -- used to be discarded entirely (ERR-03) -----------------------------
+    do
+      require("open").setup({})
+      local registry = require("open.registry")
+      local orig_dispatch = registry.dispatch
+
+      registry.dispatch = function()
+        return true, nil
+      end
+      local ok, err = require("open").open("filemanager", "path=/tmp")
+      H.eq(ok, true, "open() propagates a successful dispatch")
+      H.falsy(err, "no err on success")
+
+      registry.dispatch = function()
+        return false, "simulated failure"
+      end
+      local ok2, err2 = require("open").open("filemanager", "path=/tmp")
+      H.falsy(ok2, "open() propagates a failed dispatch")
+      H.eq(err2, "simulated failure", "open() propagates the dispatch error message")
+
+      registry.dispatch = orig_dispatch
+    end
+
+    -- open(): "Nothing to open" is itself a reported (false, err), not a
+    -- silent no-op ----------------------------------------------------------
+    do
+      require("open").setup({
+        keywords = {
+          nope_kw = function()
+            return nil
+          end,
+        },
+      })
+      local ok, err = require("open").open("filemanager", "nope_kw")
+      H.falsy(ok, "open() returns ok=false when nothing resolved")
+      H.contains(err, "Nothing to open", "open() names the reason")
+      require("open").setup({})
+    end
+
     -- picker.enabled = true + ambiguous context + no explicit target: prompt.
     do
       require("open").setup({ picker = { enabled = true } })
