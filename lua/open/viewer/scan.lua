@@ -105,7 +105,11 @@ function M.resolve(target, base_dir)
   frag = frag or ""
   if path == "" then return target end
   if is_absolute(path) then
-    return vim.fs.normalize(vim.fn.fnamemodify(vim.fn.expand(path), ":p")) .. frag
+    -- lib.nvim.cross.fs.expand_path, not vim.fn.expand() (SEC-34): `path`
+    -- is a markdown link target parsed out of buffer text, so a backtick
+    -- span in it must not run through &shell.
+    local expand_path = require("lib.nvim.cross.fs.expand_path")
+    return vim.fs.normalize(vim.fn.fnamemodify(expand_path(path), ":p")) .. frag
   end
   if not base_dir or base_dir == "" then return target end
   return vim.fs.normalize(vim.fn.fnamemodify(base_dir .. "/" .. path, ":p")) .. frag
@@ -123,7 +127,10 @@ local function resolve_path(tok, base_dir)
   -- Must contain a separator or start with ~ — a bare word is not a path.
   if not (tok:find("[/\\]") or tok:match("^~")) then return nil end
   local candidates = {}
-  local expanded = vim.fn.expand(tok)
+  -- lib.nvim.cross.fs.expand_path, not vim.fn.expand() (SEC-34): `tok` is a
+  -- filesystem-looking token scanned out of buffer text, so a backtick span
+  -- in it must not run through &shell.
+  local expanded = require("lib.nvim.cross.fs.expand_path")(tok)
   if is_absolute(expanded) then
     candidates[#candidates + 1] = expanded
   elseif base_dir then
