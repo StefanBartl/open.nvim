@@ -583,4 +583,23 @@ return function(H)
       require("open").setup({})
     end)
   end
+
+  -- setup(): a throwing lib.nvim.deps.show_once does not break setup() -------
+  -- (ERR-01: the pcall around require("lib.nvim.deps") only ever guarded
+  -- against the module being absent, not against show_once() itself failing)
+  do
+    local orig_deps = package.loaded["lib.nvim.deps"]
+    package.loaded["lib.nvim.deps"] = {
+      show_once = function()
+        error("simulated: show_once failed")
+      end,
+    }
+
+    local ok = pcall(require("open").setup, {})
+
+    package.loaded["lib.nvim.deps"] = orig_deps
+
+    H.ok(ok, "setup() does not throw when lib.nvim.deps.show_once itself throws")
+    require("open").setup({})
+  end
 end

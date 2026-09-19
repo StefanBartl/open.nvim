@@ -110,13 +110,16 @@ function M.setup(opts)
   require("open.bindings.keymaps").register(cfg)
 
   -- Report the declared external tools (docs/install.json) once, ever, on
-  -- the first setup after installation. pcall'd because an older lib.nvim
-  -- without lib.nvim.deps must not break setup() over an informational
-  -- popup; `:Lib deps show open.nvim` stays available either way. Turn it
-  -- off with `vim.g.lib_nvim_deps_disable_first_run` (or the per-plugin
+  -- the first setup after installation. Both the require and the call are
+  -- pcall'd (ERR-01): an older lib.nvim without lib.nvim.deps, or a failure
+  -- inside show_once itself (an API-signature change, a malformed
+  -- docs/install.json, a failure while drawing the popup), must not break
+  -- setup() over an informational popup; `:Lib deps show open.nvim` stays
+  -- available either way. Turn it off with
+  -- `vim.g.lib_nvim_deps_disable_first_run` (or the per-plugin
   -- `vim.g.lib_nvim_deps_disabled_plugins`).
   local ok_deps, deps = pcall(require, "lib.nvim.deps")
-  if ok_deps then deps.show_once("open.nvim") end
+  if ok_deps then pcall(deps.show_once, "open.nvim") end
 end
 
 return M
