@@ -251,6 +251,23 @@ return function(H)
   end
 
   do
+    -- A list with a blank command name is just as unusable as an empty
+    -- list -- it must not slip past cmdspec validation into run_detached.
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    config.setup({ filemanager = { command = { "" } } })
+    H.eq(
+      config.get().filemanager.command,
+      nil,
+      "filemanager.command (blank element) fell back to nil"
+    )
+    H.contains(
+      table.concat(config.issues(), "\n"),
+      "option 'filemanager.command' must be a string or non-empty list of strings, got table"
+    )
+    config.setup({})
+  end
+
+  do
     config.setup({ filemanager = { command = "thunar" } })
     H.eq(config.get().filemanager.command, "thunar", "a valid string command is kept as-is")
     H.eq(#config.issues(), 0, "a valid filemanager.command raises no issue")

@@ -129,6 +129,17 @@ local function is_string_list(t)
   return true
 end
 
+---Whether every element of array-shaped `t` is a non-empty string.
+---@internal
+---@param t table
+---@return boolean
+local function is_nonempty_string_list(t)
+  for _, v in ipairs(t) do
+    if type(v) ~= "string" or v == "" then return false end
+  end
+  return true
+end
+
 ---Check `value` against a `"string"`/`"boolean"`/`"list"`/`"string_list"`/
 ---`"cmdspec"` expected shape.
 ---@internal
@@ -147,7 +158,10 @@ local function fits(expected, value)
     -- reach `run_detached` as a 0-element argv, which shifts the resolved
     -- path into argv[1] and crashes the dispatch with a raw
     -- "E475: ... is not executable" instead of using the platform default.
-    return type(value) == "table" and is_list(value) and #value > 0 and is_string_list(value)
+    return type(value) == "table"
+      and is_list(value)
+      and #value > 0
+      and is_nonempty_string_list(value)
   end
   return type(value) == expected
 end
