@@ -79,19 +79,32 @@ function M.setup(opts)
   cfg_mod.setup(opts)
   local cfg = cfg_mod.get()
 
-  -- Load & register handler modules
+  -- Load & register handler modules. A failure at any of the three stages
+  -- below (require, shape check, register_all itself) is reported rather
+  -- than swallowed (PRIN-20): setup() still does not abort over one broken
+  -- handler module, matching how an unknown config value degrades (ERR-22),
+  -- but the gap in the registry is no longer silent the way a wrong-typed
+  -- config value used to be too loud.
+  local notify = require("lib.nvim.notify").create("[open]")
   local registry = require("open.registry")
   for _, key in ipairs(cfg.handlers) do
     local mod_path = HANDLER_MODULES[key]
     if mod_path then
       local ok, mod = pcall(require, mod_path)
-      if ok and type(mod) == "table" and type(mod.register_all) == "function" then
-        pcall(mod.register_all, registry.register)
+      if not ok then
+        notify.error("Handler module '" .. key .. "' failed to load: " .. tostring(mod))
+      elseif type(mod) ~= "table" or type(mod.register_all) ~= "function" then
+        notify.error("Handler module '" .. key .. "' has no register_all(register_fn)")
+      else
+        local ok_reg, reg_err = pcall(mod.register_all, registry.register)
+        if not ok_reg then
+          notify.error(
+            "Handler module '" .. key .. "' register_all() failed: " .. tostring(reg_err)
+          )
+        end
       end
     else
-      require("lib.nvim.notify")
-        .create("[open]")
-        .warn("Unknown handler module key: '" .. key .. "'")
+      notify.warn("Unknown handler module key: '" .. key .. "'")
     end
   end
 

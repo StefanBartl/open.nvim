@@ -39,6 +39,98 @@ return function(H)
     H.ok(seen, "custom handler's run() was invoked via dispatch")
   end
 
+  -- setup(): a handler module that fails to require() is reported, not
+  -- swallowed, and does not stop the rest of the loop (PRIN-20) --------------
+  -- registry.register is stubbed to observe exactly what THIS setup() call
+  -- attempts to register, independent of what earlier specs already left in
+  -- the shared, never-reset registry.
+  do
+    local orig_loaded = package.loaded["open.handlers.notepad"]
+    local orig_preload = package.preload["open.handlers.notepad"]
+    package.loaded["open.handlers.notepad"] = nil
+    package.preload["open.handlers.notepad"] = function()
+      error("simulated: handler module failed to load")
+    end
+
+    local registry = require("open.registry")
+    local orig_register = registry.register
+    local registered_keys = {}
+    registry.register = function(h)
+      registered_keys[#registered_keys + 1] = h.key
+      return true
+    end
+
+    local messages = {}
+    local orig_notify = vim.notify
+    vim.notify = function(msg)
+      messages[#messages + 1] = msg
+    end
+
+    require("open").setup({ handlers = { "notepad", "browser" } })
+
+    vim.notify = orig_notify
+    registry.register = orig_register
+    package.preload["open.handlers.notepad"] = orig_preload
+    package.loaded["open.handlers.notepad"] = orig_loaded
+
+    local all_msgs = table.concat(messages, "\n")
+    H.contains(all_msgs, "notepad", "the failing handler module is named in a notification")
+    H.contains(all_msgs, "failed to load", "the require() failure itself is reported")
+
+    H.falsy(
+      vim.tbl_contains(registered_keys, "notepad"),
+      "the module that failed to load registered nothing"
+    )
+    H.ok(
+      vim.tbl_contains(registered_keys, "browser"),
+      "a later handler module in the list still registers"
+    )
+
+    require("open").setup({})
+  end
+
+  -- setup(): a register_all() that throws is reported, not swallowed
+  -- (PRIN-20) -----------------------------------------------------------
+  do
+    local orig_loaded = package.loaded["open.handlers.image"]
+    package.loaded["open.handlers.image"] = {
+      register_all = function()
+        error("simulated: register_all failed")
+      end,
+    }
+
+    local registry = require("open.registry")
+    local orig_register = registry.register
+    local registered_keys = {}
+    registry.register = function(h)
+      registered_keys[#registered_keys + 1] = h.key
+      return true
+    end
+
+    local messages = {}
+    local orig_notify = vim.notify
+    vim.notify = function(msg)
+      messages[#messages + 1] = msg
+    end
+
+    local ok = pcall(require("open").setup, { handlers = { "image", "browser" } })
+
+    vim.notify = orig_notify
+    registry.register = orig_register
+    package.loaded["open.handlers.image"] = orig_loaded
+
+    H.ok(ok, "a throwing register_all() does not abort setup() itself")
+    local all_msgs = table.concat(messages, "\n")
+    H.contains(all_msgs, "image", "the failing handler module is named in a notification")
+    H.contains(all_msgs, "register_all", "the register_all() failure itself is reported")
+    H.ok(
+      vim.tbl_contains(registered_keys, "browser"),
+      "a later handler module in the list still registers"
+    )
+
+    require("open").setup({})
+  end
+
   -- terminal handler --------------------------------------------------------
   do
     H.tmpdir(function(dir)
