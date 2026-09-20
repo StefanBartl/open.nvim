@@ -153,7 +153,7 @@ The results list is ui.nvim's
   `l`, `0`, `$`, `w`, `b` and friends are mapped to `<Nop>`
 - `<CR>` opens the entry, `<Esc>` or `q` closes
 
-**`<CR>` is kind-aware:**
+#### `<CR>` is kind-aware
 
 | Entry | Opens in |
 |---|---|

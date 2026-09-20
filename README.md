@@ -54,20 +54,20 @@ and hands you a picker.
 Start at [docs/README.md](docs/README.md), which says what is where and which
 question each page answers.
 
-**The Basics**
+### The Basics
 
 - [Requirements](docs/installation.md#requirements) — Neovim version, required plugins and CLI tools.
 - [Installation](docs/installation.md) — a spec per plugin manager.
 - [Quickstart](docs/quickstart.md) — the first thing to run after installing.
 
-**Configuration**
+### Configuration
 
 - [What you get with the defaults](docs/cheatsheet.md) — every handler, the scope tokens, the platform dispatch, and common examples, all on one screen.
 - [All options](docs/configuration.md) — every `setup()` option, with the full defaults printed out.
 - [Command reference](docs/commands.md) — the two command families in full, and what each argument does.
 - [Bindings](docs/BINDINGS.md) — every user command, keymap and autocommand this plugin registers.
 
-**The Rest**
+### The Rest
 
 - [Features](docs/FEATURES/README.md) — one page per area: [the core](docs/FEATURES/CORE.md), [the handlers](docs/FEATURES/HANDLERS.md), [the viewer](docs/FEATURES/VIEWER.md).
 - [Workflow](docs/WORKFLOW.md) — how the commands combine day to day, `:Open viewer` against a direct handler, and the traps.
