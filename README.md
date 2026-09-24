@@ -20,6 +20,9 @@
 ![Status](https://img.shields.io/badge/status-beta-orange)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20WSL-lightgrey)
 [![CI](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/StefanBartl/open.nvim/actions/workflows/ci.yml)
+[![wkd](https://img.shields.io/badge/wkd-family-c6ff3d)](https://stefanbartl.github.io/wkd/p/open/)
+
+> Part of the [wkd](https://stefanbartl.github.io/wkd/) family — see this plugin's [page](https://stefanbartl.github.io/wkd/p/open/) on the site.
 
 Open files, URLs and paths from anywhere in Neovim, with one command.
 `:Open [target] [scope]` routes the thing under your cursor — a path, a URL, or
