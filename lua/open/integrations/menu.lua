@@ -37,6 +37,17 @@ local function contextmenu()
   return ok and mod or nil
 end
 
+--- Whether a host that asks first (ui.nvim's `ui.menu`) may show this
+--- plugin's fly-out: `integrations.ui_menu` is not false and the `menu` group
+--- is not switched off. `items()`/`submenu()` themselves stay governed by
+--- `menu` alone, so other hosts are unaffected by `ui_menu`.
+---@return boolean
+function M.enabled()
+  local cfg = require("open.config").get()
+  if (cfg.integrations or {}).ui_menu == false then return false end
+  return (cfg.menu or {}).enable ~= false
+end
+
 --- Build the open.nvim menu entries for the current cursor/buffer context.
 --- Returns an empty list when ui.nvim is not installed, the integration is
 --- disabled, or nothing in the current context resolves to anything, so a

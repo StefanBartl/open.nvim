@@ -72,6 +72,13 @@ return {
     enable = true,
   },
 
+  -- Which hosts may drive this plugin. `ui_menu = false` keeps ui.nvim's
+  -- right-click menu (ui.menu) from composing the Open fly-out; the entries
+  -- stay available to any other host through `menu`/`items()`.
+  integrations = {
+    ui_menu = true,
+  },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. Set a value to false to

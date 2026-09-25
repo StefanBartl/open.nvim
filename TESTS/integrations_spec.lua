@@ -128,6 +128,15 @@ return function(H)
     H.eq(#menu_integration.items(), 0, "menu.enable=false yields no entries")
     H.falsy(menu_integration.submenu(), "submenu() is nil when items() is empty")
 
+    -- enabled(): what ui.nvim's ui.menu asks first ------------------------------
+    require("open").setup({})
+    H.eq(menu_integration.enabled(), true, "enabled() is true by default")
+    require("open").setup({ integrations = { ui_menu = false } })
+    H.eq(menu_integration.enabled(), false, "integrations.ui_menu=false -> enabled() false")
+    H.ok(#menu_integration.items() > 0, "ui_menu=false leaves items() to other hosts")
+    require("open").setup({ menu = { enable = false } })
+    H.eq(menu_integration.enabled(), false, "menu.enable=false -> enabled() false")
+
     -- Enabled: the "List Links Here" entry is always present -------------------
     require("open").setup({ menu = { enable = true } })
     local items = menu_integration.items()

@@ -83,6 +83,10 @@ require("open").setup({
   -- M.items()/M.submenu() return entries.
   menu = { enable = true },
 
+  -- Which hosts may drive this plugin. `ui_menu = false` keeps ui.nvim's
+  -- right-click menu from composing the Open fly-out.
+  integrations = { ui_menu = true },
+
   -- `:Open viewer [kind]` — list links in a scope.
   viewer = {
     -- Standalone wrapper commands, one per filter. false = do not register.

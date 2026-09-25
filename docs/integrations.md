@@ -87,6 +87,11 @@ without ui.nvim installed, `M.items()`/`M.submenu()` simply return no
 entries, same as when `menu.enable = false`. A host, typically your own
 `<RightMouse>` dispatcher, composes the entries into its own menu:
 
+`integrations.ui_menu = false` keeps ui.nvim's right-click menu (`ui.menu`)
+from showing the fly-out while `items()`/`submenu()` keep working for any other
+host. The module also answers `enabled()`, which is what `ui.menu` asks first
+(`false` when that switch or `menu.enable` is off).
+
 ```lua
 local items = require("open.integrations.menu").items()
 -- prepend/append `items` to your own menu table, then menu.open(composed)

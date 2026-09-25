@@ -79,6 +79,7 @@ local KNOWN = {
     open_file = "string",
   },
   menu = { enable = "boolean" },
+  integrations = { ui_menu = "boolean" },
 }
 
 ---What the last `setup()` had to reject or flag, for `:checkhealth`. Reset on

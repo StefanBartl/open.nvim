@@ -182,6 +182,7 @@
 ---@field picker?              OpenNvim.Picker.Config  Handler-choice picker for ambiguous no-target invocations
 ---@field viewer?              OpenNvim.Viewer.Config  `:Open viewer` / `:UrlView` / `:MDLinksView` settings
 ---@field menu?                OpenNvim.Menu.Config  `open.integrations.menu` (nvzone/menu) opt-out
+---@field integrations?        OpenNvim.Integrations.Config  Which hosts may drive this plugin (`ui_menu`)
 
 ---@class OpenNvim.Picker.Config
 ---@field enabled boolean  When true, an ambiguous no-target `:Open` shows a picker (`ui.kit.select`, honoring any `vim.ui.select` override) (default false)
@@ -190,6 +191,9 @@
 ---itself; this only gates whether `M.items()`/`M.submenu()` return entries.
 ---@class OpenNvim.Menu.Config
 ---@field enable boolean  Set false to make `open.integrations.menu` always return no entries (default true)
+
+---@class OpenNvim.Integrations.Config
+---@field ui_menu boolean  Let ui.nvim's right-click menu (`ui.menu`) compose the Open fly-out (default true)
 
 ---Redirects reads of matching extensions to the system default app via a
 ---BufReadCmd autocmd, so `.docx`/`.xlsx`/`.pptx` never load as garbled text.
