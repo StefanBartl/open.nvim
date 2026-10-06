@@ -5,26 +5,32 @@ directly — no picker interaction, no real network, no real subprocess left
 running.
 
 ```sh
-nvim --headless -u NONE -c "set rtp+=." -c "luafile TESTS/run.lua" -c "qa!"
+bash scripts/test.sh                    # every spec
+bash scripts/test.sh --file config      # only spec files whose name contains "config"
+bash scripts/test.sh --json ir.json     # also write the machine-readable result
 ```
 
-`run.lua` prints one line per spec and exits non-zero if any spec failed
-(`OPEN_TESTS_OK` on success). CI (`.github/workflows/ci.yml`) runs exactly
-this command.
+The runner is [testing.nvim](https://github.com/StefanBartl/testing.nvim)
+(configured by `.testing.lua`: dialect `h`, i.e. the specs run on this
+directory's own `harness.lua`). It prints one line per spec and exits non-zero
+if any spec failed (`OPEN_TESTS_OK` on a full green run). CI
+(`.github/workflows/ci.yml`) runs exactly `scripts/test.sh`.
 
 ## lib.nvim and ui.nvim
 
 open.nvim depends on `lib.nvim` hard (notify, `usercmd.composer`,
 `cross.platform`, `cross.fs.wslpath`, `cross.run`, `harvest`) and on
 `ui.nvim` for its opt-in picker (`open.picker`, `ui.kit.select`) and the
-`open.integrations.menu` item builders (`ui.contextmenu`). `run.lua` resolves
-each of them in this order:
+`open.integrations.menu` item builders (`ui.contextmenu`). `scripts/test.sh`
+resolves each of them (and testing.nvim itself) in this order and exits 1,
+naming all four places, when one is missing:
 
-1. `$LIB_NVIM_PATH` / `$UI_NVIM_PATH`
-2. a sibling checkout, `../lib.nvim` / `../ui.nvim`
-3. the lazy.nvim-managed copy under `stdpath("data")/lazy/<name>`
+1. `$LIB_NVIM_DIR` / `$UI_NVIM_DIR` / `$TESTING_NVIM_DIR`
+2. `.deps/<name>` (what CI checks out)
+3. a sibling checkout, `../lib.nvim` / `../ui.nvim` / `../testing.nvim`
+4. the lazy.nvim-managed copy under `stdpath("data")/lazy/<name>`
 
-CI checks out both as siblings (see `ci.yml`), which is why this suite can
+CI checks out all three (see `ci.yml`), which is why this suite can
 drive `open.picker.select()` and `open.integrations.menu` for real instead of
 stubbing either dependency away.
 
@@ -49,11 +55,11 @@ stubbing either dependency away.
 | `picker_spec.lua` | `open.picker.select()`'s own branches driven directly: a cancelled prompt, a choice that resolves to nothing, a real dispatch, and the `format_item` fallback for an unregistered key |
 | `health_spec.lua` | `open.health`: one baseline "runs to completion" smoke check, plus a regression pinning the composer-crash bug (see Bugs below) — `health.lua` otherwise stays deliberately untested |
 | `harness.lua` | shared assertions (`eq`, `ok`, `falsy`, `contains`) plus `scratch()`/`tmpdir()`/`write()` fixture helpers |
-| `run.lua` | runner: resolves lib.nvim/ui.nvim, loads each spec, reports results, sets the exit code |
+| `minimal_init.lua` | puts the plugin, testing.nvim, lib.nvim and ui.nvim on the runtimepath for isolated child runs; a missing dependency is fatal |
 
 Adding one: write `TESTS/<name>_spec.lua` returning `function(H) ... end`
-(use `H.eq`/`H.ok`/`H.falsy`/`H.contains`/`H.scratch`/`H.tmpdir`/`H.write`),
-then list its filename in the `specs` table in `run.lua`.
+(use `H.eq`/`H.ok`/`H.falsy`/`H.contains`/`H.scratch`/`H.tmpdir`/`H.write`).
+It is picked up by name (`*_spec.lua`); there is no list to maintain.
 
 ## Coverage
 

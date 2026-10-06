@@ -96,11 +96,14 @@ exist on a machine resolves to nothing and says so; it is not an error.
 `TESTS/` is a headless spec suite.
 
 ```
-nvim --headless -u NONE -c "set rtp+=." -c "set rtp+=../lib.nvim" \
-  -c "luafile TESTS/run.lua" -c "qa!"
+bash scripts/test.sh                  # every spec
+bash scripts/test.sh --file config    # only spec files whose name contains "config"
 ```
 
-Exit 0 is a pass; lib.nvim is expected as a sibling checkout.
+The runner is [testing.nvim](https://github.com/StefanBartl/testing.nvim).
+Exit 0 is a pass. testing.nvim, lib.nvim and ui.nvim are expected as sibling
+checkouts or under `.deps/` (see [`TESTS/README.md`](../TESTS/README.md)); a
+missing one is a loud error, never a silent skip.
 [GitHub Actions](../.github/workflows/ci.yml) runs it plus stylua and luacheck
 on every push and pull request to `main`.
 
