@@ -27,8 +27,9 @@ return {
   },
   -- What the guards let through on purpose.
   guard_allow = {
-    -- features_spec deliberately runs the reveal-in-file-manager security test, which starts
-    -- powershell (win_reveal.ps1 -Path "`echo sec34`") to prove the path is never interpreted.
-    spawn = { "powershell" },
+    -- features_spec deliberately runs the reveal-in-file-manager security test, which starts the
+    -- platform opener with the path "`echo sec34`" to prove the path is never interpreted:
+    -- powershell (Windows), xdg-open (Linux), open (macOS).
+    spawn = { "powershell", "xdg-open", "open" },
   },
 }
