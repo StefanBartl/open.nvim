@@ -13,5 +13,22 @@ return {
   deps = { "lib.nvim", "ui.nvim" },
   -- "none" = all specs in one nvim, "file" = one nvim per spec file
   -- (nothing leaks from one file into the next).
-  isolated = "none",
+  isolated = "file",
+  -- Guards (docs/GUARDS.md of testing.nvim): every one passes cleanly on this suite, so all run as errors.
+  -- The state guard is clean because every spec file runs in its own editor (isolated = "file"); in a
+  -- shared editor the specs leave buffers, autocmds and user commands behind.
+  guards = {
+    fs = "error",
+    state = "error",
+    scheduled_error = "error",
+    prompt = "error",
+    deprecation = "error",
+    process_net = "error",
+  },
+  -- What the guards let through on purpose.
+  guard_allow = {
+    -- features_spec deliberately runs the reveal-in-file-manager security test, which starts
+    -- powershell (win_reveal.ps1 -Path "`echo sec34`") to prove the path is never interpreted.
+    spawn = { "powershell" },
+  },
 }
