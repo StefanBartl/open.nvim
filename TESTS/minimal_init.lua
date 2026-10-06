@@ -81,4 +81,10 @@ for _, name in ipairs(DEPS) do
   vim.opt.rtp:append(found[name])
 end
 
+-- lib.nvim shows a one-time "missing tools" float on the first `require("open").setup()` of a
+-- fresh state directory (CI always has one). Under testing.nvim that float opens in the middle of
+-- features_spec.lua's office_open case, takes focus, and the placeholder buffer is then not wiped.
+-- The specs must not depend on whether the popup was already seen.
+vim.g.lib_nvim_deps_disable_first_run = true
+
 return { root = root, deps = found }
