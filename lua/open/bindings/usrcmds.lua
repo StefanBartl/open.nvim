@@ -237,9 +237,35 @@ end
 ---@return Lib.UserCmd.Composer.KvSpec[]
 local function viewer_kv()
   return {
-    { key = "sort", enum = { "none", "file", "kind", "alpha" } },
-    { key = "out", values = { "picker", "table", "clipboard", "mdlinks", "csv", "echo", "file:" } },
-    { key = "match" },
+    {
+      key = "sort",
+      enum = { "none", "file", "kind", "alpha" },
+      desc = "Order of the listed links",
+      enum_desc = {
+        none = "Keep the order the scan found them in",
+        file = "By file, then line and column",
+        kind = "By link kind, then position",
+        alpha = "Alphabetically by target",
+      },
+    },
+    {
+      key = "out",
+      values = { "picker", "table", "clipboard", "mdlinks", "csv", "echo", "file:" },
+      desc = "Where the links are shown or sent",
+      enum_desc = {
+        picker = "Choose one link and open it",
+        table = "Markdown table in a scratch buffer",
+        clipboard = "Markdown table copied to the clipboard",
+        mdlinks = "One markdown link per line, to mdlinks_output",
+        csv = "CSV in a scratch buffer",
+        echo = "Markdown table in the message area",
+        ["file:"] = "Markdown table written to file:<path>",
+      },
+    },
+    {
+      key = "match",
+      desc = "Lua pattern on file names when scanning a directory",
+    },
   }
 end
 
@@ -248,10 +274,10 @@ end
 ---@return Lib.UserCmd.Composer.FlagSpec[]
 local function viewer_flags()
   return {
-    { name = "paths", bool = true },
-    { name = "anchors", bool = true },
-    { name = "dupes", bool = true },
-    { name = "flat", bool = true },
+    { name = "paths", bool = true, desc = "Also list filesystem paths that exist on disk" },
+    { name = "anchors", bool = true, desc = "Keep in-document #heading anchors" },
+    { name = "dupes", bool = true, desc = "Keep duplicate targets instead of listing each once" },
+    { name = "flat", bool = true, desc = "Do not descend into subdirectories of a directory" },
   }
 end
 
