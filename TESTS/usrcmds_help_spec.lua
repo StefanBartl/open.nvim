@@ -28,5 +28,30 @@ return function(H)
       0,
       ":" .. name .. " options without a help text: " .. table.concat(missing, ", ")
     )
+
+    -- The positional arguments too: their text comes from the argument types registered in
+    -- bindings/usrcmds.lua (OPEN_TARGET, OPEN_SCOPE, VIEWER_KIND, VIEWER_SCOPE).
+    local missing_args = {}
+    for _, m in ipairs(composer.help.undocumented(name, { args = true })) do
+      missing_args[#missing_args + 1] = m.kind .. ":" .. m.name
+    end
+    H.eq(
+      #missing_args,
+      0,
+      ":" .. name .. " arguments without a help text: " .. table.concat(missing_args, ", ")
+    )
+  end
+
+  -- The type texts follow the house style: one line, no trailing period, at most 80 characters.
+  local argtypes = require("lib.nvim.bindings.usercmd.composer.argtypes")
+  for _, type_name in ipairs({ "OPEN_TARGET", "OPEN_SCOPE", "VIEWER_KIND", "VIEWER_SCOPE" }) do
+    local def = argtypes.get(type_name)
+    H.ok(def ~= nil, type_name .. " is a registered argument type")
+    local text = def and def.desc or ""
+    H.ok(text ~= "", type_name .. " has a help text")
+    H.ok(
+      not text:find("\n", 1, true) and text:sub(-1) ~= "." and #text <= 80,
+      type_name .. " text is one line, without a trailing period, <= 80 characters: " .. text
+    )
   end
 end

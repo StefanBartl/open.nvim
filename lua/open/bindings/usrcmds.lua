@@ -63,6 +63,7 @@ end
 -- 1st positional: handler key. Validation stays soft (registry.dispatch
 -- reports unknown targets itself); completion lists live registry keys.
 composer.register_type("OPEN_TARGET", {
+  desc = "Handler to open with; picked from the context when omitted",
   validate = function(raw)
     return true, raw, nil
   end,
@@ -81,6 +82,7 @@ composer.register_type("OPEN_TARGET", {
 -- named scope keywords, and general file completion — "path=<lead>" gets
 -- file completion on the part after the prefix, re-prefixed on return.
 composer.register_type("OPEN_SCOPE", {
+  desc = "What to open: %, cfile, cwd, git, path=<file>, a keyword or path",
   validate = function(raw)
     return true, raw, nil
   end,
@@ -144,6 +146,7 @@ end
 -- Scope token for the wrapper commands: the literal scope keywords plus
 -- ordinary file/directory completion.
 composer.register_type("VIEWER_SCOPE", {
+  desc = "Where to look: % (default), cwd, buffers, or a file or directory",
   validate = function(raw)
     return true, raw, nil
   end,
@@ -155,6 +158,7 @@ composer.register_type("VIEWER_SCOPE", {
 -- `enum` here would reject `:Open viewer cwd` outright rather than reading it
 -- as "all kinds, cwd scope", which is the more useful interpretation.
 composer.register_type("VIEWER_KIND", {
+  desc = "Link kind (all, urls, mdlinks, files, paths) or the scope",
   validate = function(raw)
     return true, raw, nil
   end,
