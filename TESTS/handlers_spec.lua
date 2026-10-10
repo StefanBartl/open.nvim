@@ -175,6 +175,48 @@ return function(H)
       "the URL's & is shielded from cmd.exe's tokenizer"
     )
 
+    -- named_browser_cmd(): a specific browser on Windows ----------------------
+    -- Located -> launched directly, the URL one untouched argv element (no
+    -- cmd.exe to split `&` or expand `%VAR%`); not located -> cmd.exe fallback
+    -- with `%` neutralised.
+    do
+      local orig_exepath, orig_getenv = vim.fn.exepath, vim.uv.os_getenv
+      platform.get = function()
+        return { is_win = true, is_wsl = false, is_mac = false, is_linux = false }
+      end
+      local url = "https://x.dev/?u=%USERNAME%&b=1"
+
+      vim.fn.exepath = function(name)
+        return name == "firefox" and "C:\\Tools\\firefox.exe" or ""
+      end
+      handlers.firefox.run({ text = url, is_url = true, is_path = false })
+      H.eq(seen_cmd[1], "C:\\Tools\\firefox.exe", "a browser on PATH is started without cmd.exe")
+      H.eq(seen_cmd[2], url, "and the URL is one untouched argument")
+
+      vim.fn.exepath = function()
+        return ""
+      end
+      vim.uv.os_getenv = function(var)
+        return var == "ProgramFiles" and "C:\\PF" or nil
+      end
+      local expected = "C:\\PF\\Google\\Chrome\\Application\\chrome.exe"
+      vim.fn.executable = function(name)
+        return name == expected and 1 or 0
+      end
+      handlers.chrome.run({ text = url, is_url = true, is_path = false })
+      H.eq(seen_cmd[1], expected, "a browser in its install directory is found")
+      H.eq(seen_cmd[2], url, "and the URL is one untouched argument")
+
+      vim.fn.executable = function()
+        return 0
+      end
+      handlers.chrome.run({ text = url, is_url = true, is_path = false })
+      H.eq(seen_cmd[1], "cmd.exe", "an unlocatable browser falls back to cmd.exe /C start")
+      H.eq(seen_cmd[5], "https://x.dev/?u=%25USERNAME%25^&b=1", "where %VAR% cannot expand")
+
+      vim.fn.exepath, vim.uv.os_getenv = orig_exepath, orig_getenv
+    end
+
     -- named_browser_cmd(): a specific browser on Linux ------------------------
     vim.fn.executable = function(name)
       return name == "firefox" and 1 or 0

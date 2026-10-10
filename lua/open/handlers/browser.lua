@@ -63,10 +63,12 @@ end
 ---@return string[]|nil, string|nil
 local function named_browser_cmd(url, plat, linux_candidates, mac_app, win_token)
   if plat.is_win then
-    -- Selecting a SPECIFIC (non-default) browser requires cmd.exe's `start
-    -- <token>` resolution — explorer.exe alone can't target a named app — so
-    -- the URL must be shielded from cmd.exe's own tokenizer instead; see
-    -- util.cmd_escape_unquoted.
+    -- Launch the resolved exe directly: the URL stays one argv element, with
+    -- no cmd.exe tokenizing `&` or expanding `%VAR%` in it. Only when the
+    -- browser cannot be located is `cmd.exe /C start <token>` used (the URL
+    -- shielded by util.cmd_escape_unquoted).
+    local exe = util.find_windows_browser(win_token)
+    if exe then return { exe, url }, nil end
     return { "cmd.exe", "/C", "start", win_token, util.cmd_escape_unquoted(url) }, nil
   elseif plat.is_wsl then
     local exec = util.find_exec(linux_candidates)

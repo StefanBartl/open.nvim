@@ -40,8 +40,10 @@ target a specific browser instead of whatever's set as default, and
 is opened with the `file://` scheme. Platform dispatch differs by target:
 Windows routes the system default straight through `explorer.exe`
 (registered protocol handler, no `cmd.exe` re-tokenizing), while a *named*
-browser needs `cmd.exe /C start <token>` since `explorer.exe` alone can't
-target a specific app.
+browser is resolved to its executable (PATH, then the default install
+directories) and started with the URL as a plain argument, so `&` and `%VAR%`
+stay untouched. Only when the executable cannot be found does it fall back to
+`cmd.exe /C start <token>`, with `&|<>^` caret-escaped and `%` percent-encoded.
 
 - **Module:** `open/handlers/browser.lua`
 - **Usercmds:** `:Open browser` · `:Open chrome` · `:Open chromium` ·

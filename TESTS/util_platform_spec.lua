@@ -67,6 +67,14 @@ return function(H)
     H.eq(util.cmd_escape_unquoted("a&b"), "a^&b", "ampersand escaped")
     H.eq(util.cmd_escape_unquoted("a|b<c>d^e"), "a^|b^<c^>d^^e", "every special character escaped")
     H.eq(util.cmd_escape_unquoted("plain"), "plain", "no escaping when nothing special is present")
+    H.eq(
+      util.cmd_escape_unquoted("a?u=%USERNAME%&b"),
+      "a?u=%25USERNAME%25^&b",
+      "%VAR% cannot expand"
+    )
+    H.eq(util.cmd_escape_unquoted("a%20b%2Fc"), "a%20b%2Fc", "real %XX escapes stay as they are")
+    H.eq(util.cmd_escape_unquoted("100%"), "100%25", "a trailing % is encoded")
+    H.eq(util.cmd_escape_unquoted("%2"), "%252", "a truncated escape is encoded")
   end
 
   -- platform.get: cached, shaped, boolean fields ---------------------------------

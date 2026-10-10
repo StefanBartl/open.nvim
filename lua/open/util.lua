@@ -80,7 +80,48 @@ end
 ---@param s string
 ---@return string
 function M.cmd_escape_unquoted(s)
+  -- `%` cannot be caret-escaped in a cmd.exe command line, so a `%NAME%` would
+  -- be expanded from the environment. Percent-encode every `%` that is not
+  -- already the start of a `%XX` escape (same URL, nothing left to expand).
+  s = s:gsub("%%(%x?%x?)", function(hex)
+    if #hex == 2 then return nil end
+    return "%25" .. hex
+  end)
   return (s:gsub("([&|<>^])", "^%1"))
+end
+
+--- Install locations of the named browsers below a Program Files / local
+--- app-data root, keyed by the token `cmd.exe /C start` knows them by.
+local WIN_BROWSER_PATHS = {
+  chrome = { "Google\\Chrome\\Application\\chrome.exe" },
+  firefox = { "Mozilla Firefox\\firefox.exe" },
+  msedge = { "Microsoft\\Edge\\Application\\msedge.exe" },
+  brave = { "BraveSoftware\\Brave-Browser\\Application\\brave.exe" },
+  opera = { "Programs\\Opera\\opera.exe", "Opera\\opera.exe" },
+}
+
+--- Resolve a named browser to its executable on Windows (PATH first, then the
+--- default install locations), so it can be launched with the URL as a plain
+--- argv element -- no cmd.exe in between that would re-tokenize it or expand
+--- `%VAR%` in it.
+---@param token string  "chrome"|"firefox"|"msedge"|"brave"|"opera"
+---@return string|nil exe  # absolute path, or nil when not found
+function M.find_windows_browser(token)
+  local on_path = vim.fn.exepath(token)
+  if on_path ~= "" then return on_path end
+
+  local rels = WIN_BROWSER_PATHS[token]
+  if not rels then return nil end
+  for _, var in ipairs({ "ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA" }) do
+    local root = vim.uv.os_getenv(var)
+    if root and root ~= "" then
+      for _, rel in ipairs(rels) do
+        local candidate = root .. "\\" .. rel
+        if vim.fn.executable(candidate) == 1 then return candidate end
+      end
+    end
+  end
+  return nil
 end
 
 return M
