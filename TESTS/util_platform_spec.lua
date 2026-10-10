@@ -75,6 +75,26 @@ return function(H)
     H.eq(util.cmd_escape_unquoted("a%20b%2Fc"), "a%20b%2Fc", "real %XX escapes stay as they are")
     H.eq(util.cmd_escape_unquoted("100%"), "100%25", "a trailing % is encoded")
     H.eq(util.cmd_escape_unquoted("%2"), "%252", "a truncated escape is encoded")
+    H.eq(
+      util.cmd_escape_unquoted("x%CD%y"),
+      "x%25CD%25y",
+      "a dynamic variable starting with hex digits"
+    )
+    H.eq(util.cmd_escape_unquoted("%DATE%"), "%25DATE%25", "%DATE% likewise")
+    H.eq(util.cmd_escape_unquoted("%cd:~0,3%"), "%25cd:~0,3%25", "and a substring expansion")
+    vim.uv.os_setenv("ABCD", "x")
+    H.eq(
+      util.cmd_escape_unquoted("%ABCD%"),
+      "%25ABCD%25",
+      "an environment variable starting with hex digits"
+    )
+    vim.uv.os_unsetenv("ABCD")
+    H.eq(util.cmd_escape_unquoted("%20x%2F"), "%20x%2F", "escapes that pair up to no variable stay")
+    H.eq(
+      util.cmd_escape_unquoted('a"&calc'),
+      "a%22^&calc",
+      "a quote cannot open cmd.exe's quoted mode"
+    )
   end
 
   -- platform.get: cached, shaped, boolean fields ---------------------------------

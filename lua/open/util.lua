@@ -68,6 +68,56 @@ end
 -- cmd.exe argument safety
 -- ---------------------------------------------------------------------------
 
+--- cmd.exe variables that are not in the environment block.
+local CMD_DYNAMIC_VARS = {
+  CD = true,
+  DATE = true,
+  TIME = true,
+  RANDOM = true,
+  ERRORLEVEL = true,
+  CMDEXTVERSION = true,
+  CMDCMDLINE = true,
+  HIGHESTNUMANODENUMBER = true,
+}
+
+---@param name string  # text between two `%`, possibly `VAR:~0,5` / `VAR:a=b`
+---@return boolean
+local function is_cmd_variable(name)
+  name = name:match("^([^:]*)")
+  if name == "" then return false end
+  return CMD_DYNAMIC_VARS[name:upper()] == true or vim.uv.os_getenv(name) ~= nil
+end
+
+---`%` cannot be caret-escaped in a cmd.exe command line, so a `%NAME%` would
+---be expanded from the environment. Percent-encode every `%` that is not the
+---start of a `%XX` escape; a `%XX` is kept too only when the text up to the
+---next `%` is not a variable (`%CD%`, `%DATE%`, `%ABCD%` start with hex
+---digits, so they would otherwise survive as `%CD%25`).
+---@param s string
+---@return string
+local function neutralise_percent(s)
+  local out, i, n = {}, 1, #s
+  while i <= n do
+    local c = s:sub(i, i)
+    if c ~= "%" then
+      out[#out + 1] = c
+      i = i + 1
+    else
+      local hex = s:match("^%x%x", i + 1)
+      if not hex then
+        out[#out + 1] = "%25"
+        i = i + 1
+      else
+        local j = s:find("%", i + 1, true)
+        local is_var = j ~= nil and is_cmd_variable(s:sub(i + 1, j - 1))
+        out[#out + 1] = (is_var and "%25" or "%") .. hex
+        i = i + 3
+      end
+    end
+  end
+  return table.concat(out)
+end
+
 --- Escape cmd.exe's unquoted-context special characters (`& | < > ^`) with a
 --- caret so an argument (typically a URL) survives `cmd.exe /C start ...`.
 --- Needed whenever a `cmd.exe /C start` argv is launched via jobstart()/
@@ -80,13 +130,10 @@ end
 ---@param s string
 ---@return string
 function M.cmd_escape_unquoted(s)
-  -- `%` cannot be caret-escaped in a cmd.exe command line, so a `%NAME%` would
-  -- be expanded from the environment. Percent-encode every `%` that is not
-  -- already the start of a `%XX` escape (same URL, nothing left to expand).
-  s = s:gsub("%%(%x?%x?)", function(hex)
-    if #hex == 2 then return nil end
-    return "%25" .. hex
-  end)
+  -- A `"` would flip cmd.exe into quoted mode, where the carets below are
+  -- taken literally and `&` runs a command; it is a plain `%22` in a URL.
+  s = s:gsub('"', "%%22")
+  s = neutralise_percent(s)
   return (s:gsub("([&|<>^])", "^%1"))
 end
 
@@ -107,8 +154,9 @@ local WIN_BROWSER_PATHS = {
 ---@param token string  "chrome"|"firefox"|"msedge"|"brave"|"opera"
 ---@return string|nil exe  # absolute path, or nil when not found
 function M.find_windows_browser(token)
+  -- only a real .exe: a .cmd/.bat shim cannot be spawned without a shell
   local on_path = vim.fn.exepath(token)
-  if on_path ~= "" then return on_path end
+  if on_path:lower():sub(-4) == ".exe" then return on_path end
 
   local rels = WIN_BROWSER_PATHS[token]
   if not rels then return nil end
