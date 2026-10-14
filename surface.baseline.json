@@ -1,0 +1,1 @@
+{"digest":"50a9704c9b4a49c5ac27e333e7636952c5c0ee2c1c0fcea253f6d61bfc007ba5","entries":{"api:open.open":"missing","api:open.setup":"missing","autocmd:OpenNvimOfficeOpen:BufReadCmd:*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx":"missing","command:MDLinksView":"hit","command:Open":"hit","command:Open viewer":"hit","command:UrlView":"hit"},"plugin":"open","ratio":0.8,"total":5,"version":1}
