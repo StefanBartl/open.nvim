@@ -182,15 +182,36 @@ end
 
 ---The entry name on one line of a netrw listing, or nil when the line is not an entry.
 ---
----Supported: the thin list (`name`) and the long list (`name  size  Wed Jan 01 12:00:00 2026`).
----Banner and header lines start with `"` and are no entry. The wide and tree styles are not
----supported: their lines are returned as they stand.
+---Supported: the thin list (`name`) and the long list (`name  size  <date>`). The date is
+---`strftime(g:netrw_timefmt)`, so its shape depends on the locale: the C locale gives
+---`Wed Jan 01 12:00:00 2026`, glibc en_US `Wed 01 Jan 2026 12:00:00 PM UTC`, a German Windows
+---`15.10.2026 01:52:17`. Only the C shape can be cut by pattern; for every other one `exists` (a
+---predicate on a candidate entry name, true when it names a real file in the listed directory)
+---decides which numeric token is the size column. Banner and header lines start with `"` and are
+---no entry. The wide and tree styles are not supported: their lines are returned as they stand.
 ---@internal
 ---@param line string
+---@param exists? fun(name: string): boolean
 ---@return string|nil
-local function netrw_entry(line)
+local function netrw_entry(line, exists)
   local entry = line:match("^%s*(.-)%s*$")
   if not entry or entry == "" or entry:sub(1, 1) == '"' then return nil end
+
+  if exists then
+    if exists(entry) then return entry end -- thin list (or a name that merely looks like a long line)
+    -- Longest candidate first: `my file 2.txt  1234 <date>` must not be cut at the `2`.
+    local cuts, init = {}, 1
+    while #cuts < 16 do
+      local s, e = entry:find("%s+%d+%f[%s]", init)
+      if not s then break end
+      cuts[#cuts + 1] = entry:sub(1, s - 1)
+      init = e + 1
+    end
+    for i = #cuts, 1, -1 do
+      if cuts[i] ~= "" and exists(cuts[i]) then return cuts[i] end
+    end
+  end
+
   local name = entry:match("^(.-)%s+%d+%s+%a+%s+%a+%s+%d+%s+%d+:%d+:%d+%s+%d+$")
   if name and name ~= "" then return name end
   return entry
@@ -206,11 +227,15 @@ local function resolve_netrw_path()
   local curdir = vim.b[buf] and vim.b[buf].netrw_curdir
   if not curdir or curdir == "" then return nil end
 
-  local entry = netrw_entry(vim.api.nvim_get_current_line() or "")
+  local sep = package.config:sub(1, 1)
+  local base = curdir:gsub("[/\\]$", "")
+  local entry = netrw_entry(vim.api.nvim_get_current_line() or "", function(name)
+    local p = base .. sep .. name
+    return (vim.uv.fs_stat(p) or vim.uv.fs_lstat(p)) ~= nil
+  end)
   if not entry then return curdir end
 
-  local sep = package.config:sub(1, 1)
-  return curdir:gsub("[/\\]$", "") .. sep .. entry
+  return base .. sep .. entry
 end
 
 ---Return the node path if the current buffer is a recognised tree buffer.

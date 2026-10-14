@@ -194,6 +194,52 @@ return function(H)
     H.eq(entry('"   Sorted by      name'), nil, "banner sort line")
     H.eq(entry(""), nil, "an empty line")
 
+    -- A long list in a locale whose date is not the C shape: the existing file decides the cut.
+    local files = { ["my file 2.txt"] = true, ["my file"] = true, ["sub/"] = true }
+    local function exists(name)
+      return files[name] == true
+    end
+    H.eq(
+      entry("report.txt  1234 15.10.2026 01:52:17", function(n)
+        return n == "report.txt"
+      end),
+      "report.txt",
+      "long list, German date: cut at the size column"
+    )
+    H.eq(
+      entry("my file 2.txt      1234 Wed 01 Jan 2026 12:00:00 PM UTC", exists),
+      "my file 2.txt",
+      "long list, glibc date: the longest existing candidate wins, not the first number"
+    )
+    H.eq(
+      entry("sub/     0 01.01.2026 12:00:00", exists),
+      "sub/",
+      "long list, German date: directory"
+    )
+    H.eq(
+      entry("my file 2.txt", exists),
+      "my file 2.txt",
+      "a thin-list name that holds a number is kept whole"
+    )
+    H.eq(
+      entry("ghost.txt  12 15.10.2026 01:52:17", exists),
+      "ghost.txt  12 15.10.2026 01:52:17",
+      "no candidate exists: the line stands (no guess)"
+    )
+
+    H.tmpdir(function(dir)
+      H.write(dir .. "/my file 2.txt", "x")
+      local buf = H.scratch({ "my file 2.txt      1234 15.10.2026 01:52:17" }, "netrw")
+      vim.b[buf].netrw_curdir = dir
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      local signals = context.gather()
+      H.eq(
+        (signals.tree_path:gsub("\\", "/")),
+        dir:gsub("\\", "/") .. "/my file 2.txt",
+        "gather(): a long list line in a non-C locale resolves to the bare file"
+      )
+    end)
+
     H.tmpdir(function(dir)
       local buf = H.scratch({ '" Netrw Directory Listing', "entry.txt" }, "netrw")
       vim.b[buf].netrw_curdir = dir
