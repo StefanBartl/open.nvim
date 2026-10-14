@@ -33,5 +33,16 @@ return {
     spawn = { "powershell", "xdg-open", "open" },
   },
   -- gated: a failed conformance check makes `scripts/test.sh conformance` exit 1 (docs/CONFORMANCE.md of testing.nvim)
-  conformance = { gate = true },
+  conformance = {
+    gate = true,
+    waivers = {
+      {
+        check = "K15",
+        rule = "NEW-08",
+        file = "lua/open/bindings",
+        reason = "the plugin registers no autocmds at all (only keymaps and user commands), so an autocmds module would be an empty placeholder",
+        expires = "2027-04-14",
+      },
+    },
+  },
 }
