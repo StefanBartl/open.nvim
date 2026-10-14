@@ -203,6 +203,34 @@ local function check_office_open()
   ))
 end
 
+---Report the optional plugins open.nvim can hand off to. Never a warning: each
+---one only widens what open.nvim can do, and every call site has a fallback.
+---@internal
+local function check_soft_dependencies()
+  vim.health.start("open: optional dependencies")
+  local deps = {
+    {
+      name = "images.nvim",
+      mod = "images",
+      found = "the image handler shows images in the terminal",
+      missing = "the image handler opens images in the system application",
+    },
+    {
+      name = "urlview.nvim",
+      mod = "urlview.actions",
+      found = "the open_in_browser action can be registered (open.integrations.urlview)",
+      missing = "open.integrations.urlview is unavailable",
+    },
+  }
+  for _, dep in ipairs(deps) do
+    if pcall(require, dep.mod) then
+      vim.health.ok(dep.name .. " found: " .. dep.found)
+    else
+      vim.health.info(dep.name .. " not installed: " .. dep.missing)
+    end
+  end
+end
+
 ---List every handler registered in `open.registry`.
 ---@internal
 local function check_handlers()
@@ -230,6 +258,7 @@ function M.check()
   check_executables()
   check_config()
   check_office_open()
+  check_soft_dependencies()
   check_handlers()
 
   -- The declared external tools (docs/install.json), reported out of the
