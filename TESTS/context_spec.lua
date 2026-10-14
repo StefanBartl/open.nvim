@@ -165,6 +165,44 @@ return function(H)
     )
   end)
 
+  -- netrw: banner and header lines are no entry; thin and long lists give the bare name -----
+  do
+    local entry = context._netrw_entry
+    H.eq(entry("entry.txt"), "entry.txt", "thin list: the line is the name")
+    H.eq(
+      entry("  my file.txt  "),
+      "my file.txt",
+      "thin list: spaces in a name are kept, the edges trimmed"
+    )
+    H.eq(entry("sub/"), "sub/", "thin list: a directory keeps its slash")
+    H.eq(
+      entry("my file.txt  1234 Wed Jan 01 12:00:00 2026"),
+      "my file.txt",
+      "long list: size and timestamp are cut off"
+    )
+    H.eq(entry("sub/  0 Wed Jan 01 12:00:00 2026"), "sub/", "long list: also for a directory")
+    H.eq(
+      entry('" ============================================================================'),
+      nil,
+      "banner rule"
+    )
+    H.eq(
+      entry('" Netrw Directory Listing                                        (netrw v175)'),
+      nil,
+      "banner title"
+    )
+    H.eq(entry('"   Sorted by      name'), nil, "banner sort line")
+    H.eq(entry(""), nil, "an empty line")
+
+    H.tmpdir(function(dir)
+      local buf = H.scratch({ '" Netrw Directory Listing', "entry.txt" }, "netrw")
+      vim.b[buf].netrw_curdir = dir
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      local signals = context.gather()
+      H.eq(signals.tree_path, dir, "the cursor on the banner resolves to the directory itself")
+    end)
+  end
+
   -- gather(): an unrecognised/soft-dep tree filetype never errors -------------
   do
     H.scratch({ "x" }, "neo-tree")

@@ -180,6 +180,24 @@ local function resolve_nvimtree_path()
   return nil
 end
 
+---The entry name on one line of a netrw listing, or nil when the line is not an entry.
+---
+---Supported: the thin list (`name`) and the long list (`name  size  Wed Jan 01 12:00:00 2026`).
+---Banner and header lines start with `"` and are no entry. The wide and tree styles are not
+---supported: their lines are returned as they stand.
+---@internal
+---@param line string
+---@return string|nil
+local function netrw_entry(line)
+  local entry = line:match("^%s*(.-)%s*$")
+  if not entry or entry == "" or entry:sub(1, 1) == '"' then return nil end
+  local name = entry:match("^(.-)%s+%d+%s+%a+%s+%a+%s+%d+%s+%d+:%d+:%d+%s+%d+$")
+  if name and name ~= "" then return name end
+  return entry
+end
+
+M._netrw_entry = netrw_entry
+
 ---Path under the cursor in a netrw directory-listing buffer.
 ---@internal
 ---@return string|nil
@@ -188,9 +206,8 @@ local function resolve_netrw_path()
   local curdir = vim.b[buf] and vim.b[buf].netrw_curdir
   if not curdir or curdir == "" then return nil end
 
-  local line = vim.api.nvim_get_current_line()
-  local entry = line and line:match("^%s*(.-)%s*$")
-  if not entry or entry == "" then return curdir end
+  local entry = netrw_entry(vim.api.nvim_get_current_line() or "")
+  if not entry then return curdir end
 
   local sep = package.config:sub(1, 1)
   return curdir:gsub("[/\\]$", "") .. sep .. entry
