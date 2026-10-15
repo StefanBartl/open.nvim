@@ -95,6 +95,35 @@ return function(H)
     package.loaded[mod_name] = orig
   end
 
+  -- open.handlers.image: images.show failing falls back to open_default -------
+  for _, mode in ipairs({ "returns false", "throws" }) do
+    local handlers = register(require("open.handlers.image"))
+    local orig_images = package.loaded["images"]
+    package.loaded["images"] = {
+      show = function()
+        if mode == "throws" then error("boom") end
+        return false
+      end,
+    }
+
+    local mod_name = "lib.nvim.cross.open_default"
+    local orig = package.loaded[mod_name]
+    local seen
+    package.loaded[mod_name] = function(target)
+      seen = target
+      return true
+    end
+
+    H.ok(
+      handlers.image.run({ text = "/pic.png" }),
+      "images.show " .. mode .. ": the system app opens it"
+    )
+    H.eq(seen, "/pic.png", "images.show " .. mode .. ": the fallback receives the target")
+
+    package.loaded["images"] = orig_images
+    package.loaded[mod_name] = orig
+  end
+
   -- open.handlers.browser --------------------------------------------------------
   do
     local handlers = register(require("open.handlers.browser"))
