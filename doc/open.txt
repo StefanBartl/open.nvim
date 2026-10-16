@@ -100,7 +100,10 @@ packer: >lua
     keywords         = {},   -- user overrides / additions (keyword → path or fn)
     custom_handlers  = {},   -- user-defined handlers, registered alongside `handlers`
     keymaps          = {},   -- optional keymaps; none registered by default
-    filemanager      = { reveal = true },  -- false: navigate instead of reveal/select
+    filemanager      = {
+      reveal  = true,  -- false: navigate instead of reveal/select
+      command = nil,   -- launcher override: "thunar" or { "dolphin", "--select" }; the path is appended
+    },
     office_open = {                        -- redirect MS Office docs to the system app
       enabled    = true,
       extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },

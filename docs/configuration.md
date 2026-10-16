@@ -62,6 +62,10 @@ require("open").setup({
   -- `filemanager` handler settings.
   filemanager = {
     reveal = true, -- false: navigate to a file's parent dir instead of selecting it
+    -- Launcher override: a string ("thunar") or an argv list ({ "dolphin", "--select" }). The resolved
+    -- path is appended as the last argument and the built-in platform dispatch is skipped entirely.
+    -- nil (default) = detect per platform.
+    command = nil,
   },
 
   -- Redirect MS Office documents to the system default app on read (BufReadCmd),
