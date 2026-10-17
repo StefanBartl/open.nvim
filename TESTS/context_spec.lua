@@ -227,6 +227,33 @@ return function(H)
       "no candidate exists: the line stands (no guess)"
     )
 
+    -- C locale together with `exists` (what gather() always passes): the existing file decides,
+    -- longest candidate first, and a stale C line still falls back to the C pattern cut.
+    local c_files = { ["notes 2 final.txt"] = true, ["notes"] = true }
+    local function c_exists(name)
+      return c_files[name] == true
+    end
+    H.eq(
+      entry("notes 2 final.txt  1234 Wed Jan 01 12:00:00 2026", c_exists),
+      "notes 2 final.txt",
+      "long list, C date, exists: the longest existing candidate wins over a shorter one"
+    )
+    H.eq(
+      entry("gone.txt  1234 Wed Jan 01 12:00:00 2026", c_exists),
+      "gone.txt",
+      "long list, C date, exists: a stale line (file deleted) still cuts by the C pattern"
+    )
+
+    -- Stale line (file deleted) whose shorter prefix up to a number token exists: resolves to
+    -- that neighbour. Kept on purpose: open.nvim only opens or reveals, the case needs a deleted
+    -- file plus an unrefreshed listing, and a stricter cut cannot tell a locale's date from the
+    -- rest of a name. Pinned so a change to it is a deliberate one.
+    H.eq(
+      entry("notes 2 draft.txt  1234 15.10.2026 01:52:17", c_exists),
+      "notes",
+      "stale long line: a shorter existing prefix (the neighbour file) wins"
+    )
+
     H.tmpdir(function(dir)
       H.write(dir .. "/my file 2.txt", "x")
       local buf = H.scratch({ "my file 2.txt      1234 15.10.2026 01:52:17" }, "netrw")
@@ -237,6 +264,20 @@ return function(H)
         (signals.tree_path:gsub("\\", "/")),
         dir:gsub("\\", "/") .. "/my file 2.txt",
         "gather(): a long list line in a non-C locale resolves to the bare file"
+      )
+    end)
+
+    H.tmpdir(function(dir)
+      H.write(dir .. "/notes 2 final.txt", "x")
+      H.write(dir .. "/notes", "x")
+      local buf = H.scratch({ "notes 2 final.txt  1234 Wed Jan 01 12:00:00 2026" }, "netrw")
+      vim.b[buf].netrw_curdir = dir
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      local signals = context.gather()
+      H.eq(
+        (signals.tree_path:gsub("\\", "/")),
+        dir:gsub("\\", "/") .. "/notes 2 final.txt",
+        "gather(): a C locale long line resolves to the file, not to an existing shorter prefix"
       )
     end)
 

@@ -189,6 +189,8 @@ end
 ---predicate on a candidate entry name, true when it names a real file in the listed directory)
 ---decides which numeric token is the size column. Banner and header lines start with `"` and are
 ---no entry. The wide and tree styles are not supported: their lines are returned as they stand.
+---A stale line (file deleted, listing not refreshed) whose shorter prefix up to a number token
+---exists resolves to that neighbour; kept on purpose, see TESTS/context_spec.lua.
 ---@internal
 ---@param line string
 ---@param exists? fun(name: string): boolean
